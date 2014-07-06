@@ -100,9 +100,9 @@ usage: tor-ctrl [-switch] [variable]
                         notice: the default output is the return code ;)
                         You propably want to set -v when running manually
 
-       Examples:      $0 -c "SETCONF bandwidthrate=1mb"
-                      $0 -v -c "GETINFO version"
-                      $0 -v -s 0 -P 9051 -p foobar -c "GETCONF bandwidthrate"
+       Examples:      $BASH_SOURCE -c "SETCONF bandwidthrate=1mb"
+                      $BASH_SOURCE -v -c "GETINFO version"
+                      $BASH_SOURCE -v -s 0 -P 9051 -p foobar -c "GETCONF bandwidthrate"
 
 EOF
 exit 2
