@@ -1,5 +1,11 @@
-tor-ctrl (1-2) UNRELEASED; urgency=low
+tor-ctrl (1.1-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Patrick Schleizer <adrelanos@riseup.net>  Sun, 17 Aug 2014 18:00:12 +0000
+
+tor-ctrl (1-2) unstable; urgency=low
 
   * Initial release.
 
- -- Patrick Schleizer <adrelanos@riseup.net>  Sun, 09 Mar 2014 14:47:45 +0000
+ -- Patrick Schleizer <adrelanos@riseup.net>  Sun, 17 Aug 2014 17:59:19 +0000
