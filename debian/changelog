@@ -2,7 +2,7 @@ tor-ctrl (1.1-1) unstable; urgency=low
 
   * New upstream version.
 
- -- Patrick Schleizer <adrelanos@riseup.net>  Sun, 17 Aug 2014 18:00:12 +0000
+ -- Patrick Schleizer <adrelanos@riseup.net>  Sun, 17 Aug 2014 20:46:42 +0000
 
 tor-ctrl (1-2) unstable; urgency=low
 
