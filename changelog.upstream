@@ -1,3 +1,15 @@
+commit c54bcb08e9915e10728a8f95a3f555ada7ab1986
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Sat May 9 15:00:46 2015 +0000
+
+    removed obsolete comments
+
+commit 7d49e7968b35a3702303ddab2dea987c5eca7e76
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Thu Apr 30 17:57:01 2015 +0000
+
+    bumped changelog version
+
 commit ef147f94803dfb16fa83840c07aee85fbc1f760a
 Author: Patrick Schleizer <adrelanos@riseup.net>
 Date:   Tue Apr 28 13:43:27 2015 +0000
