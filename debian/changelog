@@ -1,3 +1,9 @@
+tor-ctrl (3:2.0-1) unstable; urgency=low
+
+  * New upstream version (local package).
+
+ -- Patrick Schleizer <adrelanos@riseup.net>  Wed, 03 Jun 2015 15:00:27 +0000
+
 tor-ctrl (3:1.9-1) unstable; urgency=low
 
   * New upstream version (local package).
