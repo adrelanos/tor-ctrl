@@ -10,7 +10,7 @@ Build-Depends: debhelper (>= 9), faketime, genmkfile, ruby-ronn (>= 0.7.3)
 Homepage: https://www.torproject.org/svn/trunk/doc/spec/control-spec.txt
 Vcs-Browser: https://github.com/Whonix/tor-ctrl
 Vcs-Git: https://github.com/Whonix/tor-ctrl.git
-Standards-Version: 3.9.6
+Standards-Version: 3.9.8
 
 Package: tor-ctrl
 Architecture: all
