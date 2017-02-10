@@ -6,7 +6,7 @@ Source: tor-ctrl
 Section: misc
 Priority: optional
 Maintainer: Patrick Schleizer <adrelanos@riseup.net>
-Build-Depends: debhelper (>= 9), faketime, genmkfile, ruby-ronn (>= 0.7.3)
+Build-Depends: debhelper (>= 9), faketime, genmkfile, ruby-ronn
 Homepage: https://www.torproject.org/svn/trunk/doc/spec/control-spec.txt
 Vcs-Browser: https://github.com/Whonix/tor-ctrl
 Vcs-Git: https://github.com/Whonix/tor-ctrl.git
