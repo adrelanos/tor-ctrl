@@ -2,7 +2,7 @@
 
 Commandline tool for executing Tor ControlPort commands.
 
-https://www.torproject.org/svn/trunk/doc/spec/control-spec.txt
+https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 
 This package is produced independently of, and carries no guarantee from,
 The Tor Project.

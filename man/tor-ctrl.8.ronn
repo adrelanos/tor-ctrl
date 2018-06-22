@@ -41,7 +41,7 @@ This would set the bandwidth to 100kb at 07:00 and to 1mb at 22:00.  You can use
 
 Many, many other things are possible, see
 
-   https://www.torproject.org/svn/trunk/doc/spec/control-spec.txt
+   https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 
 ## OPTIONS
   * -c [command]
@@ -116,7 +116,7 @@ tor-ctl -v -s 0 -P 9051 -p foobar -c "GETCONF bandwidthrate"
 
 ## WWW
 
-https://svn.torproject.org/svn/tor/branches/hidserv-perf/contrib/tor-ctrl.sh
+https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 
 ## DISCLAIMER
 

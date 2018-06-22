@@ -6,7 +6,7 @@ Section: misc
 Priority: optional
 Maintainer: Patrick Schleizer <adrelanos@riseup.net>
 Build-Depends: debhelper (>= 9), genmkfile, ruby-ronn
-Homepage: https://www.torproject.org/svn/trunk/doc/spec/control-spec.txt
+Homepage: https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 Vcs-Browser: https://github.com/Whonix/tor-ctrl
 Vcs-Git: https://github.com/Whonix/tor-ctrl.git
 Standards-Version: 3.9.8
@@ -17,7 +17,7 @@ Depends: telnet, vim-common, ${misc:Depends}
 Description: Tor control port command line tool
  Commandline tool for executing Tor ControlPort commands.
  .
- https://www.torproject.org/svn/trunk/doc/spec/control-spec.txt
+ https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
  .
  This package is produced independently of, and carries no guarantee from,
  The Tor Project.
