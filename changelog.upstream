@@ -1,3 +1,17 @@
+commit 9540968fe984d8dc7cbdd5ccec41952b4429d4b6
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Fri Jun 22 04:21:03 2018 +0000
+
+    update hyperlink
+    
+    fixes https://github.com/Whonix/tor-ctrl/issues/1
+
+commit 12c675856e37f80f540f619630219eb1c99be65f
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Thu Feb 1 15:25:27 2018 +0000
+
+    bumped changelog version
+
 commit 8956589eb020b93150625554262d7919d8c0e3d6
 Author: Patrick Schleizer <adrelanos@riseup.net>
 Date:   Mon Jan 29 15:50:39 2018 +0000
