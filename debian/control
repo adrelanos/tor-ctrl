@@ -13,7 +13,7 @@ Standards-Version: 3.9.8
 
 Package: tor-ctrl
 Architecture: all
-Depends: telnet, vim-common, ${misc:Depends}
+Depends: telnet, ${misc:Depends}
 Description: Tor control port command line tool
  Commandline tool for executing Tor ControlPort commands.
  .
