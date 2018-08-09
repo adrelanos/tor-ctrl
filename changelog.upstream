@@ -1,3 +1,15 @@
+commit 1d591e8c120f29f8cd23011dbab1b7ca29bd9d1b
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Wed Jul 25 17:06:29 2018 +0800
+
+    remove unneeded dependency vim-common
+
+commit 792d1ff91223fcb1ecba5e8d8550e6112646ae9f
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Tue Jul 3 05:42:17 2018 +0000
+
+    bumped changelog version
+
 commit 9540968fe984d8dc7cbdd5ccec41952b4429d4b6
 Author: Patrick Schleizer <adrelanos@riseup.net>
 Date:   Fri Jun 22 04:21:03 2018 +0000
