@@ -60,7 +60,7 @@ Many, many other things are possible, see
 
      path to tor's control_auth_cookie
 
-     default: /var/lib/tor/data/control_auth_cookie
+     default: /var/run/tor/control.authcookie
 
      notice: do not forget to adjust your torrc
 
