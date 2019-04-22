@@ -154,5 +154,5 @@ License version 3 can be found in the file
 This man page has been written by Patrick Schleizer (adrelanos@riseup.net).
 Most information came script comments itself.
 
-tor-ctrl has been written by Stefan Behte (Stefan dot Behte at gmx dot net)
+tor-ctrl was originally written by Stefan Behte (Stefan dot Behte at gmx dot net)
 (http://ge.mine.nu)

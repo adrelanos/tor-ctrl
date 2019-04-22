@@ -45,7 +45,7 @@
 # License version 3 can be found in the file
 # `/usr/share/common-licenses/GPL-3'.
 
-# Written by Stefan Behte
+# tor-ctrl was originally written by Stefan Behte
 #
 # Please send bugs, comments, wishes, thanks and success stories to:
 # Stefan dot Behte at gmx dot net
@@ -64,7 +64,7 @@ usage()
 {
 cat <<EOF
 
-tor-ctrl by Stefan Behte (http://ge.mine.nu)
+tor-ctrl was originally written by Stefan Behte (http://ge.mine.nu)
 You should have a look at
 https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 
