@@ -65,6 +65,7 @@ usage()
 cat <<EOF
 
 tor-ctrl was originally written by Stefan Behte (http://ge.mine.nu)
+
 You should have a look at
 https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 
