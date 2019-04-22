@@ -49,12 +49,6 @@
 #
 # Also have a look at my page:
 # http://ge.mine.nu/
-#
-# 2007-10-03: First version, only changing bandwidth possible.
-# 2007-10-04: Renaming to "tor-ctrl", added a lot of functions, it's now a
-#             general-purpose tool.
-#             Added control_auth_cookie/controlpassword auth, getopts,
-#             program checks, reading from file etc.
 
 TORCTLIP=127.0.0.1
 TORCTLPORT=9051
