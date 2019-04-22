@@ -121,7 +121,7 @@ checkprogs()
 
         for p in $programs
         do
-                command -v $p &>/dev/null            # are you there?
+                command -v "$p" &>/dev/null            # are you there?
                 if [ "$?" != "0" ]
                 then
                         echo "$p is missing."
@@ -133,14 +133,14 @@ checkprogs()
 sendcmd()
 {
         echo "$@"
-        sleep ${SLEEP_AFTER_CMD}
+        sleep "${SLEEP_AFTER_CMD}"
 }
 
 login()
 {
         if [ "$PASSWORD" = "" ]
         then
-                sendcmd "AUTHENTICATE $(xxd -c 32 -g 0 ${TOR_COOKIE} | awk '{print $2}')"
+                sendcmd "AUTHENTICATE $(xxd -c 32 -g 0 "${TOR_COOKIE}" | awk '{print $2}')"
         else
                 sendcmd "AUTHENTICATE \"${PASSWORD}\""
         fi
@@ -155,7 +155,7 @@ cmdpipe()
 
 vecho()
 {
-        if [ $VERBOSE -ge 1 ]
+        if [ "$VERBOSE" -ge 1 ]
         then
                 echo "$@"
         fi
@@ -164,7 +164,7 @@ vecho()
 myecho()
 {
         local STR
-        STR=$(cat)
+        STR="$(cat)"
         vecho "$STR"
 
         echo "$STR" | if [ "$(grep -c ^"250 ")" = 3 ]
@@ -203,7 +203,7 @@ done
 if [ -e "$FILE" ]
 then
         checkprogs
-        #filepipe "$FILE" | telnet $TORCTLIP $TORCTLPORT 2>/dev/null | myecho
+        #filepipe "$FILE" | telnet "$TORCTLIP" "$TORCTLPORT" 2>/dev/null | myecho
         filepipe "$FILE" | socat - UNIX-CONNECT:"$TOR_CONTROL" | myecho
         exit 4
 fi
@@ -211,8 +211,8 @@ fi
 if [ "$CMD" != "" ]
 then
         checkprogs
-        #cmdpipe $CMD | telnet $TORCTLIP $TORCTLPORT 2>/dev/null | myecho
-        cmdpipe $CMD | socat - UNIX-CONNECT:"$TOR_CONTROL" | myecho
+        #cmdpipe "$CMD" | telnet "$TORCTLIP" "$TORCTLPORT" 2>/dev/null | myecho
+        cmdpipe "$CMD" | socat - UNIX-CONNECT:"$TOR_CONTROL" | myecho
 else
         usage
 fi
