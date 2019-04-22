@@ -1,5 +1,5 @@
 #!/bin/bash
-#
+
 # tor-ctrl is a commandline tool for executing commands on a Tor server via
 # the controlport.  In order to get this to work, add "ControlPort 9051" and
 # "CookieAuthentication 1" to your torrc and reload Tor.  Or - if you want a
@@ -21,10 +21,10 @@
 #
 # This would set the bandwidth to 100kb at 07:00 and to 1mb at 22:00.  You can
 # use notations like 1mb, 1kb or the number of bytes.
-#
+
 # Many, many other things are possible, see
 #              https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
-#
+
 # Copyright (c) 2007 by Stefan Behte
 # Portion Copyright (C) 2013 - 2019 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
 #
@@ -44,7 +44,7 @@
 # On Debian systems, the full text of the GNU General Public
 # License version 3 can be found in the file
 # `/usr/share/common-licenses/GPL-3'.
-#
+
 # Written by Stefan Behte
 #
 # Please send bugs, comments, wishes, thanks and success stories to:
