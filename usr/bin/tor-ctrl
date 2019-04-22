@@ -87,7 +87,7 @@ usage: tor-ctrl [-switch] [variable]
        [-s] [time]    = sleep [var] seconds after each command sent
                         default: 1 second
                         notice: for GETCONF, you can use smaller pause times
-                        than for SETCONF; this is due to telnet's behaviour.
+                        than for SETCONF; this is due to telnet's behavior.
 
        [-p] [pwd]     = Use password [var] instead of tor's control_auth_cookie
                         default: not used
@@ -99,7 +99,7 @@ usage: tor-ctrl [-switch] [variable]
        [-v]           = verbose
                         default: not set
                         notice: the default output is the return code ;)
-                        You propably want to set -v when running manually
+                        You probably want to set -v when running manually
 
        Examples:      $BASH_SOURCE -c "SETCONF bandwidthrate=1mb"
                       $BASH_SOURCE -v -c "GETINFO version"
