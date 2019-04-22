@@ -56,7 +56,6 @@
 #             Added control_auth_cookie/controlpassword auth, getopts,
 #             program checks, reading from file etc.
 
-VERSION=v1
 TORCTLIP=127.0.0.1
 TORCTLPORT=9051
 TOR_COOKIE="/var/run/tor/control.authcookie"
@@ -68,7 +67,7 @@ usage()
 {
 cat <<EOF
 
-tor-ctrl $VERSION by Stefan Behte (http://ge.mine.nu)
+tor-ctrl by Stefan Behte (http://ge.mine.nu)
 You should have a look at
 https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 
