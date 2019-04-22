@@ -26,7 +26,7 @@
 #              https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 #
 # Copyright (c) 2007 by Stefan Behte
-# Portion Copyright (C) 2013 - 2018 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
+# Portion Copyright (C) 2013 - 2019 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
 #
 # tor-ctrl is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,6 +60,7 @@ VERSION=v1
 TORCTLIP=127.0.0.1
 TORCTLPORT=9051
 TOR_COOKIE="/var/run/tor/control.authcookie"
+TOR_CONTROL="/var/run/tor/control"
 SLEEP_AFTER_CMD=1
 VERBOSE=0
 
@@ -200,14 +201,16 @@ done
 if [ -e "$FILE" ]
 then
         checkprogs
-        filepipe "$FILE" | telnet $TORCTLIP $TORCTLPORT 2>/dev/null | myecho
+        #filepipe "$FILE" | telnet $TORCTLIP $TORCTLPORT 2>/dev/null | myecho
+        filepipe "$FILE" | socat - UNIX-CONNECT:"$TOR_CONTROL" | myecho
         exit 4
 fi
 
 if [ "$CMD" != "" ]
 then
         checkprogs
-        cmdpipe $CMD | telnet $TORCTLIP $TORCTLPORT 2>/dev/null | myecho
+        #cmdpipe $CMD | telnet $TORCTLIP $TORCTLPORT 2>/dev/null | myecho
+        cmdpipe $CMD | socat - UNIX-CONNECT:"$TOR_CONTROL" | myecho
 else
         usage
 fi
