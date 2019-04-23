@@ -1,3 +1,99 @@
+commit f67b517644d1da353e2b08b6edf0c0c19765e0c3
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:41:30 2019 -0400
+
+    formatting
+
+commit 6beb9f46e2eb50052d4764e225482724c2aa3a18
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:41:17 2019 -0400
+
+    attribution
+
+commit d3f3693555ea83bd8ebd8ab3df52bc3beb17978d
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:37:34 2019 -0400
+
+    upgrade license from GPLv2+ to GPLv3+
+
+commit 0edb6d8ba5e9de3cb0c849245ee1f6e7c4a0ac4a
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:36:18 2019 -0400
+
+    formatting
+
+commit 4ddbd592222e943996ed2452c680353f43d57da5
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:35:17 2019 -0400
+
+    upgrade license from GPLv2+ to GPLv3+
+
+commit ac677365cc9f923d93e647a7a65f0af73b8a6b74
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:32:02 2019 -0400
+
+    simplification
+
+commit 6483ed4be4c4349d5f763a2ed5cfc0a23a4b4ec8
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:31:03 2019 -0400
+
+    typo
+
+commit 3b0941be20850093b42b8efce6aca16fdb847cc8
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:29:39 2019 -0400
+
+    remove never updated changelog
+
+commit 09966c1410c1d68d7d8bc453e249e682dd85d6a6
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:28:59 2019 -0400
+
+    deprecate never updated VERSION variable
+
+commit b5e73f7c7a094b1c9b3bf9ae270e41f2ebadcf11
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:27:38 2019 -0400
+
+    style
+
+commit 00e6a245ba2d72659d414d51445ff02206d42339
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:26:07 2019 -0400
+
+    typo
+
+commit 18b817ce5cc329a5d969e3b99954b7d84912c0f7
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:24:53 2019 -0400
+
+    quotes
+
+commit 49351f005ff4713bf915f3467befb8f3640d052e
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:22:33 2019 -0400
+
+    local
+
+commit 699a39bf15861feea9269a9190f000834f7a3dcc
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:20:47 2019 -0400
+
+    port to unix domain socket files
+
+commit fbccd1a5d51d04e7167ade709939330d8dc48d87
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Mon Apr 22 04:15:19 2019 -0400
+
+    fix
+
+commit 526e0a3ecc314da7343c2d1746f54f264faed77d
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Sat Apr 6 12:18:56 2019 +0000
+
+    bumped changelog version
+
 commit 0da7e7833b3267786a4051af28ab8dd5a56bf08c
 Author: Patrick Schleizer <adrelanos@riseup.net>
 Date:   Thu Apr 4 05:51:08 2019 -0400
