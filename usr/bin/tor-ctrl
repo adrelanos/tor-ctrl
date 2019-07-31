@@ -55,8 +55,8 @@
 
 TORCTLIP=127.0.0.1
 TORCTLPORT=9051
-TOR_COOKIE="/var/run/tor/control.authcookie"
-TOR_CONTROL="/var/run/tor/control"
+TOR_COOKIE="/run/tor/control.authcookie"
+TOR_CONTROL="/run/tor/control"
 SLEEP_AFTER_CMD=1
 VERBOSE=0
 
@@ -78,7 +78,7 @@ usage: tor-ctrl [-switch] [variable]
                         notice: only one command per line
 
        [-a] [path]    = path to Tor's control_auth_cookie
-                        default: /var/run/tor/control.authcookie
+                        default: /run/tor/control.authcookie
                         notice: do not forget to adjust your torrc
 
        [-s] [time]    = sleep [var] seconds after each command sent

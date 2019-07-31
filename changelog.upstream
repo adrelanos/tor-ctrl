@@ -561,7 +561,7 @@ commit d1a58d322fb723e32ec7542ea65fee3689016772
 Author: Patrick Schleizer <adrelanos@riseup.net>
 Date:   Sat May 31 16:56:15 2014 +0000
 
-    adjusted default control authcookie part to debian-tor's default /var/run/tor/control.authcookie
+    adjusted default control authcookie part to debian-tor's default /run/tor/control.authcookie
 
 commit fb243053dc1e84d6841b1342f621f17b394a0253
 Author: Patrick Schleizer <adrelanos@riseup.net>
