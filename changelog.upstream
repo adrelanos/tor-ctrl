@@ -1,3 +1,15 @@
+commit d95fd01e6b23ceadb9ddee8a9e41c4c8a37951ea
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Wed Jul 31 03:12:51 2019 -0400
+
+    /var/run -> /run
+
+commit 3571e426c39218329f7949d856d51e6ba5d31de5
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Sat Jun 8 11:37:38 2019 +0000
+
+    bumped changelog version
+
 commit db64a20eadbd9fc9a6b582e3894771fe68002d99
 Author: Patrick Schleizer <adrelanos@riseup.net>
 Date:   Sat Jun 8 00:05:37 2019 -0400
@@ -561,7 +573,7 @@ commit d1a58d322fb723e32ec7542ea65fee3689016772
 Author: Patrick Schleizer <adrelanos@riseup.net>
 Date:   Sat May 31 16:56:15 2014 +0000
 
-    adjusted default control authcookie part to debian-tor's default /run/tor/control.authcookie
+    adjusted default control authcookie part to debian-tor's default /var/run/tor/control.authcookie
 
 commit fb243053dc1e84d6841b1342f621f17b394a0253
 Author: Patrick Schleizer <adrelanos@riseup.net>
