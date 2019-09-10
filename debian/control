@@ -13,7 +13,7 @@ Standards-Version: 4.3.0
 
 Package: tor-ctrl
 Architecture: all
-Depends: telnet, ${misc:Depends}
+Depends: telnet, socat, ${misc:Depends}
 Description: Tor control port command line tool
  Commandline tool for executing Tor ControlPort commands.
  .
