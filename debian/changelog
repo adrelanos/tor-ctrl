@@ -1,3 +1,9 @@
+tor-ctrl (3:3.9-1) unstable; urgency=medium
+
+  * New upstream version (local package).
+
+ -- Patrick Schleizer <adrelanos@riseup.net>  Thu, 12 Sep 2019 12:51:18 +0000
+
 tor-ctrl (3:3.8-1) unstable; urgency=medium
 
   * New upstream version (local package).

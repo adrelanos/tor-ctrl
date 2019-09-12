@@ -1,3 +1,17 @@
+commit 9ff66c2b76d1c46dee4edda540da9e997bccad88
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Tue Sep 10 02:17:17 2019 -0400
+
+    depend on socat
+    
+    https://forums.whonix.org/t/tor-ctrl-tor-control-port-command-line-tool/8074
+
+commit da964b49335af17ec9c084fa9a73fc71923e446f
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Wed Aug 28 12:49:51 2019 +0000
+
+    bumped changelog version
+
 commit 7571e3b100c37d53145437781f337a519c96986f
 Author: Patrick Schleizer <adrelanos@riseup.net>
 Date:   Wed Aug 28 11:35:33 2019 +0000
