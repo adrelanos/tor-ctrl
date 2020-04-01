@@ -5,7 +5,7 @@ Source: tor-ctrl
 Section: misc
 Priority: optional
 Maintainer: Patrick Schleizer <adrelanos@riseup.net>
-Build-Depends: debhelper (>= 12), genmkfile, ronn
+Build-Depends: debhelper (>= 12), ronn
 Homepage: https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 Vcs-Browser: https://github.com/Whonix/tor-ctrl
 Vcs-Git: https://github.com/Whonix/tor-ctrl.git
