@@ -3,7 +3,7 @@ tor-ctl(8) -- Tor control port command line tool
 
 <span class="comment">
 Copyright (c) 2007 by Stefan Behte
-Portion Copyright (C) 2013 - 2019 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
+Portion Copyright (C) 2013 - 2020 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@ Tor Project.
 ## LICENSE
 
 Copyright (c) 2007 by Stefan Behte
-Portion Copyright (C) 2013 - 2019 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
+Portion Copyright (C) 2013 - 2020 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
