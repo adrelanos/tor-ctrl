@@ -240,6 +240,8 @@ case "${tor_control}" in
   ;;
 esac
 
+[ -z "${socket_type}" ] && { socket_type="tcp"; tor_control_port="9051"; tor_control_host="127.0.0.1"; }
+
 ############
 ### main ###
 
