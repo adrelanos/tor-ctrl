@@ -1,0 +1,274 @@
+#!/usr/bin/env sh
+
+## tor-ctrl is a commandline tool for executing commands on a Tor server via
+## the controlport.  In order to get this to work, add "ControlPort 9051" and
+## "CookieAuthentication 1" to your torrc and reload Tor.  Or if you want a
+## fixed password, leave out "CookieAuthentication 1" and use the following
+## line to create the appropriate HashedControlPassword entry for your torrc
+## (you need to change yourpassword):
+##
+## echo "HashedControlPassword $(tor --hash-password yourpassword)"
+##
+## Many, many other things are possible, see
+##              https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
+##
+## Copyright (c) 2007 by Stefan Behte <stefan.behte@gmx.net> <http://ge.mine.nu/>
+## Portion Copyright (C) 2013 - 2020 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
+## Portion Copyright (C) 2021 nyxnor <nyxnor@protonmail.com>
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <https://www.gnu.org/licenses/>.
+##
+## On Debian systems, the full text of the GNU General Public
+## License version 3 can be found in the file
+## `/usr/share/common-licenses/GPL-3'.
+##
+## tor-ctrl was originally written by Stefan Behte
+## further developed by Patrick Schleizer
+## and later enhanced bu Nyxnor
+##
+## nyxnor major changes made were for (WARNING: SAFECOOKIE is not working currently)
+## - portability
+##  - be POSIX
+##  - use hexdump instead of xxd for normal COOKIE, xxd still needed for SAFECOOKIE
+##  - autodetect CookieAuthFile by sending PROTOCOLINFO and receiving COOKIEFILE
+##  - use any compatible networking tool available: nc socat telnet
+##  - use any compatible hex converter tool available: xxd, hexdump, od
+##  - accept [addr:]port format for ControlPort cli argument
+## - stability
+##  - test if ControlSocket file exists or if it is possible to connect to ControlPort
+## - security
+##  - regarding AUTH METHODS, if SAFECOOKIE is enabled and xxd is available, use it,
+##    else fallback to COOKIE if available,
+##    if only HASHEDPASSWORD is available and password is provided, use it else fail.
+
+me="${0##*/}"
+
+usage(){
+  printf '%s\n' "usage: ${me}
+
+  -c [command]   command to execute
+                 notice: always \"double quote\" your command
+                 notice: separate control commands with a pipe '|'
+
+  -s [socket]    tor's control socket
+                 default: 9051
+                 notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
+                 notice: unix: /run/tor/control, unix:/run/tor/control
+
+  -p [pwd]       use password [var] instead of Tor's control_auth_cookie
+                 default: not used
+
+  -t [time]      sleep [time] seconds after each command sent
+                 default: 0 second
+                 notice: if the socket program is telnet, fallback to 1 second
+
+  -w             wait to read confirmation by pressing ENTER before closing the connection
+                 notice: useful when you want to be informed about events
+                 (Default: not set).
+
+  -q             quiet mode. (Default: not set).
+
+  Examples:      ${me} -q -c \"SETCONF bandwidthrate=1mb\"
+                 ${me} -s 9051 -p foobar -c \"GETCONF bandwidthrate\"
+                 ${me} -c \"GETINFO config-defaults-file config-file config-text\"
+                 ${me} -c \"GETCONF SocksPort | GETINFO net/listeners/socks\"
+                 ${me} -w -c \"SETEVENTS STREAM\"
+
+You should have a look at
+https://gitweb.torproject.org/torspec.git/tree/control-spec.txt"
+  exit 1
+}
+
+error_msg(){
+  printf %s"${me}: ${1}\n"
+  exit 1
+}
+
+checkprogs(){
+  prog_net="nc socat telnet"
+  while :; do
+    for prog in ${prog_net}; do
+      command -v "${prog}" >/dev/null && socket_prog="$(command -v "${prog}")" && break
+    done
+    break
+  done
+  [ -z "${socket_prog}" ] && error_msg "Install one of the following programs to connect to sockets: ${prog_net}"
+
+  case "${socket_prog}" in
+    telnet) sleep_n=1;;
+    *) : "${sleep_n:=0}";;
+  esac
+
+  case "${socket_type}" in
+    unix)
+      [ ! -S "${tor_control_unix}" ] && error_msg "${tor_control_unix} doesn't exist"
+      case "${socket_prog##*/}" in
+        nc|netcat) socket_prog="${socket_prog} -U ${tor_control_unix}";;
+        socat) socket_prog="${socket_prog} - UNIX-CONNECT:${tor_control_unix}";;
+        telnet) error_msg "Telnet doesn't support unix domain sockets";;
+      esac
+    ;;
+    tcp)
+      case "${socket_prog##*/}" in
+        nc|netcat)
+          "${socket_prog}" -z "${tor_control_host}" "${tor_control_port}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
+          socket_prog="${socket_prog} ${tor_control_host} ${tor_control_port}"
+        ;;
+        socat)
+          "${socket_prog}" /dev/null TCP:"${tor_control_host}:${tor_control_port}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
+          socket_prog="${socket_prog} - TCP:${tor_control_host}:${tor_control_port}"
+        ;;
+        telnet)
+          ##printf "\x1dclose\x0d" | "${socket_prog}" "${tor_control_host}" "${tor_control_port}" >/dev/null 2>&1 || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
+          socket_prog="${socket_prog} ${tor_control_host} ${tor_control_port}"
+        ;;
+        # bash)
+        #   bash -c "{ printf '%s\n%s\n' \"PROTOCOLINFO\" \"QUIT\" >&3; cat <&3 ; } 3<> /dev/tcp/${tor_control_host}/${tor_control_port}"
+        # ;;
+      esac
+    ;;
+  esac
+}
+
+login(){
+  auth="$({ sendcmd "PROTOCOLINFO"; sendcmd "QUIT"; } 3>&1 | ${socket_prog} | grep "AUTH")"
+  auth_methods="$(printf '%s\n' "${auth}" | sed "s/250-AUTH METHODS=//" | cut -d " " -f1 | tr "," "\n")"
+
+  if printf %s"${auth}" | grep -q "AUTH METHODS=NULL"; then
+    printf '%s\n' "Configure an authentication method to connect to tor's controller on your torrc."
+    printf '%s\n' "Chose either or both options: HashedControlPassword or CookieAuthentication"
+    printf '%s\n' "Read the manual: https://2019.www.torproject.org/docs/tor-manual-dev.html.en"
+    exit 1
+  fi
+
+  hashedpassword_enabled="$(printf '%s\n' "${auth_methods}" | grep "^HASHEDPASSWORD$")"
+  tor_cookie="$(printf '%s\n' "${auth}" | sed "s/.*COOKIEFILE=//" | tr -d "\"" | tr -d "\\r")"
+  if test -r "${tor_cookie}"; then
+    safecookie_enabled="$(printf '%s\n' "${auth_methods}" | grep "^SAFECOOKIE$")"
+    cookie_enabled="$(printf '%s\n' "${auth_methods}" | grep "^COOKIE$")"
+    if [ -n "${cookie_enabled}" ]; then
+      ## xxd is only needed when authenticating with SAFECOOKIE
+      while :; do
+        command -v xxd >/dev/null && hex_prog="xxd" && break
+        command -v hexdump >/dev/null && hex_prog="hexdump" && break
+        command -v od >/dev/null && hex_prog="od" && break
+        break
+      done
+      case "${hex_prog}" in
+        xxd) auth_string="AUTHENTICATE $(xxd -u -p -c 32 "${tor_cookie}")";;
+        hexdump) auth_string="AUTHENTICATE $(hexdump -e '32/1 "%02x""\n"' "${tor_cookie}")";;
+        od) auth_string="AUTHENTICATE $(od -t x1 "${tor_cookie}" | head -n 2 | cut -d " " -f2- | tr -d "\n" | tr -d " ")";;
+        *) printf "Missing program to dump hex. Install either 'hexdump' or 'xxd' or 'od'."
+      esac
+    fi
+  elif [ -n "${hashedpassword_enabled}" ] && [ -n "${tor_password}" ]; then
+    auth_string="AUTHENTICATE \"${tor_password}\""
+  fi
+}
+
+sendcmd(){
+  printf '%s\n' "${1}" >&3
+  sleep "${sleep_n}"
+}
+
+finish(){
+  str="$(cat)"
+  [ -z "${quiet:-}" ] && printf '%s\n' "${str}"
+  printf '%s\n' "${str}" | if [ "$(grep -c ^"250 ")" = 3 ]; then
+    exit 0
+  else
+    exit 1
+  fi
+}
+
+
+while getopts ":c:s:p:t:qwh" Option; do
+  case ${Option} in
+    c) cmd_cli="${OPTARG}";;
+    s) tor_control_socket="${OPTARG}";;
+    p) tor_password="${OPTARG}";;
+    t) sleep_n="${OPTARG}";;
+    q) quiet=1;;
+    w) wait_confirmation=1;;
+    h|*) usage;;
+  esac
+done
+
+## accept commands separated by pipes
+cmd_cli="$(printf '%s\n' "${cmd_cli}" | tr -s "|" "\n" | sed "s|^ ||")"
+
+
+## find if tor_control_socket is a unix domain socket or a tcp socket and do sanity checks
+case "${tor_control_socket}" in
+  "unix:/"*|"/"*)
+    socket_type="unix"
+    tor_control_unix="${tor_control_socket##*unix:}"
+    test -e "${tor_control_unix}" || error_msg "${tor_control_unix} does not exist"
+    test -S "${tor_control_unix}" || error_msg "${tor_control_unix} is not a socket"
+  ;;
+  [0-9]*)
+    socket_type="tcp"
+    tor_control_port="${tor_control_socket##*:}"
+    tor_control_port="${tor_control_port:-9051}"
+    printf %d "${tor_control_port}" >/dev/null 2>&1 || error_msg "${tor_control_port} is not a valid port, not an integer"
+    { [ "${tor_control_port}" -gt 0 ] && [ "${tor_control_port}" -le 65535 ]; } || error_msg "${tor_control_port} is not a valid port, not within range: 0-65535"
+    tor_control_host="${tor_control_socket%%:*}"
+    [ "${tor_control_host}" = "${tor_control_port}" ] && tor_control_host="127.0.0.1"
+    for quad in $(printf '%s\n' "${tor_control_host}" | tr "." " "); do
+      printf %d "${quad}" >/dev/null 2>&1 || error_msg "${tor_control_host} is not a valid address, ${quad} is not and integer"
+      { [ "${quad}" -ge 0 ] && [ "${quad}" -le 255 ]; } || error_msg "${tor_control_host}is not a valid address, ${quad} is not within range: 0-255"
+    done
+  ;;
+esac
+
+[ -z "${socket_type}" ] && { socket_type="tcp"; tor_control_port="9051"; tor_control_host="127.0.0.1"; }
+
+############
+### main ###
+
+if [ -n "${cmd_cli}" ]; then
+  checkprogs
+  login
+  ## disable safecookie as it is not working https://github.com/nyxnor/tor-ctrl/issues/1
+  safecookie_enabled=""
+  if [ -n "${safecookie_enabled}" ] && test -r "${tor_cookie}" && command -v xxd >/dev/null && test -c /dev/urandom; then
+    {
+      cookie_string="$(xxd -u -p -c 32 "${tor_cookie}")"
+      client_nonce="$(xxd -u -p -l 32 -c 32 < /dev/urandom)"
+      ## TODO server_nonce is not working, how to solve a challenge and continue answering the server?
+      #sendcmd "AUTHCHALLENGE SAFECOOKIE ${client_nonce}"
+      server_nonce="$(sendcmd "AUTHCHALLENGE SAFECOOKIE ${client_nonce}")"
+      server_nonce="$(printf '%s\n' "${server_nonce}" | sed "s/.* SERVERNONCE=//" | tr -d "\\r")"
+      #server_nonce="$(printf '%s\n' "$(sendcmd "AUTHCHALLENGE SAFECOOKIE ${client_nonce}" 3>&1)" | sed "s/.* SERVERNONCE=//" | tr -d "\\r")"
+      # shellcheck disable=SC2030
+      auth_string="AUTHENTICATE $(printf '%s%s%s\n' "${cookie_string}" "${client_nonce}" "${server_nonce}" | xxd -r -p | openssl dgst -sha256 -binary -hmac "Tor safe cookie authentication controller-to-server hash" | xxd -p -u -c 32)"
+      sendcmd "${auth_string}"
+      sendcmd "${cmd_cli}"
+      # shellcheck disable=SC2034
+      [ -n "${wait_confirmation}" ] && read -r confirmation
+      sendcmd "QUIT"
+    } 3>&1 2>/dev/null | ${socket_prog} | finish
+  else
+    {
+      # shellcheck disable=SC2030,2031
+      sendcmd "${auth_string}"
+      sendcmd "${cmd_cli}"
+      # shellcheck disable=SC2034
+      [ -n "${wait_confirmation}" ] && read -r confirmation
+      sendcmd "QUIT"
+    } 3>&1 2>/dev/null | ${socket_prog} | finish
+  fi
+else
+  usage
+fi
