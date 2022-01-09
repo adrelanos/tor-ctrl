@@ -1,4 +1,4 @@
-# tor-controller
+# tor-ctrl
 
 Raw use of tor's controller. Inspired on [stem](stem.torproject.org) and fork of [tor-ctrl](https://github.com/adrelanos/tor-ctrl/blob/master/usr/bin/tor-ctrl).
 
@@ -12,8 +12,8 @@ At least one of each item is necessary.
 ## Features
 
 **ControlPort**/**ControlSocket**: the following socket types are accepted to connect to the controller:
-* unix domain socket, specified as just the path, without the `unix:` prefix.
-* tcp socket, specified as `[addr:]port`, if empty, will use port 9051.
+* unix domain socket, specified as `[unix:]path`
+* tcp socket, specified as `[addr:]port`, if empty, will try port 127.0.0.1:9051.
 
 **Authentication methods**:
 * ~~SAFECOOKIE~~ (on the work, help wanted)
@@ -24,7 +24,7 @@ At least one of each item is necessary.
 
 ## Installation
 
-### Control protocol
+### Control method
 
 This will be the socket that allows those connections to control the Tor process. Choose between `ControlPort` and `ControlSocket` (setting both means either control can be used).
 
@@ -66,24 +66,24 @@ pkill -sighup tor
 
 ## Usage
 
-Install:
+Install as root:
 ```sh
-./configure.sh
+./configure.sh install
 ```
 
 See usage:
 ```sh
-tor-controller -h
+tor-ctrl -h
 ```
 
 Get your tor user:
 ```sh
-tor-controller -v -s 0 -c "GETCONF User"
+tor-ctrl -c "GETCONF User"
 ```
 
 Get your circuits (raw):
 ```sh
-tor-controller -v -s 0 -c "GETINFO circuit-status"
+tor-ctrl -c "GETINFO circuit-status"
 ```
 
 That is not very clean to read, too much information, so lets organize it.
@@ -107,6 +107,10 @@ Now, go back to the script and press enter to print out the events received.
 * [tor manual](https://2019.www.torproject.org/docs/tor-manual-dev.html.en#cookieauthentication)
 * [control-spec](https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n1637)
 
+## History
+
+**tor-ctrl** was originally named **tor-ctrl** and created by Stefan Behte, later developed by Patrick Schleizer and later continued by nyxnor.
+
 ## License
 
-tor-controller is GPLv3, the rest is MIT.
+tor-ctrl is GPLv3, the rest is MIT.
