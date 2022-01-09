@@ -4,15 +4,14 @@
 .hy
 .SH NAME
 .PP
-tor-ctrl(8) - Interact with Tor\[aq]s controller via command line
-tool
-.SS SYNOPSIS
+tor-ctrl(8) - Interact with Tor\[aq]s controller via command line tool
+.SH SYNOPSIS
 .PP
 \f[B]tor-ctrl\f[R] [-switch] [variable]
-.SS DESCRIPTION
+.SH DESCRIPTION
 .PP
-\f[B]tor-ctrl\f[R] is a commandline tool for executing commands on
-a tor server via the controlport.
+\f[B]tor-ctrl\f[R] is a commandline tool for executing commands on a tor
+server via the controlport.
 In order to get this to work, add define the socket that will control
 the tor process, can be a tcp socket \f[I]ControlPort 9051\f[R] or a
 unix domain socket \f[I]ControlSocket /path/to/socket\f[R].
@@ -23,7 +22,7 @@ fixed password, hash a password with \f[I]echo
 and use the same output given.
 These configuration lines must be inserted to your torrc and tor
 reloaded after making changes.
-.SS OPTIONS
+.SH OPTIONS
 .TP
 \f[B]-c\f[R] [\f[I]command\f[R]]
 command to execute notice: always \[dq]quote\[dq] your command
@@ -54,14 +53,14 @@ command is \f[I]SETEVENTS STREAM\f[R] (Default: not set)
 \f[B]-q\f[R]
 Quiet mode.
 (Default: not set).
-.SS EXIT CODES
+.SH EXIT CODES
 .TP
 \f[B]0\f[R]
 Fail
 .TP
 \f[B]>0\f[R]
 Success.
-.SS EXAMPLES
+.SH EXAMPLES
 .PP
 tor-ctrl -c \[dq]SETCONF bandwidthrate=1mb\[dq]
 .PP
@@ -78,14 +77,14 @@ calling tor-ctrl via cron, e.g.:
 .PP
 This would set the bandwidth to 100kb at 07:00 and to 1mb at 22:00.
 You can use notations like 1mb, 1kb or the number of bytes.
-.SS WWW
+.SH WWW
 .PP
 https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
-.SS DISCLAIMER
+.SH DISCLAIMER
 .PP
 This package is produced independently of, and carries no guarantee
 from, The Tor Project.
-.SS LICENSE
+.SH LICENSE
 .PP
 Copyright (c) 2007 by Stefan Behte Portion Copyright (C) 2013 - 2020
 ENCRYPTED SUPPORT LP <adrelanos@riseup.net> Portion Copyright (C) 2021 -
@@ -108,13 +107,7 @@ If not, see <https://www.gnu.org/licenses/>.
 On Debian systems, the full text of the GNU General Public License
 version 3 can be found in the file
 \[ga]/usr/share/common-licenses/GPL-3\[aq].
-.SS AUTHOR
-.PP
-This man page has been written by Patrick Schleizer
-(adrelanos\[at]riseup.net) and adapted by nyxnor
-(nyxnor\[at]protonmail.com)
-.PP
-tor-ctrl was originally written by Stefan Behte (Stefan dot Behte at gmx
-dot net) (http://ge.mine.nu)
 .SH AUTHORS
-Written by nyxnor (nyxnor\[at]protonmail.com).
+tor-ctrl was written by Stefan Behte (stefan.behte\[at]gmx.net), later
+developed by and Patrick Schleizer (adrelanos\[at]riseup.net) and futher
+improved by nyxnor (nyxnor\[at]protonmail.com).

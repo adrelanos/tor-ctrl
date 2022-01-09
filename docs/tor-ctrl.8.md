@@ -1,21 +1,21 @@
 % tor-ctrl(8) Interact with Tor's controller via command line tool
-% Written by nyxnor (nyxnor@protonmail.com)
+% tor-ctrl was written by Stefan Behte (stefan.behte@gmx.net), later developed by and Patrick Schleizer (adrelanos@riseup.net) and futher improved by nyxnor (nyxnor@protonmail.com)
 % September 2069
 
 # NAME
 
 tor-ctrl(8) - Interact with Tor's controller via command line tool
 
-## SYNOPSIS
+# SYNOPSIS
 
 **tor-ctrl** [-switch] [variable]
 
-## DESCRIPTION
+# DESCRIPTION
 
 **tor-ctrl** is a commandline tool for executing commands on a tor server via the controlport.  In order to get this to work, add define the socket that will control the tor process, can be a tcp socket *ControlPort 9051* or a unix domain socket *ControlSocket /path/to/socket*. To secure the controller, you must setup and authentication method, which can be a cookie
 *CookieAuthentication 1* or if you want a fixed password, hash a password with *echo "HashedControlPassword $(tor --hash-password yourpassword)"* and use the same output given. These configuration lines must be inserted to your torrc and tor reloaded after making changes.
 
-## OPTIONS
+# OPTIONS
 
 **-c** [*command*]
 : command to execute
@@ -36,7 +36,7 @@ notice: always "quote" your command
 **-q**
 : Quiet mode. (Default: not set).
 
-## EXIT CODES
+# EXIT CODES
 
 **0**
 : Fail
@@ -44,7 +44,7 @@ notice: always "quote" your command
 **>0**
 : Success.
 
-## EXAMPLES
+# EXAMPLES
 
 tor-ctrl -c "SETCONF bandwidthrate=1mb"
 
@@ -60,16 +60,16 @@ For setting the bandwidth for specific times of the day, I suggest calling tor-c
 
 This would set the bandwidth to 100kb at 07:00 and to 1mb at 22:00.  You can use notations like 1mb, 1kb or the number of bytes.
 
-## WWW
+# WWW
 
 https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 
-## DISCLAIMER
+# DISCLAIMER
 
 This package is produced independently of, and carries no guarantee from, The
 Tor Project.
 
-## LICENSE
+# LICENSE
 
 Copyright (c) 2007 by Stefan Behte
 Portion Copyright (C) 2013 - 2020 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
@@ -91,10 +91,3 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 On Debian systems, the full text of the GNU General Public
 License version 3 can be found in the file
 `/usr/share/common-licenses/GPL-3'.
-
-## AUTHOR
-
-This man page was written by Patrick Schleizer (adrelanos@riseup.net) and further adapted by nyxnor (nyxnor@protonmail.com)
-
-tor-ctrl was originally written by Stefan Behte (Stefan dot Behte at gmx dot net)
-(http://ge.mine.nu)
