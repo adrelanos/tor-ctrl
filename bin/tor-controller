@@ -55,7 +55,7 @@
 me="${0##*/}"
 
 usage(){
-  printf '%s\n' "usage: ${me} [-cfCaPps] [argument] [-v]
+  printf '%s\n' "usage: ${me}
 
   -c [command]   command to execute
                  notice: always \"double quote\" your command
@@ -79,16 +79,14 @@ usage(){
                  default: not set
                  notice: useful when you want to be informed about events
 
-  -v             verbose
+  -q             quiet mode
                  default: not set
-                 notice: the default output is the return code ;)
-                 You probably want to set -v when running manually
 
-  Examples:      ${me} -c \"SETCONF bandwidthrate=1mb\"
-                 ${me} -v -P 9051 -p foobar -c \"GETCONF bandwidthrate\"
-                 ${me} -v -c \"GETINFO config-defaults-file config-file config-text\"
-                 ${me} -v -c \"GETCONF SocksPort | GETINFO net/listeners/socks\"
-                 ${me} -v -w -c \"SETEVENTS STREAM\"
+  Examples:      ${me} -q -c \"SETCONF bandwidthrate=1mb\"
+                 ${me} -P 9051 -p foobar -c \"GETCONF bandwidthrate\"
+                 ${me} -c \"GETINFO config-defaults-file config-file config-text\"
+                 ${me} -c \"GETCONF SocksPort | GETINFO net/listeners/socks\"
+                 ${me} -w -c \"SETEVENTS STREAM\"
 
 You should have a look at
 https://gitweb.torproject.org/torspec.git/tree/control-spec.txt"
@@ -188,30 +186,26 @@ sendcmd(){
 }
 
 finish(){
-  sendcmd "QUIT"
-  #exec 0<&3
-  #str="$(cat)"
-  str="$(exec 0<&3 cat)"
-  #str="$(cat <&3 2>/dev/null)"
-  [ "${verbose}" -ge 1 ] && printf '%s\n' "${str}"
-  printf '%s\n' "${str}" | { [ "$(grep -c "^250 ")" != 3 ] && exit 1; }
+  str="$(cat)"
+  [ -z "${quiet:-}" ] && printf '%s\n' "${str}"
+  printf '%s\n' "${str}" | if [ "$(grep -c ^"250 ")" = 3 ]; then
+    exit 0
+  else
+    exit 1
+  fi
 }
 
-
-while getopts ":c:C:s:p:vwh" Option; do
+while getopts ":c:C:s:p:qwh" Option; do
   case ${Option} in
     c) cmd_cli="${OPTARG}";;
     C) tor_control="${OPTARG}";;
     s) sleep_n="${OPTARG}";;
     p) tor_password="${OPTARG}";;
-    v) verbose=1;;
+    q) quiet=1;;
     w) wait_confirmation=1;;
     h|*) usage;;
   esac
 done
-
-
-: "${verbose:=0}"
 
 ## accept commands separated by pipes
 cmd_cli="$(printf '%s\n' "${cmd_cli}" | tr -s "|" "\n" | sed "s|^ ||")"
@@ -263,8 +257,10 @@ if [ -n "${cmd_cli}" ]; then
       auth_string="AUTHENTICATE $(printf '%s%s%s\n' "${cookie_string}" "${client_nonce}" "${server_nonce}" | xxd -r -p | openssl dgst -sha256 -binary -hmac "Tor safe cookie authentication controller-to-server hash" | xxd -p -u -c 32)"
       sendcmd "${auth_string}"
       sendcmd "${cmd_cli}"
-      finish
-    } 3>&1 | ${socket_prog}
+      # shellcheck disable=SC2034
+      [ -n "${wait_confirmation}" ] && read -r confirmation
+      sendcmd "QUIT"
+    } 3>&1 2>/dev/null | ${socket_prog} | finish
   else
     {
       # shellcheck disable=SC2030,2031
@@ -272,8 +268,8 @@ if [ -n "${cmd_cli}" ]; then
       sendcmd "${cmd_cli}"
       # shellcheck disable=SC2034
       [ -n "${wait_confirmation}" ] && read -r confirmation
-      finish
-    } 3>&1 2>/dev/null | ${socket_prog}
+      sendcmd "QUIT"
+    } 3>&1 2>/dev/null | ${socket_prog} | finish
   fi
 else
   usage
