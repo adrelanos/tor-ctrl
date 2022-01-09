@@ -88,13 +88,13 @@ tor-ctrl -c "GETINFO circuit-status"
 
 That is not very clean to read, too much information, so lets organize it.
 ```sh
-./scripts/circuit.sh
+./examples/circuit.sh
 ```
 Much better now huh?
 
 And if we could see the streams and to which circuit they are attached to and what is their target host?
 ```sh
-./scripts/stream.sh
+./examples/stream.sh
 ```
 Now, from another terminal, connect via tor to where you wish:
 ```sh
