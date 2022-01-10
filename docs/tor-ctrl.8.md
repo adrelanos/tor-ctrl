@@ -8,7 +8,7 @@ tor-ctrl(8) - Interact with Tor's controller via command line tool
 
 # SYNOPSIS
 
-**tor-ctrl** [-switch] [variable]
+**tor-ctrl** [**-wq**] [**-s** *socket*] [**-p** *pwd*] [**-t** *time*] [[**-c**] *command*]
 
 # DESCRIPTION
 
@@ -18,8 +18,7 @@ tor-ctrl(8) - Interact with Tor's controller via command line tool
 # OPTIONS
 
 **-c** [*command*]
-: command to execute
-notice: always "quote" your command
+: command to execute. Always "quote" your command. The *-c* is optional if the command is the last positional argument.
 
 **-s** [*socket*]
 : Tor's control socket. Accept *tcp socket* in the format [*addr:*]*port* (examples: 9051, 127.0.0.1:9051). Accept *unix domain socket* in the following format [*unix:*]*path* (examples: /run/tor/control, unix:/run/tor/control). (Default: 9051).
@@ -46,11 +45,11 @@ notice: always "quote" your command
 
 # EXAMPLES
 
-tor-ctrl -c "SETCONF bandwidthrate=1mb"
+tor-ctrl -c "SETCONF bandwidthrate=1mb" -q
 
-tor-ctrl -c "GETINFO version"
+tor-ctrl "GETINFO version"
 
-tor-ctrl -s 9051 -p foobar -c "GETCONF bandwidthrate"
+tor-ctrl -s 9051 -p foobar "GETCONF bandwidthrate"
 
 For setting the bandwidth for specific times of the day, I suggest calling tor-ctrl via cron, e.g.:
 

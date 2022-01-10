@@ -7,7 +7,9 @@
 tor-ctrl(8) - Interact with Tor\[aq]s controller via command line tool
 .SH SYNOPSIS
 .PP
-\f[B]tor-ctrl\f[R] [-switch] [variable]
+\f[B]tor-ctrl\f[R] [\f[B]-wq\f[R]] [\f[B]-s\f[R] \f[I]socket\f[R]]
+[\f[B]-p\f[R] \f[I]pwd\f[R]] [\f[B]-t\f[R] \f[I]time\f[R]]
+[[\f[B]-c\f[R]] \f[I]command\f[R]]
 .SH DESCRIPTION
 .PP
 \f[B]tor-ctrl\f[R] is a commandline tool for executing commands on a tor
@@ -25,7 +27,10 @@ reloaded after making changes.
 .SH OPTIONS
 .TP
 \f[B]-c\f[R] [\f[I]command\f[R]]
-command to execute notice: always \[dq]quote\[dq] your command
+command to execute.
+Always \[dq]quote\[dq] your command.
+The \f[I]-c\f[R] is optional if the command is the last positional
+argument.
 .TP
 \f[B]-s\f[R] [\f[I]socket\f[R]]
 Tor\[aq]s control socket.
@@ -62,11 +67,11 @@ Fail
 Success.
 .SH EXAMPLES
 .PP
-tor-ctrl -c \[dq]SETCONF bandwidthrate=1mb\[dq]
+tor-ctrl -c \[dq]SETCONF bandwidthrate=1mb\[dq] -q
 .PP
-tor-ctrl -c \[dq]GETINFO version\[dq]
+tor-ctrl \[dq]GETINFO version\[dq]
 .PP
-tor-ctrl -s 9051 -p foobar -c \[dq]GETCONF bandwidthrate\[dq]
+tor-ctrl -s 9051 -p foobar \[dq]GETCONF bandwidthrate\[dq]
 .PP
 For setting the bandwidth for specific times of the day, I suggest
 calling tor-ctrl via cron, e.g.:
