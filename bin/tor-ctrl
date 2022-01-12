@@ -64,9 +64,9 @@ usage(){
                  notice: '-c' is optional when command is the last positional argument
 
   -s [socket]    tor's control socket
-                 default: 9051
                  notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
                  notice: unix: [unix:]path: /run/tor/control, unix:/run/tor/control
+                 default: 9051
 
   -p [pwd]       use password [var] instead of Tor's control_auth_cookie
                  default: not used
@@ -79,13 +79,15 @@ usage(){
                  notice: useful when you want to be informed about events
                  default: not set
 
-  -q             quiet mode. (Default: not set).
+  -q             quiet mode.
+                 default: not set.
 
-  Examples:      ${me} -q \"SETCONF bandwidthrate=1mb\"
-                 ${me} -s 9051 -p foobar \"GETCONF bandwidthrate\"
-                 ${me} \"GETINFO config-defaults-file config-file config-text\"
-                 ${me} \"GETCONF SocksPort | GETINFO net/listeners/socks\"
-                 ${me} -c \"SETEVENTS STREAM\" -w
+  Examples:      ${me} GETCONF User
+                 ${me} -q SETCONF bandwidthrate=1mb
+                 ${me} -s 9051 -p foobar -- GETCONF bandwidthrate
+                 ${me} GETINFO config-defaults-file config-file config-text
+                 ${me} GETCONF SocksPort | GETINFO net/listeners/socks
+                 ${me} -w -- SETEVENTS STREAM
 
 You should have a look at
 https://gitweb.torproject.org/torspec.git/tree/control-spec.txt"
@@ -220,25 +222,47 @@ tor_control_detection(){
 }
 
 
-while getopts ":c:s:p:t:qwh" Option; do
-  case ${Option} in
-    c) cmd_cli="${OPTARG}";;
-    s) tor_control_socket="${OPTARG}";;
-    p) tor_password="${OPTARG}";;
-    t) sleep_n="${OPTARG}";;
-    q) quiet=1;;
-    w) wait_confirmation=1;;
+assign_value(){
+  case "${2}" in
+    --*) value="${2#--}";;
+    -*) value="${2#-}";;
+    *) value="${2}"
+  esac
+  ## Escaping quotes is needed because else if will fail if the argument is quoted
+  # shellcheck disable=SC2140
+  eval "${1}"="\"${value}\""
+}
+
+get_arg(){
+  case "${arg}" in
+    ""|-*) error_msg "Option '${opt}' requires an argument.";;
+  esac
+  assign_value "${1}" "${arg}"
+}
+
+
+while :; do
+  case "${1}" in
+    -*=*) opt="${1%=*}"; arg="${1#*=}";;
+    -*) opt="${1#*-}"; arg="${2}";;
+    *) opt="${1}"; arg="${2}";;
+  esac
+  case "${opt}" in
+    c) get_arg cmd_cli; shift 2;;
+    s) get_arg cmd tor_control_socket; shift 2;;
+    p) get_arg tor_password; shift 2;;
+    t) get_arg sleep_n; shift 2;;
+    q) quiet=1; shift 1;;
+    w) wait_confirmation=1; shift 1;;
     h) usage;;
-    *) usage;;
+    -) shift 1; break;; ## this is in fact '--', but one one hifen was removed from 'opt' above
+    -*) error_msg "Unkown option: ${opt}";;
+    "") break;;
+    *) break;;
   esac
 done
 
-[ -z "${cmd_cli}" ] && for cmd_cli; do true; done
-
-if [ -z "${cmd_cli}" ]; then
-  [ "${OPTIND}" != "${#}" ] && error_msg "Command must be the last positional argument or preceded with the '-c' option"
-  eval cmd_cli='$'"${OPTIND}"
-fi
+[ -z "${cmd_cli}" ] && cmd_cli="${*}"
 
 ## accept commands separated by pipes
 cmd_cli="$(printf '%s\n' "${cmd_cli}" | tr -s "|" "\n" | sed "s|^ ||")"

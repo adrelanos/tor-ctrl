@@ -76,14 +76,14 @@ See usage:
 tor-ctrl -h
 ```
 
-Get your tor user (the **-c** is optional when the command is the last positional argument):
+Get your tor user:
 ```sh
-tor-ctrl -c "GETCONF User"
+tor-ctrl GETCONF User"
 ```
 
 Get your circuits (raw):
 ```sh
-tor-ctrl "GETINFO circuit-status"
+tor-ctrl GETINFO circuit-status
 ```
 
 That is not very clean to read, too much information, so lets organize it.
