@@ -114,12 +114,18 @@ checkprogs(){
     *) : "${sleep_n:=0}";;
   esac
 
+socket_prog=socat
   case "${socket_type}" in
     unix)
-      [ ! -S "${tor_control_unix}" ] && error_msg "${tor_control_unix} doesn't exist"
       case "${socket_prog##*/}" in
-        nc|netcat) socket_prog="${socket_prog} -U ${tor_control_unix}";;
-        socat) socket_prog="${socket_prog} - UNIX-CONNECT:${tor_control_unix}";;
+        nc|netcat)
+          ${socket_prog} -U "${tor_control_unix}" -z || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
+          socket_prog="${socket_prog} -U ${tor_control_unix}"
+        ;;
+        socat)
+          ${socket_prog} /dev/null "UNIX-CONNECT:${tor_control_unix}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
+          socket_prog="${socket_prog} - UNIX-CONNECT:${tor_control_unix}"
+        ;;
         *) error_msg "${socket_prog##*/} doesn't support unix domain sockets";;
       esac
     ;;
@@ -249,7 +255,7 @@ while :; do
   esac
   case "${opt}" in
     c) get_arg cmd_cli; shift 2;;
-    s) get_arg cmd tor_control_socket; shift 2;;
+    s) get_arg tor_control_socket; shift 2;;
     p) get_arg tor_password; shift 2;;
     t) get_arg sleep_n; shift 2;;
     q) quiet=1; shift 1;;
@@ -273,8 +279,8 @@ case "${tor_control_socket}" in
   "unix:/"*|"/"*)
     socket_type="unix"
     tor_control_unix="${tor_control_socket##*unix:}"
-    test -e "${tor_control_unix}" || error_msg "${tor_control_unix} does not exist"
-    test -S "${tor_control_unix}" || error_msg "${tor_control_unix} is not a socket"
+    #test -e "${tor_control_unix}" || error_msg "${tor_control_unix} does not exist"
+    #test -S "${tor_control_unix}" || error_msg "${tor_control_unix} is not a socket"
   ;;
   [0-9]*)
     socket_type="tcp"
