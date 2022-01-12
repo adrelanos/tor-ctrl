@@ -9,9 +9,9 @@ usage(){
   printf '%s\n' "usage: ${me} [-CaPp] [argument]
 
   -s [socket]    tor's control socket
-                 default: 9051
                  notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
-                 notice: unix: /run/tor/control, unix:/run/tor/control
+                 notice: unix: [unix:]path: /run/tor/control, unix:/run/tor/control
+                 default: 9051
 
   -p [pwd]       use password [var] instead of Tor's control_auth_cookie
                  default: not used
