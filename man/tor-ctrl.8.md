@@ -8,7 +8,7 @@ tor-ctrl(8) - Interact with Tor's controller via command line tool
 
 # SYNOPSIS
 
-**tor-ctrl** [**-wq**] [**-s** *socket*] [**-p** *pwd*] [**-t** *time*] [[**-c**] *"command"*] [[**--**] *command*]
+**tor-ctrl** [**-wq**] [**-s** *socket*] [**-p** *pwd*] [**-t** *time*] [[**-c**|**--**] *command*]
 
 # DESCRIPTION
 
@@ -17,11 +17,8 @@ tor-ctrl(8) - Interact with Tor's controller via command line tool
 
 # OPTIONS
 
-[**--**] [*command*]
-: command to execute. Must be after all options. Don't need to be quoted and preferably signal end of option parsing with *--*.
-
-**-c** [*"command"*]
-: command to execute. Always "quote" your command. The *-c* is optional if the command is the last positional argument.
+[**-c**|**--**] [*command*]
+: command to execute. If the command option is *-c*, you must "quote" your command. If the command option is *--*, option parsing will stop, meaning you any option specified after it won't be parsed, the benefit is that it becomes uncessary to quote your command.
 
 **-s** [*socket*]
 : Tor's control socket. Accept *tcp socket* in the format [*addr:*]*port* (examples: 9051, 127.0.0.1:9051). Accept *unix domain socket* in the following format [*unix:*]*path* (examples: /run/tor/control, unix:/run/tor/control). (Default: 9051).
@@ -74,7 +71,9 @@ Tor Project.
 # LICENSE
 
 Copyright (c) 2007 by Stefan Behte
+
 Portion Copyright (C) 2013 - 2020 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
+
 Portion Copyright (C) 2021 - 2022 nyxnor <nyxnor@protonmail.com>
 
 This program is free software: you can redistribute it and/or modify

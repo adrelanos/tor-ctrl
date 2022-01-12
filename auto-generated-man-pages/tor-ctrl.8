@@ -9,8 +9,7 @@ tor-ctrl(8) - Interact with Tor\[aq]s controller via command line tool
 .PP
 \f[B]tor-ctrl\f[R] [\f[B]-wq\f[R]] [\f[B]-s\f[R] \f[I]socket\f[R]]
 [\f[B]-p\f[R] \f[I]pwd\f[R]] [\f[B]-t\f[R] \f[I]time\f[R]]
-[[\f[B]-c\f[R]] \f[I]\[dq]command\[dq]\f[R]] [[\f[B]--\f[R]]
-\f[I]command\f[R]]
+[[\f[B]-c\f[R]|\f[B]--\f[R]] \f[I]command\f[R]]
 .SH DESCRIPTION
 .PP
 \f[B]tor-ctrl\f[R] is a commandline tool for executing commands on a tor
@@ -27,17 +26,13 @@ These configuration lines must be inserted to your torrc and tor
 reloaded after making changes.
 .SH OPTIONS
 .TP
-[\f[B]--\f[R]] [\f[I]command\f[R]]
+[\f[B]-c\f[R]|\f[B]--\f[R]] [\f[I]command\f[R]]
 command to execute.
-Must be after all options.
-Don\[aq]t need to be quoted and preferably signal end of option parsing
-with \[aq]--\[aq].
-.TP
-\f[B]-c\f[R] [\f[I]\[dq]command\[dq]\f[R]]
-command to execute.
-Always \[dq]quote\[dq] your command.
-The \f[I]-c\f[R] is optional if the command is the last positional
-argument.
+If the command option is \f[I]-c\f[R], you must \[dq]quote\[dq] your
+command.
+If the command option is \f[I]--\f[R], option parsing will stop, meaning
+you any option specified after it won\[aq]t be parsed, the benefit is
+that it becomes uncessary to quote your command.
 .TP
 \f[B]-s\f[R] [\f[I]socket\f[R]]
 Tor\[aq]s control socket.
@@ -98,9 +93,12 @@ This package is produced independently of, and carries no guarantee
 from, The Tor Project.
 .SH LICENSE
 .PP
-Copyright (c) 2007 by Stefan Behte Portion Copyright (C) 2013 - 2020
-ENCRYPTED SUPPORT LP <adrelanos@riseup.net> Portion Copyright (C) 2021 -
-2022 nyxnor <nyxnor@protonmail.com>
+Copyright (c) 2007 by Stefan Behte
+.PP
+Portion Copyright (C) 2013 - 2020 ENCRYPTED SUPPORT LP
+<adrelanos@riseup.net>
+.PP
+Portion Copyright (C) 2021 - 2022 nyxnor <nyxnor@protonmail.com>
 .PP
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
