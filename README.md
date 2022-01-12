@@ -13,7 +13,10 @@ At least one of each item is necessary.
 
 **ControlPort**/**ControlSocket**: the following socket types are accepted to connect to the controller:
 * unix domain socket, specified as `[unix:]path`
-* tcp socket, specified as `[addr:]port`, if empty, will try port 127.0.0.1:9051.
+* tcp socket, specified as `[addr:]port`
+
+Autodetects the socket by verifying tor configuration without starting it.
+If still undiscovered, will try port 127.0.0.1:9051.
 
 **Authentication methods**:
 * ~~SAFECOOKIE~~ (on the work, help wanted)
