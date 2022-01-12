@@ -1,13 +1,15 @@
-# tor-ctrl
+# tor-ctrl - control the tor process on the cli
 
-Raw use of tor's controller. Inspired on [stem](stem.torproject.org) and fork of [tor-ctrl](https://github.com/adrelanos/tor-ctrl/blob/master/usr/bin/tor-ctrl).
+Command line tool for executing tor controller's commands using TCP sockets or Unix Domain sockets.
+
+This package is produced independently of, and carries no guarantee from, The Tor Project.
 
 ## Requirements
 
-At least one of each item is necessary.
+At least one of each item is necessary:
 
-* **nc**/**socat**/**telnet**
-* **xxd**/**hexdump**/**od**
+* Networking tool:**nc**/**socat**/**telnet**
+* Hex converter: **xxd**/**hexdump**/**od**
 
 ## Features
 
@@ -15,15 +17,13 @@ At least one of each item is necessary.
 * unix domain socket, specified as `[unix:]path`
 * tcp socket, specified as `[addr:]port`
 
-Autodetects the socket by verifying tor configuration without starting it.
-If still undiscovered, will try port 127.0.0.1:9051.
+Autodetects the socket by reading the tor configuration.
+If still unknown, will try tcp socket 127.0.0.1:9051.
 
 **Authentication methods**:
 * ~~SAFECOOKIE~~ (on the work, help wanted)
-* COOKIE
-* HASHEDPASSWORD
-
-**CookieAuthFile**: discover it by sending PROTOCOLINFO, so no need to specify the file.
+* COOKIE - discover it by sending PROTOCOLINFO, so no need to specify the file.
+* HASHEDPASSWORD - needs to be specifiedo on the command line
 
 ## Installation
 
@@ -33,12 +33,12 @@ This will be the socket that allows those connections to control the Tor process
 
 Note: the options must be set inside your torrc.
 
-Port:
+TCP socket:
 ```sh
 ControlPort 9051
 ```
 
-Socket:
+Unix domain socket:
 ```sh
 ControlSocket /var/run/tor/control
 ```
@@ -58,13 +58,17 @@ Password (change `yourpassword`, but maintain it double quoted)
 ```
 printf '%s\n' "HashedControlPassword $(tor --hash-password "yourpassword")"
 ```
+the result of the above operation should be used as the configuration.
 
 ### Apply the changes
 
-If you have made any changes to the tor run commands file (torrc), you will need to HUP tor to apply the new configuration.
+If you have made any changes to the tor run commands file (torrc), you will need to HUP tor to apply the new configuration as root:
 
 ```sh
 pkill -sighup tor
+## or
+#ps -o user,pid,command -A | grep -E "/usr/bin/tor|/usr/local/bin/tor"
+#kill -sighup "${tor_pid_from_above}"
 ```
 
 ## Usage
@@ -116,4 +120,4 @@ Now, go back to the script and press enter to print out the events received.
 
 ## License
 
-tor-ctrl is GPLv3, the rest is MIT.
+tor-ctrl is GPLv3
