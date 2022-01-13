@@ -85,7 +85,7 @@ tor-ctrl -h
 
 Get your tor user:
 ```sh
-tor-ctrl GETCONF User"
+tor-ctrl GETCONF User
 ```
 
 Get your circuits (raw):
