@@ -24,6 +24,9 @@ fixed password, hash a password with \f[I]echo
 and use the same output given.
 These configuration lines must be inserted to your torrc and tor
 reloaded after making changes.
+.PP
+The script will try to detect a valid control socket even if you
+don\[aq]t especify it on the command line.
 .SH OPTIONS
 .TP
 [\f[B]-c\f[R]|\f[B]--\f[R]] [\f[I]command\f[R]]
@@ -31,7 +34,7 @@ command to execute.
 If the command option is \f[I]-c\f[R], you must \[dq]quote\[dq] your
 command.
 If the command option is \f[I]--\f[R], option parsing will stop, meaning
-you any option specified after it won\[aq]t be parsed, the benefit is
+that any option specified after it won\[aq]t be parsed, the benefit is
 that it becomes uncessary to quote your command.
 .TP
 \f[B]-s\f[R] [\f[I]socket\f[R]]
@@ -69,9 +72,9 @@ Fail
 Success.
 .SH EXAMPLES
 .PP
-tor-ctrl -q -- SETCONF bandwidthrate=1mb
+tor-ctrl -q SETCONF bandwidthrate=1mb
 .PP
-tor-ctrl \[dq]GETINFO version\[dq]
+tor-ctrl GETINFO version
 .PP
 tor-ctrl -s 9051 -p foobar -- GETCONF bandwidthrate
 .PP

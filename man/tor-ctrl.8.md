@@ -15,10 +15,12 @@ tor-ctrl(8) - Interact with Tor's controller via command line tool
 **tor-ctrl** is a commandline tool for executing commands on a tor server via the controlport.  In order to get this to work, add define the socket that will control the tor process, can be a tcp socket *ControlPort 9051* or a unix domain socket *ControlSocket /path/to/socket*. To secure the controller, you must setup and authentication method, which can be a cookie
 *CookieAuthentication 1* or if you want a fixed password, hash a password with *echo "HashedControlPassword $(tor --hash-password yourpassword)"* and use the same output given. These configuration lines must be inserted to your torrc and tor reloaded after making changes.
 
+The script will try to detect a valid control socket even if you don't especify it on the command line.
+
 # OPTIONS
 
 [**-c**|**--**] [*command*]
-: command to execute. If the command option is *-c*, you must "quote" your command. If the command option is *--*, option parsing will stop, meaning you any option specified after it won't be parsed, the benefit is that it becomes uncessary to quote your command.
+: command to execute. If the command option is *-c*, you must "quote" your command. If the command option is *--*, option parsing will stop, meaning that any option specified after it won't be parsed, the benefit is that it becomes uncessary to quote your command.
 
 **-s** [*socket*]
 : Tor's control socket. Accept *tcp socket* in the format [*addr:*]*port* (examples: 9051, 127.0.0.1:9051). Accept *unix domain socket* in the following format [*unix:*]*path* (examples: /run/tor/control, unix:/run/tor/control). (Default: 9051).
@@ -45,9 +47,9 @@ tor-ctrl(8) - Interact with Tor's controller via command line tool
 
 # EXAMPLES
 
-tor-ctrl -q -- SETCONF bandwidthrate=1mb
+tor-ctrl -q SETCONF bandwidthrate=1mb
 
-tor-ctrl "GETINFO version"
+tor-ctrl GETINFO version
 
 tor-ctrl -s 9051 -p foobar -- GETCONF bandwidthrate
 
