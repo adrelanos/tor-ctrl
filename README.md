@@ -68,15 +68,52 @@ If you have made any changes to the tor run commands file (torrc), you will need
 pkill -sighup tor
 ## or
 #ps -o user,pid,command -A | grep -E "/usr/bin/tor|/usr/local/bin/tor"
-#kill -sighup "${tor_pid_from_above}"
+#kill -sighup PID_FROM_ABOVE
+```
+
+## How to install `tor-ctrl` on any unix system
+
+Install the script and the manual:
+```sh
+sudo ./configure.sh install
+```
+
+## How to build deb package from source sode
+
+### Build the package
+
+Install build dependencies.
+```sh
+sudo mk-build-deps --remove --install
+```
+If that did not work, have a look in debian/control file and manually install all packages listed under Build-Depends and Depends.
+
+Build the package without signing it (not required for personal use) and install it.
+```sh
+dpkg-buildpackage -b
+```
+
+### Install the package
+
+The package can be found in the parent folder.
+Install the package:
+```sh
+sudo dpkg -i ../tor-ctrl_*.deb
+```
+
+### Clean up
+
+Delete temporary debhelper files in package source folder as well as debhelper artifacts:
+```sh
+sudo rm -rf tor-ctrl-build-deps_*.buildinfo tor-ctrl-build-deps_*.changes debian/tor-ctrl.debhelper.log debian/tor-ctrl.substvars debian/.debhelper debian/files debian/debhelper-build-stamp debian/tor-ctrl
+```
+
+Delete debhelper artifacts from the parent folder (including the .deb file):
+```sh
+sudo rm -f ../tor-ctrl_*.deb ../tor-ctrl_*.buildinfo ../tor-ctrl_*.changes
 ```
 
 ## Usage
-
-Install as root:
-```sh
-./configure.sh install
-```
 
 See usage:
 ```sh
@@ -99,24 +136,24 @@ tor-ctrl-circuit
 ```
 Much better now huh?
 
-And if we could see the streams and to which circuit they are attached to and what is their target host?
+And if we could see the streams and to which circuit they are attached to and what is their target?
 ```sh
 tor-ctrl-stream
 ```
-Now, from another terminal, connect via tor to where you wish:
+Now, from another terminal, connect via Tor to where you wish:
 ```sh
 curl -x socks5h://127.0.0.1:9050 github.com
 ```
-Now, go back to the script and press enter to print out the events received.
+Now, return to the script and press enter to print out the events received.
 
 ## Useful links
 
-* [tor manual](https://2019.www.torproject.org/docs/tor-manual-dev.html.en#cookieauthentication)
+* [tor manual](https://2019.www.torproject.org/docs/tor-manual-dev.html.en)
 * [control-spec](https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n1637)
 
 ## History
 
-**tor-ctrl** was originally named **tor-ctrl** and created by Stefan Behte, later developed by Patrick Schleizer and later continued by nyxnor.
+**tor-ctrl** was created by Stefan Behte, later developed by Patrick Schleizer and further improved by nyxnor.
 
 ## License
 
