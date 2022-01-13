@@ -105,7 +105,10 @@ sudo dpkg -i ../tor-ctrl_*.deb
 
 Delete temporary debhelper files in package source folder as well as debhelper artifacts:
 ```sh
-sudo rm -rf tor-ctrl-build-deps_*.buildinfo tor-ctrl-build-deps_*.changes debian/tor-ctrl.debhelper.log debian/tor-ctrl.substvars debian/.debhelper debian/files debian/debhelper-build-stamp debian/tor-ctrl
+sudo rm -rf tor-ctrl-build-deps_*.buildinfo tor-ctrl-build-deps_*.changes \
+debian/tor-ctrl.debhelper.log debian/tor-ctrl.substvars \
+debian/.debhelper debian/files \
+debian/debhelper-build-stamp debian/tor-ctrl
 ```
 
 Delete debhelper artifacts from the parent folder (including the .deb file):
