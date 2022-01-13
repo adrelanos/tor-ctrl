@@ -94,64 +94,138 @@ https://gitweb.torproject.org/torspec.git/tree/control-spec.txt"
   exit 1
 }
 
+
 error_msg(){
   printf %s"${me}: ${1}\n"
   exit 1
 }
 
+
+## dylanaraps/pfetch has function
+has() {
+  _cmd=$(command -v "${1}") 2>/dev/null || return 1
+  [ -x "${_cmd}" ] || return 1
+}
+
+
 checkprogs(){
   prog_net="nc netcat socat telnet"
-  while :; do
-    for prog in ${prog_net}; do
-      command -v "${prog}" >/dev/null && socket_prog="$(command -v "${prog}")" && break
-    done
-    break
+  for n in ${prog_net}; do
+    has "${n}" && socket_prog="${n}" && break
   done
   [ -z "${socket_prog}" ] && error_msg "Install one of the following programs to connect to sockets: ${prog_net}"
+}
 
-  case "${socket_prog}" in
-    telnet) sleep_n=1;;
+
+setprogs(){
+
+  case "${socket_prog##*/}" in
+    telnet) : "${sleep_n:=1}";;
     *) : "${sleep_n:=0}";;
   esac
 
-socket_prog=socat
   case "${socket_type}" in
     unix)
       case "${socket_prog##*/}" in
         nc|netcat)
-          ${socket_prog} -U "${tor_control_unix}" -z || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
-          socket_prog="${socket_prog} -U ${tor_control_unix}"
+          socket_prog_connect="${socket_prog} -U ${tor_control_unix}"
+          ${socket_prog_connect} -zv || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
         ;;
         socat)
-          ${socket_prog} /dev/null "UNIX-CONNECT:${tor_control_unix}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
-          socket_prog="${socket_prog} - UNIX-CONNECT:${tor_control_unix}"
+          socket_prog_connect="${socket_prog} UNIX-CONNECT:${tor_control_unix} -"
+          ${socket_prog} "UNIX-CONNECT:${tor_control_unix}" /dev/null || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
         ;;
         *) error_msg "${socket_prog##*/} doesn't support unix domain sockets";;
       esac
     ;;
+
     tcp)
       case "${socket_prog##*/}" in
         nc|netcat)
-          "${socket_prog}" -z "${tor_control_host}" "${tor_control_port}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
-          socket_prog="${socket_prog} ${tor_control_host} ${tor_control_port}"
+          socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
+          ${socket_prog_connect} -z || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
         ;;
         socat)
-          "${socket_prog}" /dev/null TCP:"${tor_control_host}:${tor_control_port}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
-          socket_prog="${socket_prog} - TCP:${tor_control_host}:${tor_control_port}"
+          socket_prog_connect="${socket_prog} TCP:${tor_control_host}:${tor_control_port} -"
+          "${socket_prog}" "TCP:${tor_control_host}:${tor_control_port}" /dev/null || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
         ;;
         telnet)
-          ##printf "\x1dclose\x0d" | "${socket_prog}" "${tor_control_host}" "${tor_control_port}" >/dev/null 2>&1 || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
-          socket_prog="${socket_prog} ${tor_control_host} ${tor_control_port}"
+          socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
+          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q "Connected to ${tor_control_host}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
         ;;
-        #bash) socket_prog="bash";;
+        #bash) socket_prog_connect="bash";;
       esac
     ;;
   esac
 }
 
-login(){
-  auth="$({ sendcmd "PROTOCOLINFO"; sendcmd "QUIT"; } 3>&1 | ${socket_prog} | grep "AUTH")"
 
+socket_assignment(){
+  ## find if tor_control_socket is a unix domain socket or a tcp socket and do sanity checks
+  case "${tor_control_socket}" in
+    "unix:/"*|"/"*)
+      socket_type="unix"
+      tor_control_unix="${tor_control_socket##*unix:}"
+      test -e "${tor_control_unix}" || error_msg "${tor_control_unix} does not exist"
+      test -S "${tor_control_unix}" || error_msg "${tor_control_unix} is not a socket"
+    ;;
+    [0-9]*)
+      socket_type="tcp"
+      tor_control_port="${tor_control_socket##*:}"
+      tor_control_port="${tor_control_port:-9051}"
+      printf %d "${tor_control_port}" >/dev/null 2>&1 || error_msg "${tor_control_port} is not a valid port, not an integer"
+      { [ "${tor_control_port}" -gt 0 ] && [ "${tor_control_port}" -le 65535 ]; } || error_msg "${tor_control_port} is not a valid port, not within range: 0-65535"
+      tor_control_host="${tor_control_socket%%:*}"
+      [ "${tor_control_host}" = "${tor_control_port}" ] && tor_control_host="127.0.0.1"
+      for quad in $(printf '%s\n' "${tor_control_host}" | tr "." " "); do
+        printf %d "${quad}" >/dev/null 2>&1 || error_msg "${tor_control_host} is not a valid address, ${quad} is not and integer"
+        { [ "${quad}" -ge 0 ] && [ "${quad}" -le 255 ]; } || error_msg "${tor_control_host} is not a valid address, ${quad} is not within range: 0-255"
+      done
+    ;;
+  esac
+}
+
+
+socket_detection(){
+  ## 1. deal with socket if already assigned via command line
+  socket_assignment
+
+  ## 2. if not assigned on the command line, try auto-detection
+  if [ -z "${tor_control_socket}" ]; then
+    ## TODO: fix posix
+    ## grep options '-o' and '-h' are not posix, but present on Debian and OpenBSD so making an excuse
+
+    ## minimal check for tor service manager file
+    if test -f /lib/systemd/system/tor@default.service; then
+      tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed s/ExecStart=//g)"
+      default_torrc="$(printf '%s\n' "${tor_start_command}" | grep -o -- "--defaults-torrc [^ ]*")"
+      f_torrc="$(printf '%s\n' "${tor_start_command}" | grep -o -- "-f [^ ]*")"
+    fi
+
+    ## don't evaluate the exit code of '--verify-config' as it will fail if not running as root or the tor user
+    ## if 'f_torrc' is empty, tor will try: Default: @CONFDIR@/torrc, or $HOME/.torrc if that file is not found
+    ## if 'default_torrc' is empty, tor will try: Default: @CONFDIR@/torrc-defaults.
+    # shellcheck disable=SC2086
+    tor_config_files="$(tor --verify-config ${default_torrc} ${f_torrc} | grep -oE " Read configuration file [^ ]*| Including configuration file [^ ]*" | cut -d " " -f5 | sed "s/\"//;s/\"\.//")"
+
+    ## only one option is needed, use head
+    # shellcheck disable=SC2086
+    tor_control_socket_alternative="$(grep -oEh "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
+
+    ## only modify 'tor_control_socket' if it is not empty, meaning not inserted as a cli option
+    tor_control_socket="${tor_control_socket_alternative}"
+    socket_assignment
+  fi
+
+
+  ## 3. if still empty, fallback to 127.0.0.1:9051
+  [ -z "${socket_type}" ] && { socket_type="tcp"; tor_control_port="9051"; tor_control_host="127.0.0.1"; }
+
+}
+
+
+login(){
+  auth="$({ sendcmd "PROTOCOLINFO"; sendcmd "QUIT"; } | ${socket_prog_connect} 2>/dev/null | grep "AUTH")"
   auth_methods="$(printf '%s\n' "${auth}" | sed "s/250-AUTH METHODS=//" | cut -d " " -f1 | tr "," "\n")"
 
   if printf %s"${auth}" | grep -q "AUTH METHODS=NULL"; then
@@ -168,17 +242,16 @@ login(){
     cookie_enabled="$(printf '%s\n' "${auth_methods}" | grep "^COOKIE$")"
     if [ -n "${cookie_enabled}" ]; then
       ## xxd is only needed when authenticating with SAFECOOKIE
-      while :; do
-        command -v xxd >/dev/null && hex_prog="xxd" && break
-        command -v hexdump >/dev/null && hex_prog="hexdump" && break
-        command -v od >/dev/null && hex_prog="od" && break
-        break
+      prog_converter_hex="xxd hexdump od"
+      for n in ${prog_converter_hex}; do
+        has "${n}" && hex_prog="${n}" && break
       done
+      [ -z "${hex_prog}" ] && error_msg "Missing program to dump hex. Install either 'hexdump' or 'xxd' or 'od'."
       case "${hex_prog}" in
         xxd) auth_string="AUTHENTICATE $(xxd -u -p -c 32 "${tor_cookie}")";;
         hexdump) auth_string="AUTHENTICATE $(hexdump -e '32/1 "%02x""\n"' "${tor_cookie}")";;
         od) auth_string="AUTHENTICATE $(od -t x1 "${tor_cookie}" | head -n 2 | cut -d " " -f2- | tr -d "\n" | tr -d " ")";;
-        *) printf "Missing program to dump hex. Install either 'hexdump' or 'xxd' or 'od'."
+        *) error_msg "Missing program to dump hex. Install either 'hexdump' or 'xxd' or 'od'."
       esac
     fi
   elif [ -n "${hashedpassword_enabled}" ] && [ -n "${tor_password}" ]; then
@@ -186,9 +259,19 @@ login(){
   fi
 }
 
+
 sendcmd(){
-  printf '%s\n' "${1}" >&3
+  printf '%s\n' "${1}"
   sleep "${sleep_n}"
+}
+
+cmdpipe(){
+  # shellcheck disable=SC2030,2031
+  sendcmd "${auth_string}"
+  sendcmd "${cmd_cli}"
+  # shellcheck disable=SC2034
+  [ -n "${wait_confirmation}" ] && read -r confirmation
+  sendcmd "QUIT"
 }
 
 finish(){
@@ -202,35 +285,11 @@ finish(){
 }
 
 
-tor_control_detection(){
-  ## TODO: fix posix
-  ## grep options '-o' and '-h' are not posix, but present on Debian and OpenBSD so making an excuse
-
-  ## minimal check for tor service manager file
-  if test -f /lib/systemd/system/tor@default.service; then
-    tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed s/ExecStart=//g)"
-    default_torrc="$(printf '%s\n' "${tor_start_command}" | grep -o -- "--defaults-torrc [^ ]*")"
-    f_torrc="$(printf '%s\n' "${tor_start_command}" | grep -o -- "-f [^ ]*")"
-  fi
-
-  ## don't evaluate the result of verify-config as it will fail if not running as root or the tor user
-  ## if 'f_torrc' is empty, tor will try: Default: @CONFDIR@/torrc, or $HOME/.torrc if that file is not found
-  ## if 'default_torrc' is empty, tor will try: Default: @CONFDIR@/torrc-defaults.
-  # shellcheck disable=SC2086
-  result="$(tor --verify-config ${default_torrc} ${f_torrc} | grep -oE " Read configuration file [^ ]*| Including configuration file [^ ]*" | cut -d " " -f5 | sed "s/\"//;s/\"\.//")"
-
-  ## only one option is needed, use head
-  # shellcheck disable=SC2086
-  tor_control_socket_alternative="$(grep -oEh "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${result} | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
-
-  ## only modify 'tor_control_socket' if it is not empty, meaning not inserted as a cli option
-  : "${tor_control_socket:="${tor_control_socket_alternative}"}"
-}
-
+############
+### opts ###
 
 assign_value(){
   case "${2}" in
-    --*) value="${2#--}";;
     -*) value="${2#-}";;
     *) value="${2}"
   esac
@@ -249,7 +308,6 @@ get_arg(){
 
 while :; do
   case "${1}" in
-    -*=*) opt="${1%=*}"; arg="${1#*=}";;
     -*) opt="${1#*-}"; arg="${2}";;
     *) opt="${1}"; arg="${2}";;
   esac
@@ -268,45 +326,19 @@ while :; do
   esac
 done
 
-[ -z "${cmd_cli}" ] && cmd_cli="${*}"
-
-## accept commands separated by pipes
-cmd_cli="$(printf '%s\n' "${cmd_cli}" | tr -s "|" "\n" | sed "s|^ ||")"
-
-
-## find if tor_control_socket is a unix domain socket or a tcp socket and do sanity checks
-case "${tor_control_socket}" in
-  "unix:/"*|"/"*)
-    socket_type="unix"
-    tor_control_unix="${tor_control_socket##*unix:}"
-    #test -e "${tor_control_unix}" || error_msg "${tor_control_unix} does not exist"
-    #test -S "${tor_control_unix}" || error_msg "${tor_control_unix} is not a socket"
-  ;;
-  [0-9]*)
-    socket_type="tcp"
-    tor_control_port="${tor_control_socket##*:}"
-    tor_control_port="${tor_control_port:-9051}"
-    printf %d "${tor_control_port}" >/dev/null 2>&1 || error_msg "${tor_control_port} is not a valid port, not an integer"
-    { [ "${tor_control_port}" -gt 0 ] && [ "${tor_control_port}" -le 65535 ]; } || error_msg "${tor_control_port} is not a valid port, not within range: 0-65535"
-    tor_control_host="${tor_control_socket%%:*}"
-    [ "${tor_control_host}" = "${tor_control_port}" ] && tor_control_host="127.0.0.1"
-    for quad in $(printf '%s\n' "${tor_control_host}" | tr "." " "); do
-      printf %d "${quad}" >/dev/null 2>&1 || error_msg "${tor_control_host} is not a valid address, ${quad} is not and integer"
-      { [ "${quad}" -ge 0 ] && [ "${quad}" -le 255 ]; } || error_msg "${tor_control_host} is not a valid address, ${quad} is not within range: 0-255"
-    done
-  ;;
-esac
-
-## try to auto-detect tor's controller socket
-tor_control_detection
-## if still empty, fallback to 127.0.0.1:9051
-[ -z "${socket_type}" ] && { socket_type="tcp"; tor_control_port="9051"; tor_control_host="127.0.0.1"; }
 
 ############
 ### main ###
 
+## if command was not assigned by '-c' option, get remaining arguments as command
+[ -z "${cmd_cli}" ] && cmd_cli="${*}"
+## accept commands separated by pipes
+cmd_cli="$(printf '%s\n' "${cmd_cli}" | tr -s "|" "\n" | sed "s|^ ||")"
+
 if [ -n "${cmd_cli}" ]; then
   checkprogs
+  socket_detection
+  setprogs
   login
   ## disable safecookie as it is not working https://github.com/nyxnor/tor-ctrl/issues/1
   safecookie_enabled=""
@@ -326,16 +358,9 @@ if [ -n "${cmd_cli}" ]; then
       # shellcheck disable=SC2034
       [ -n "${wait_confirmation}" ] && read -r confirmation
       sendcmd "QUIT"
-    } 3>&1 2>/dev/null | ${socket_prog} | finish
+    } 3>&1 2>/dev/null | ${socket_prog_connect} | finish
   else
-    {
-      # shellcheck disable=SC2030,2031
-      sendcmd "${auth_string}"
-      sendcmd "${cmd_cli}"
-      # shellcheck disable=SC2034
-      [ -n "${wait_confirmation}" ] && read -r confirmation
-      sendcmd "QUIT"
-    } 3>&1 2>/dev/null | ${socket_prog} | finish
+    cmdpipe | ${socket_prog_connect} 2>/dev/null | finish
   fi
 else
   usage
