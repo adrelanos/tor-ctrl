@@ -1,20 +1,13 @@
 #!/usr/bin/env sh
 
-## tor-ctrl is a commandline tool for executing commands on a Tor server via
-## the controlport.  In order to get this to work, add "ControlPort 9051" and
-## "CookieAuthentication 1" to your torrc and reload Tor.  Or if you want a
-## fixed password, leave out "CookieAuthentication 1" and use the following
-## line to create the appropriate HashedControlPassword entry for your torrc
-## (you need to change yourpassword):
-##
-## echo "HashedControlPassword $(tor --hash-password yourpassword)"
-##
-## Many, many other things are possible, see
-##              https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
+## tor-ctrl is a commandline tool for send_cmding commands to the tor's controller
+## In order to get this to work, read tor-ctrl's and tor's man page
+## to configure the conrol method (ControlPort/ControlSocket) and the
+## authentication method (CookieAuthentication/HashedControlPassword).
 ##
 ## Copyright (c) 2007 by Stefan Behte <stefan.behte@gmx.net> <http://ge.mine.nu/>
 ## Portion Copyright (C) 2013 - 2020 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
-## Portion Copyright (C) 2021 nyxnor <nyxnor@protonmail.com>
+## Portion Copyright (C) 2021 - 2022 nyxnor <nyxnor@protonmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -35,23 +28,8 @@
 ##
 ## tor-ctrl was originally written by Stefan Behte
 ## further developed by Patrick Schleizer
-## and later enhanced bu Nyxnor
-##
-## nyxnor major changes made were for (WARNING: SAFECOOKIE is not working currently)
-## - portability
-##  - be POSIX
-##  - use hexdump instead of xxd for normal COOKIE, xxd still needed for SAFECOOKIE
-##  - autodetect CookieAuthFile by sending PROTOCOLINFO and receiving COOKIEFILE
-##  - use any compatible networking tool available: nc socat telnet
-##  - use any compatible hex converter tool available: xxd, hexdump, od
-##  - accept [addr:]port/[unix:]path format for ControlPort/ControlSocket cli arguments
-##  - autodetect control socket is possible
-## - stability
-##  - test if ControlSocket file exists or if it is possible to connect to ControlPort
-## - security
-##  - regarding AUTH METHODS, if SAFECOOKIE is enabled and xxd is available, use it,
-##    else fallback to COOKIE if available,
-##    if only HASHEDPASSWORD is available and password is provided, use it else fail.
+## and later enhanced by Nyxnor
+
 
 me="${0##*/}"
 
@@ -108,7 +86,7 @@ has() {
 }
 
 
-checkprogs(){
+check_progs(){
   prog_net="nc netcat socat telnet"
   for n in ${prog_net}; do
     has "${n}" && socket_prog="${n}" && break
@@ -117,7 +95,7 @@ checkprogs(){
 }
 
 
-setprogs(){
+set_progs(){
 
   case "${socket_prog##*/}" in
     telnet) : "${sleep_n:=1}";;
@@ -203,8 +181,8 @@ socket_detection(){
     fi
 
     ## don't evaluate the exit code of '--verify-config' as it will fail if not running as root or the tor user
-    ## if 'f_torrc' is empty, tor will try: Default: @CONFDIR@/torrc, or $HOME/.torrc if that file is not found
-    ## if 'default_torrc' is empty, tor will try: Default: @CONFDIR@/torrc-defaults.
+    ## if 'default_torrc' is empty, tor will try: @CONFDIR@/torrc-defaults.
+    ## if 'f_torrc' is empty, tor will try: @CONFDIR@/torrc, or $HOME/.torrc if that file is not found
     # shellcheck disable=SC2086
     tor_config_files="$(tor --verify-config ${default_torrc} ${f_torrc} | grep -oE " Read configuration file [^ ]*| Including configuration file [^ ]*" | cut -d " " -f5 | sed "s/\"//;s/\"\.//")"
 
@@ -218,14 +196,14 @@ socket_detection(){
   fi
 
 
-  ## 3. if still empty, fallback to 127.0.0.1:9051
+  ## 3. if still empty, fallback to tcp 127.0.0.1:9051
   [ -z "${socket_type}" ] && { socket_type="tcp"; tor_control_port="9051"; tor_control_host="127.0.0.1"; }
 
 }
 
 
 login(){
-  auth="$({ sendcmd "PROTOCOLINFO"; sendcmd "QUIT"; } | ${socket_prog_connect} 2>/dev/null | grep "AUTH")"
+  auth="$({ send_cmd "PROTOCOLINFO"; send_cmd "QUIT"; } | ${socket_prog_connect} 2>/dev/null | grep "AUTH")"
   auth_methods="$(printf '%s\n' "${auth}" | sed "s/250-AUTH METHODS=//" | cut -d " " -f1 | tr "," "\n")"
 
   if printf %s"${auth}" | grep -q "AUTH METHODS=NULL"; then
@@ -251,7 +229,6 @@ login(){
         xxd) auth_string="AUTHENTICATE $(xxd -u -p -c 32 "${tor_cookie}")";;
         hexdump) auth_string="AUTHENTICATE $(hexdump -e '32/1 "%02x""\n"' "${tor_cookie}")";;
         od) auth_string="AUTHENTICATE $(od -t x1 "${tor_cookie}" | head -n 2 | cut -d " " -f2- | tr -d "\n" | tr -d " ")";;
-        *) error_msg "Missing program to dump hex. Install either 'hexdump' or 'xxd' or 'od'."
       esac
     fi
   elif [ -n "${hashedpassword_enabled}" ] && [ -n "${tor_password}" ]; then
@@ -260,18 +237,18 @@ login(){
 }
 
 
-sendcmd(){
+send_cmd(){
   printf '%s\n' "${1}"
   sleep "${sleep_n}"
 }
 
-cmdpipe(){
+cmd_pipe(){
   # shellcheck disable=SC2030,2031
-  sendcmd "${auth_string}"
-  sendcmd "${cmd_cli}"
+  send_cmd "${auth_string}"
+  send_cmd "${cmd_cli}"
   # shellcheck disable=SC2034
   [ -n "${wait_confirmation}" ] && read -r confirmation
-  sendcmd "QUIT"
+  send_cmd "QUIT"
 }
 
 finish(){
@@ -336,9 +313,9 @@ done
 cmd_cli="$(printf '%s\n' "${cmd_cli}" | tr -s "|" "\n" | sed "s|^ ||")"
 
 if [ -n "${cmd_cli}" ]; then
-  checkprogs
+  check_progs
   socket_detection
-  setprogs
+  set_progs
   login
   ## disable safecookie as it is not working https://github.com/nyxnor/tor-ctrl/issues/1
   safecookie_enabled=""
@@ -347,20 +324,20 @@ if [ -n "${cmd_cli}" ]; then
       cookie_string="$(xxd -u -p -c 32 "${tor_cookie}")"
       client_nonce="$(xxd -u -p -l 32 -c 32 < /dev/urandom)"
       ## TODO server_nonce is not working, how to solve a challenge and continue answering the server?
-      #sendcmd "AUTHCHALLENGE SAFECOOKIE ${client_nonce}"
-      server_nonce="$(sendcmd "AUTHCHALLENGE SAFECOOKIE ${client_nonce}")"
+      #send_cmd "AUTHCHALLENGE SAFECOOKIE ${client_nonce}"
+      server_nonce="$(send_cmd "AUTHCHALLENGE SAFECOOKIE ${client_nonce}")"
       server_nonce="$(printf '%s\n' "${server_nonce}" | sed "s/.* SERVERNONCE=//" | tr -d "\\r")"
-      #server_nonce="$(printf '%s\n' "$(sendcmd "AUTHCHALLENGE SAFECOOKIE ${client_nonce}" 3>&1)" | sed "s/.* SERVERNONCE=//" | tr -d "\\r")"
+      #server_nonce="$(printf '%s\n' "$(send_cmd "AUTHCHALLENGE SAFECOOKIE ${client_nonce}" 3>&1)" | sed "s/.* SERVERNONCE=//" | tr -d "\\r")"
       # shellcheck disable=SC2030
       auth_string="AUTHENTICATE $(printf '%s%s%s\n' "${cookie_string}" "${client_nonce}" "${server_nonce}" | xxd -r -p | openssl dgst -sha256 -binary -hmac "Tor safe cookie authentication controller-to-server hash" | xxd -p -u -c 32)"
-      sendcmd "${auth_string}"
-      sendcmd "${cmd_cli}"
+      send_cmd "${auth_string}"
+      send_cmd "${cmd_cli}"
       # shellcheck disable=SC2034
       [ -n "${wait_confirmation}" ] && read -r confirmation
-      sendcmd "QUIT"
+      send_cmd "QUIT"
     } 3>&1 2>/dev/null | ${socket_prog_connect} | finish
   else
-    cmdpipe | ${socket_prog_connect} 2>/dev/null | finish
+    cmd_pipe | ${socket_prog_connect} 2>/dev/null | finish
   fi
 else
   usage
