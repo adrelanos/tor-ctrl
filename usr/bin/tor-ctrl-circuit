@@ -21,10 +21,10 @@ list_circuits(){
   circuit_all="$(tor-ctrl -c "GETINFO circuit-status" ${cli_args})"
   circuit_all="$(printf '%s\n' "${circuit_all}" | sed "/250 OK/d;/250+circuit-status=/d;/250 closing connection/d")"
   printf '%s\n' "${circuit_all}" | while IFS="$(printf '\n')" read -r circuit || [ -n "${circuit}" ]; do
-    circuit_id="$(printf '%s\n' "${circuit}" | awk '{print $1}')"
-    circuit_status="$(printf '%s\n' "${circuit}" | awk '{print $2}')"
-    circuit_path="$(printf '%s\n' "${circuit}" | awk '{print $3}')"
-    circuit_purpose="$(printf '%s\n' "${circuit}" | awk '{print $5}' | sed "s/PURPOSE=//")"
+    circuit_id="$(printf '%s\n' "${circuit}" | cut -d " " -f1)"
+    circuit_status="$(printf '%s\n' "${circuit}" | cut -d " " -f2)"
+    circuit_path="$(printf '%s\n' "${circuit}" | cut -d " " -f3)"
+    circuit_purpose="$(printf '%s\n' "${circuit}" | cut -d " " -f5 | sed "s/PURPOSE=//")"
     [ -z "${circuit_status}" ] && break
     if [ "${circuit_status}" = "BUILT" ]; then
       printf '%s\n' "Circuit: ${circuit_id}, status: ${circuit_status}, purpose: ${circuit_purpose}"
@@ -33,8 +33,8 @@ list_circuits(){
         r=$((r+1))
         [ ${r} -gt 3 ] && break
         relay="$(printf '%s\n' "${relay}" | tr -d "$" | tr "~" " ")"
-        relay_fingerprint="$(printf '%s\n' "${relay}" | awk '{print $1}')"
-        relay_nickname="$(printf '%s\n' "${relay}" | awk '{print $2}')"
+        relay_fingerprint="$(printf '%s\n' "${relay}" | cut -d " " -f1)"
+        relay_nickname="$(printf '%s\n' "${relay}" | cut -d " " -f2)"
         # shellcheck disable=SC2086
         relay_status="$(tor-ctrl -c "GETINFO ns/id/${relay_fingerprint}" ${cli_args})"
         relay_host="$(printf '%s\n' "${relay_status}" | grep "^r " | cut -d " " -f7)"
