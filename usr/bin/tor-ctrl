@@ -108,35 +108,37 @@ check_progs(){
   esac
 }
 
+## if socket was not assigned on the command line, try auto-detection
 get_socket(){
-  ## if not assigned on the command line, try auto-detection
-  if [ -z "${tor_control_socket}" ]; then
-    ## TODO: fix posix
-    ## grep options '-o' and '-h' are not posix, but present on Debian and OpenBSD so making an excuse
+  ## TODO: fix posix
+  ## grep options '-o' and '-h' are not posix, but present on Debian and OpenBSD so making an excuse
 
-    ## minimal check for tor service manager file
-    if test -f /lib/systemd/system/tor@default.service; then
-      tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed s/ExecStart=//g)"
-      default_torrc="$(printf '%s\n' "${tor_start_command}" | grep -o -- "--defaults-torrc [^ ]*")"
-      f_torrc="$(printf '%s\n' "${tor_start_command}" | grep -o -- "-f [^ ]*")"
-    fi
-
-    ## don't evaluate the exit code of '--verify-config' as it will fail if not running as root or the tor user
-    ## if 'default_torrc' is empty, tor will try: @CONFDIR@/torrc-defaults.
-    ## if 'f_torrc' is empty, tor will try: @CONFDIR@/torrc, or $HOME/.torrc if that file is not found
-    # shellcheck disable=SC2086
-    tor_config_files="$(tor --verify-config ${default_torrc} ${f_torrc} | grep -oE " Read configuration file [^ ]*| Including configuration file [^ ]*" | cut -d " " -f5 | sed "s/\"//;s/\"\.//")"
-
-    ## only one option is needed, use head
-    # shellcheck disable=SC2086
-    tor_control_socket_alternative="$(grep -oEh "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
-
-    ## only modify 'tor_control_socket' if it is not empty, meaning not inserted as a cli option
-    tor_control_socket="${tor_control_socket_alternative}"
+  ## minimal check for tor service manager file
+  if test -f /lib/systemd/system/tor@default.service; then
+    tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed s/ExecStart=//g)"
+    default_torrc="$(printf '%s\n' "${tor_start_command}" | grep -o -- "--defaults-torrc [^ ]*")"
+    f_torrc="$(printf '%s\n' "${tor_start_command}" | grep -o -- "-f [^ ]*")"
   fi
 
-  ## if still empty, fallback to tcp 127.0.0.1:9051
-  [ -z "${tor_control_socket}" ] && tor_control_socket="127.0.0.1:9051"
+  ## don't evaluate the exit code of '--verify-config' as it will fail if not running as root or the tor user
+  ## if 'default_torrc' is empty, tor will try: @CONFDIR@/torrc-defaults.
+  ## if 'f_torrc' is empty, tor will try: @CONFDIR@/torrc, or $HOME/.torrc if that file is not found
+  # shellcheck disable=SC2086
+  tor_config_files="$(tor --verify-config ${default_torrc} ${f_torrc} | grep -oE " Read configuration file [^ ]*| Including configuration file [^ ]*" | cut -d " " -f5 | sed "s/\"//;s/\"\.//")"
+
+  ## only one option is needed, use head
+  # shellcheck disable=SC2086
+  tor_control_socket_alternative="$(grep -oEh "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
+
+  ## only modify 'tor_control_socket' if it is not empty, meaning not inserted as a cli option
+  tor_control_socket="${tor_control_socket_alternative}"
+
+  ## assign detected socket to the variable or if still empty, fallback to tcp 127.0.0.1:9051
+  if [ -n "${tor_control_socket_alternative}" ]; then
+    tor_control_socket="${tor_control_socket_alternative}"
+  else
+    tor_control_socket="127.0.0.1:9051"
+  fi
 }
 
 check_socket(){
@@ -236,10 +238,8 @@ login(){
 ## just get variables, don't send commands to the controller
 get_dry_run(){
   if [ "${dry_run:-}" = "1" ]; then
-    for key in cmd_cli tor_control_socket tor_password sleep_n quiet wait_confirmation debug dry_run; do
-      eval val='$'"${key}"
-      #[ -n "${val}" ] && printf '%s\n' "${key}=${val}"
-      printf '%s\n' "${key}=${val:-""}"
+    for key in cmd_cli tor_control_socket tor_password sleep_n quiet wait_confirmation debug_mode dry_run; do
+      eval val='$'"${key}" && printf '%s\n' "${key}=${val:-""}"
     done
     exit 0
   fi
@@ -331,8 +331,8 @@ if [ -n "${cmd_cli}" ]; then
   cmd_cli="$(printf %s"${cmd_cli}\n" | sed "s|^ ||")"
   ## check if requirements are fulfilled
   check_progs
-  ## get socket by cli or auto-detection or if both empty set fallback
-  get_socket
+  ## if socket was not assigned on the command line, try auto-detection
+  [ -z "${tor_control_socket}" ] && get_socket
   ## just get variables, don't send commands to the controller
   get_dry_run
   ## set options for the socket program
