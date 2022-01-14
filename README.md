@@ -8,7 +8,7 @@ This package is produced independently of, and carries no guarantee from, The To
 
 At least one of each item is necessary:
 
-* Networking tool:**nc**/**socat**/**telnet**
+* Networking tool: **nc**/**socat**/**telnet**
 * Hex converter: **xxd**/**hexdump**/**od**
 
 ## Features
@@ -71,7 +71,7 @@ pkill -sighup tor
 #kill -sighup PID_FROM_ABOVE
 ```
 
-## How to install `tor-ctrl` on any unix system
+## How to install tor-ctrl on any unix system
 
 Install the script and the manual:
 ```sh
@@ -133,7 +133,7 @@ Get your circuits (raw):
 tor-ctrl GETINFO circuit-status
 ```
 
-That is not very clean to read, too much information, so lets organize it.
+That is not very clean to read, too much information, so lets organize it:
 ```sh
 tor-ctrl-circuit
 ```
@@ -147,7 +147,7 @@ Now, from another terminal, connect via Tor to where you wish:
 ```sh
 curl -x socks5h://127.0.0.1:9050 github.com
 ```
-Now, return to the script and press enter to print out the events received.
+Now, return to the script and press enter to print out the stream events received.
 
 ## Useful links
 
