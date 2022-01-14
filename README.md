@@ -1,6 +1,6 @@
 # tor-ctrl - control the tor process on the cli
 
-Command line tool for executing tor controller's commands using TCP sockets or Unix Domain sockets.
+Command line tool for setting up stream for communication from the Tor Controller's (client) to a Tor process (server). The client send commands using TCP sockets or Unix-domain sockets and receive replies from the server.
 
 This package is produced independently of, and carries no guarantee from, The Tor Project.
 
@@ -14,11 +14,11 @@ At least one of each item is necessary:
 ## Features
 
 **ControlPort**/**ControlSocket**: the following socket types are accepted to connect to the controller:
-* unix domain socket, specified as `[unix:]path`
-* tcp socket, specified as `[addr:]port`
+* Unix-domain socket, specified as `[unix:]path`
+* TCP socket, specified as `[addr:]port`
 
 Autodetects the socket by reading the tor configuration.
-If still unknown, will try tcp socket 127.0.0.1:9051.
+If still unknown, will try TCP socket 127.0.0.1:9051.
 
 **Authentication methods**:
 * ~~SAFECOOKIE~~ (on the work, help wanted)
@@ -151,8 +151,8 @@ Now, return to the script and press enter to print out the stream events receive
 
 ## Useful links
 
-* [tor manual](https://2019.www.torproject.org/docs/tor-manual-dev.html.en)
-* [control-spec](https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n1637)
+* [tor manual](https://gitweb.torproject.org/tor.git/tree/doc/man/tor.1.txt)
+* [control-spec](https://gitweb.torproject.org/torspec.git/tree/control-spec.txt)
 
 ## History
 
