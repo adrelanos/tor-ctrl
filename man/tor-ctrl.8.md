@@ -15,7 +15,7 @@ tor-ctrl - Interact with Tor's controller via command line tool
 **tor-ctrl** is a command line tool for setting up stream for communication from the Tor Controller's (client) to a Tor process (server). The client send commands using TCP sockets or Unix-domain sockets and receive replies from the server.
 The following configuration lines must be inserted to your torrc and tor reloaded to apply the changes.
 
-In order to get this to work, define the socket that will control the tor process, can be a TCP socket *ControlPort 9051* or a unix-domain socket *ControlSocket /path/to/socket*.
+In order to get this to work, define the socket that will control the tor process, can be a TCP socket *ControlPort 9051* or a Unix-domain socket *ControlSocket /path/to/socket*.
 
 To secure the controller, you must setup and authentication method, which can be a cookie
 *CookieAuthentication 1* or if you want a fixed password, hash a password with *echo "HashedControlPassword $(tor --hash-password yourpassword)"* and use the same output given as the configuration line.
@@ -26,7 +26,7 @@ To secure the controller, you must setup and authentication method, which can be
 : Command to execute. If the command option is *-c*, you must "quote" your command. If the command option is *--*, option parsing will stop and everything after it will be assigned to the *command*, it then becomes uncessary to quote your command. To use different commands together, you must make shell escape to a new line with *\\\\n*.
 
 **-s** *socket*
-: Tor's control socket. Accept *tcp socket* in the format [*addr:*]*port* (examples: 9051, 127.0.0.1:9051). Accept *Unix-domain socket* in the following format [*unix:*]*path* (examples: /run/tor/control, unix:/run/tor/control). (Default: 9051).
+: Tor's control socket. Accept *TCP socket* in the format [*addr:*]*port* (examples: 9051, 127.0.0.1:9051). Accept *Unix-domain socket* in the following format [*unix:*]*path* (examples: /run/tor/control, unix:/run/tor/control). (Default: 9051).
 
 **-p** *pwd*
 : Use password instead of tor's cookie. (Default: not used).
