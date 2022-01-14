@@ -110,12 +110,9 @@ check_progs(){
 
 ## if socket was not assigned on the command line, try auto-detection
 get_socket(){
-  ## TODO: fix posix
-  ## grep options '-o' and '-h' are not posix, but present on Debian and OpenBSD so making an excuse
-
   ## minimal check for tor service manager file
   if test -f /lib/systemd/system/tor@default.service; then
-    tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed s/ExecStart=//g)"
+    tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed "s/ExecStart=//g")"
     default_torrc="$(printf '%s\n' "${tor_start_command}" | grep -- " --defaults-torrc [^ ]*" | sed "s/.*--defaults-torrc //" | cut -d " " -f1)"
     [ -n "${default_torrc}" ] && default_torrc="$(printf '%s\n' "--defaults-torrc ${default_torrc}")"
     f_torrc="$(printf '%s\n' "${tor_start_command}" | grep -- " -f [^ ]*" | sed "s/.*-f //" | cut -d " " -f1)"
