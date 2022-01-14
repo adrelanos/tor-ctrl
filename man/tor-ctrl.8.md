@@ -1,45 +1,47 @@
-% tor-ctrl(8) Interact with Tor's controller via command line tool
+% TOR-CTRL(8) tor-ctrl manual
 % tor-ctrl was written by Stefan Behte (stefan.behte@gmx.net), later developed by and Patrick Schleizer (adrelanos@riseup.net) and futher improved by nyxnor (nyxnor@protonmail.com)
-% September 2069
+% default_date
 
 # NAME
 
-tor-ctrl(8) - Interact with Tor's controller via command line tool
+tor-ctrl - Interact with Tor's controller via command line tool
 
 # SYNOPSIS
 
-**tor-ctrl** [**-wq**] [**-s** *socket*] [**-p** *pwd*] [**-t** *time*] [[**-c**|**--**] *command*]
+**tor-ctrl** [**-qVw**] [**-p** *pwd*] [**-s** *socket*] [**-t** *time*] [[**-c**|**--**] *command*]
 
 # DESCRIPTION
 
-**tor-ctrl** is a commandline tool for executing commands on tor's controller.
-
+**tor-ctrl** is a command line tool for setting up stream for communication from the Tor Controller's (client) to a Tor process (server). The client send commands using TCP sockets or Unix-domain sockets and receive replies from the server.
 The following configuration lines must be inserted to your torrc and tor reloaded to apply the changes.
 
-In order to get this to work, define the socket that will control the tor process, can be a tcp socket *ControlPort 9051* or a unix domain socket *ControlSocket /path/to/socket*.
+In order to get this to work, define the socket that will control the tor process, can be a TCP socket *ControlPort 9051* or a unix-domain socket *ControlSocket /path/to/socket*.
 
 To secure the controller, you must setup and authentication method, which can be a cookie
-*CookieAuthentication 1* or if you want a fixed password, hash a password with *echo "HashedControlPassword $(tor --hash-password yourpassword)"* and use the same output given.
+*CookieAuthentication 1* or if you want a fixed password, hash a password with *echo "HashedControlPassword $(tor --hash-password yourpassword)"* and use the same output given as the configuration line.
 
 # OPTIONS
 
-[**-c**|**--**] [*command*]
-: command to execute. If the command option is *-c*, you must "quote" your command. If the command option is *--*, option parsing will stop, meaning that any option specified after it won't be parsed, the benefit is that it becomes uncessary to quote your command. To use different commands together, you must make shell escape to a new line with *\\\\n*.
+[**-c**|**--**] *command*
+: Command to execute. If the command option is *-c*, you must "quote" your command. If the command option is *--*, option parsing will stop and everything after it will be assigned to the *command*, it then becomes uncessary to quote your command. To use different commands together, you must make shell escape to a new line with *\\\\n*.
 
-**-s** [*socket*]
-: Tor's control socket. Accept *tcp socket* in the format [*addr:*]*port* (examples: 9051, 127.0.0.1:9051). Accept *unix domain socket* in the following format [*unix:*]*path* (examples: /run/tor/control, unix:/run/tor/control). (Default: 9051).
+**-s** *socket*
+: Tor's control socket. Accept *tcp socket* in the format [*addr:*]*port* (examples: 9051, 127.0.0.1:9051). Accept *Unix-domain socket* in the following format [*unix:*]*path* (examples: /run/tor/control, unix:/run/tor/control). (Default: 9051).
 
-**-p** [*pwd*]
+**-p** *pwd*
 : Use password instead of tor's cookie. (Default: not used).
 
-**-t** [*time*]
-: sleep [var] seconds after each command sent. (Default for socat/nc: 0 second, Default for telnet: 1 second).
+**-t** *time*
+: Sleep N seconds after each command sent. (Default for socat/nc: 0 second, Default for telnet: 1 second).
 
 **-w**
-: Wait for confirmation with an enter pressed to end the connection after sending the command. Usefult when you want to be warned about events, example is when the command is *SETEVENTS STREAM* (Default: not set)
+: Wait for confirmation with an enter pressed to end the connection after sending the command. Usefult when you want to be warned about events (asynchronous replies), example is when the command is *SETEVENTS STREAM* (Default: not set)
 
 **-q**
 : Quiet mode. (Default: not set).
+
+**-V**
+: Print version information and exit.
 
 # DEBUGGING OPTIONS
 
@@ -90,13 +92,17 @@ https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 This package is produced independently of, and carries no guarantee from, The
 Tor Project.
 
-## SEE ALSO
+# SEE ALSO
 
 tor(1)
 
+# BUGS
+
+Not expected, please report them at https://github.com/nyxnor/tor-ctrl/issues
+
 # LICENSE
 
-Copyright (c) 2007 by Stefan Behte
+Copyright (C) 2007 by Stefan Behte
 
 Portion Copyright (C) 2013 - 2020 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
 
