@@ -116,19 +116,21 @@ get_socket(){
   ## minimal check for tor service manager file
   if test -f /lib/systemd/system/tor@default.service; then
     tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed s/ExecStart=//g)"
-    default_torrc="$(printf '%s\n' "${tor_start_command}" | grep -o -- "--defaults-torrc [^ ]*")"
-    f_torrc="$(printf '%s\n' "${tor_start_command}" | grep -o -- "-f [^ ]*")"
+    default_torrc="$(printf '%s\n' "${tor_start_command}" | grep -- " --defaults-torrc [^ ]*" | sed "s/.*--defaults-torrc //" | cut -d " " -f1)"
+    [ -n "${default_torrc}" ] && default_torrc="$(printf '%s\n' "--defaults-torrc ${default_torrc}")"
+    f_torrc="$(printf '%s\n' "${tor_start_command}" | grep -- " -f [^ ]*" | sed "s/.*-f //" | cut -d " " -f1)"
+    [ -n "${f_torrc}" ] && f_torrc="$(printf '%s\n' "-f ${f_torrc}")"
   fi
 
   ## don't evaluate the exit code of '--verify-config' as it will fail if not running as root or the tor user
   ## if 'default_torrc' is empty, tor will try: @CONFDIR@/torrc-defaults.
   ## if 'f_torrc' is empty, tor will try: @CONFDIR@/torrc, or $HOME/.torrc if that file is not found
   # shellcheck disable=SC2086
-  tor_config_files="$(tor --verify-config ${default_torrc} ${f_torrc} | grep -oE " Read configuration file [^ ]*| Including configuration file [^ ]*" | cut -d " " -f5 | sed "s/\"//;s/\"\.//")"
+  tor_config_files="$(tor --verify-config ${default_torrc} ${f_torrc} | grep -E " Read configuration file [^ ]*| Including configuration file [^ ]*" | awk '{print $NF}' | sed "s/\"//;s/\"\.//")"
 
   ## only one option is needed, use head
   # shellcheck disable=SC2086
-  tor_control_socket_alternative="$(grep -oEh "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
+  tor_control_socket_alternative="$(grep -E "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2 | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
 
   ## only modify 'tor_control_socket' if it is not empty, meaning not inserted as a cli option
   tor_control_socket="${tor_control_socket_alternative}"
