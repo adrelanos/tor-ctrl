@@ -30,15 +30,15 @@
 ## further developed by Patrick Schleizer
 ## and later enhanced by Nyxnor
 
-
+## script name
 me="${0##*/}"
 
 usage(){
   printf '%s\n' "usage: ${me}
 
   -c [command]   command to execute
-                 notice: always \"double quote\" your command
-                 notice: separate control commands with a pipe '|'
+                 notice: recommended to \"double quote\" your command
+                 notice: separate control commands with a shell escape to new line '\\\n'
                  notice: '-c' is optional when command is the last positional argument
 
   -s [socket]    tor's control socket
@@ -60,11 +60,20 @@ usage(){
   -q             quiet mode.
                  default: not set.
 
+Debugging options:
+
+  -d             debug mode.
+                 default: not set
+
+  -r             dry-run mode
+                 notice: Show what would be done, without sending commands to the controller
+                 default: not set
+
   Examples:      ${me} GETCONF User
                  ${me} -q SETCONF bandwidthrate=1mb
                  ${me} -s 9051 -p foobar -- GETCONF bandwidthrate
                  ${me} GETINFO config-defaults-file config-file config-text
-                 ${me} GETCONF SocksPort | GETINFO net/listeners/socks
+                 ${me} GETCONF SocksPort \\\n GETINFO net/listeners/socks\"
                  ${me} -w -- SETEVENTS STREAM
 
 You should have a look at
@@ -72,103 +81,35 @@ https://gitweb.torproject.org/torspec.git/tree/control-spec.txt"
   exit 1
 }
 
-
+## print what failed, redirect output to stderr and exit with failed status
 error_msg(){
-  printf %s"${me}: ${1}\n"
+  printf %s"${me}: ${1}\n" >&2
   exit 1
 }
 
-
 ## dylanaraps/pfetch has function
+## fail if program is not installed on path or not executable
 has() {
   _cmd=$(command -v "${1}") 2>/dev/null || return 1
   [ -x "${_cmd}" ] || return 1
 }
 
-
+## check if required programs are installed
 check_progs(){
   prog_net="nc netcat socat telnet"
   for n in ${prog_net}; do
     has "${n}" && socket_prog="${n}" && break
   done
   [ -z "${socket_prog}" ] && error_msg "Install one of the following programs to connect to sockets: ${prog_net}"
-}
-
-
-set_progs(){
 
   case "${socket_prog##*/}" in
     telnet) : "${sleep_n:=1}";;
     *) : "${sleep_n:=0}";;
   esac
-
-  case "${socket_type}" in
-    unix)
-      case "${socket_prog##*/}" in
-        nc|netcat)
-          socket_prog_connect="${socket_prog} -U ${tor_control_unix}"
-          ${socket_prog_connect} -zv || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
-        ;;
-        socat)
-          socket_prog_connect="${socket_prog} UNIX-CONNECT:${tor_control_unix} -"
-          ${socket_prog} "UNIX-CONNECT:${tor_control_unix}" /dev/null || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
-        ;;
-        *) error_msg "${socket_prog##*/} doesn't support unix domain sockets";;
-      esac
-    ;;
-
-    tcp)
-      case "${socket_prog##*/}" in
-        nc|netcat)
-          socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
-          ${socket_prog_connect} -z || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
-        ;;
-        socat)
-          socket_prog_connect="${socket_prog} TCP:${tor_control_host}:${tor_control_port} -"
-          "${socket_prog}" "TCP:${tor_control_host}:${tor_control_port}" /dev/null || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
-        ;;
-        telnet)
-          socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
-          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q "Connected to ${tor_control_host}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
-        ;;
-        #bash) socket_prog_connect="bash";;
-      esac
-    ;;
-  esac
 }
 
-
-socket_assignment(){
-  ## find if tor_control_socket is a unix domain socket or a tcp socket and do sanity checks
-  case "${tor_control_socket}" in
-    "unix:/"*|"/"*)
-      socket_type="unix"
-      tor_control_unix="${tor_control_socket##*unix:}"
-      test -e "${tor_control_unix}" || error_msg "${tor_control_unix} does not exist"
-      test -S "${tor_control_unix}" || error_msg "${tor_control_unix} is not a socket"
-    ;;
-    [0-9]*)
-      socket_type="tcp"
-      tor_control_port="${tor_control_socket##*:}"
-      tor_control_port="${tor_control_port:-9051}"
-      printf %d "${tor_control_port}" >/dev/null 2>&1 || error_msg "${tor_control_port} is not a valid port, not an integer"
-      { [ "${tor_control_port}" -gt 0 ] && [ "${tor_control_port}" -le 65535 ]; } || error_msg "${tor_control_port} is not a valid port, not within range: 0-65535"
-      tor_control_host="${tor_control_socket%%:*}"
-      [ "${tor_control_host}" = "${tor_control_port}" ] && tor_control_host="127.0.0.1"
-      for quad in $(printf '%s\n' "${tor_control_host}" | tr "." " "); do
-        printf %d "${quad}" >/dev/null 2>&1 || error_msg "${tor_control_host} is not a valid address, ${quad} is not and integer"
-        { [ "${quad}" -ge 0 ] && [ "${quad}" -le 255 ]; } || error_msg "${tor_control_host} is not a valid address, ${quad} is not within range: 0-255"
-      done
-    ;;
-  esac
-}
-
-
-socket_detection(){
-  ## 1. deal with socket if already assigned via command line
-  socket_assignment
-
-  ## 2. if not assigned on the command line, try auto-detection
+get_socket(){
+  ## if not assigned on the command line, try auto-detection
   if [ -z "${tor_control_socket}" ]; then
     ## TODO: fix posix
     ## grep options '-o' and '-h' are not posix, but present on Debian and OpenBSD so making an excuse
@@ -192,16 +133,72 @@ socket_detection(){
 
     ## only modify 'tor_control_socket' if it is not empty, meaning not inserted as a cli option
     tor_control_socket="${tor_control_socket_alternative}"
-    socket_assignment
   fi
 
-
-  ## 3. if still empty, fallback to tcp 127.0.0.1:9051
-  [ -z "${socket_type}" ] && { socket_type="tcp"; tor_control_port="9051"; tor_control_host="127.0.0.1"; }
-
+  ## if still empty, fallback to tcp 127.0.0.1:9051
+  [ -z "${tor_control_socket}" ] && tor_control_socket="127.0.0.1:9051"
 }
 
+check_socket(){
+  ## find if tor_control_socket is a unix domain socket or a tcp socket and do sanity checks
+  case "${tor_control_socket}" in
+    "unix:/"*|"/"*)
+      socket_type="unix"
+      tor_control_unix="${tor_control_socket##*unix:}"
+      test -e "${tor_control_unix}" || error_msg "${tor_control_unix} does not exist"
+      test -S "${tor_control_unix}" || error_msg "${tor_control_unix} is not a socket"
+    ;;
+    [0-9]*)
+      socket_type="tcp"
+      tor_control_port="${tor_control_socket##*:}"
+      tor_control_port="${tor_control_port:-9051}"
+      printf %d "${tor_control_port}" >/dev/null 2>&1 || error_msg "${tor_control_port} is not a valid port, not an integer"
+      { [ "${tor_control_port}" -gt 0 ] && [ "${tor_control_port}" -le 65535 ]; } || error_msg "${tor_control_port} is not a valid port, not within range: 0-65535"
+      tor_control_host="${tor_control_socket%%:*}"
+      [ "${tor_control_host}" = "${tor_control_port}" ] && tor_control_host="127.0.0.1"
+      for quad in $(printf '%s\n' "${tor_control_host}" | tr "." " "); do
+        printf %d "${quad}" >/dev/null 2>&1 || error_msg "${tor_control_host} is not a valid address, ${quad} is not and integer"
+        { [ "${quad}" -ge 0 ] && [ "${quad}" -le 255 ]; } || error_msg "${tor_control_host} is not a valid address, ${quad} is not within range: 0-255"
+      done
+    ;;
+  esac
 
+  ## assign the program options for socket and test if conneciton is refused
+  case "${socket_type}" in
+    unix)
+      case "${socket_prog##*/}" in
+        nc|netcat)
+          socket_prog_connect="${socket_prog} -U ${tor_control_unix}"
+          ${socket_prog_connect} -zv || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
+        ;;
+        socat)
+          socket_prog_connect="${socket_prog} UNIX-CONNECT:${tor_control_unix} -"
+          ${socket_prog} "UNIX-CONNECT:${tor_control_unix}" /dev/null || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
+        ;;
+        *) error_msg "${socket_prog##*/} doesn't support unix domain sockets";;
+      esac
+    ;;
+    tcp)
+      case "${socket_prog##*/}" in
+        nc|netcat)
+          socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
+          ${socket_prog_connect} -z || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
+        ;;
+        socat)
+          socket_prog_connect="${socket_prog} TCP:${tor_control_host}:${tor_control_port} -"
+          "${socket_prog}" "TCP:${tor_control_host}:${tor_control_port}" /dev/null || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
+        ;;
+        telnet)
+          socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
+          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q "Connected to ${tor_control_host}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
+        ;;
+        #bash) socket_prog_connect="bash";;
+      esac
+    ;;
+  esac
+}
+
+## get string to authenticate to the controller
 login(){
   auth="$({ send_cmd "PROTOCOLINFO"; send_cmd "QUIT"; } | ${socket_prog_connect} 2>/dev/null | grep "AUTH")"
   auth_methods="$(printf '%s\n' "${auth}" | sed "s/250-AUTH METHODS=//" | cut -d " " -f1 | tr "," "\n")"
@@ -236,24 +233,38 @@ login(){
   fi
 }
 
+## just get variables, don't send commands to the controller
+get_dry_run(){
+  if [ "${dry_run:-}" = "1" ]; then
+    for key in cmd_cli tor_control_socket tor_password sleep_n quiet wait_confirmation debug dry_run; do
+      eval val='$'"${key}"
+      #[ -n "${val}" ] && printf '%s\n' "${key}=${val}"
+      printf '%s\n' "${key}=${val:-""}"
+    done
+    exit 0
+  fi
+}
 
+## send command to the controller and sleep after it if required
 send_cmd(){
   printf '%s\n' "${1}"
   sleep "${sleep_n}"
 }
 
+## piping commands to be sent
 cmd_pipe(){
   # shellcheck disable=SC2030,2031
   send_cmd "${auth_string}"
   send_cmd "${cmd_cli}"
   # shellcheck disable=SC2034
-  [ -n "${wait_confirmation}" ] && read -r confirmation
+  [ "${wait_confirmation}" -eq 1 ] && read -r confirmation
   send_cmd "QUIT"
 }
 
+## get result, be verbose by default and quiet if required, set exit code
 finish(){
   str="$(cat)"
-  [ -z "${quiet:-}" ] && printf '%s\n' "${str}"
+  [ "${quiet}" -eq 0 ] && printf '%s\n' "${str}"
   printf '%s\n' "${str}" | if [ "$(grep -c ^"250 ")" = 3 ]; then
     exit 0
   else
@@ -261,32 +272,29 @@ finish(){
   fi
 }
 
-
 ############
 ### opts ###
 
-assign_value(){
-  case "${2}" in
-    -*) value="${2#-}";;
-    *) value="${2}"
-  esac
-  ## Escaping quotes is needed because else if will fail if the argument is quoted
-  # shellcheck disable=SC2140
-  eval "${1}"="\"${value}\""
-}
-
+## if option requires argument, check if it was provided, if yes, assign the arg to the opt
 get_arg(){
   case "${arg}" in
     ""|-*) error_msg "Option '${opt}' requires an argument.";;
   esac
-  assign_value "${1}" "${arg}"
+
+  case "${arg}" in
+    -*) value="${arg#-}";;
+    *) value="${arg}"
+  esac
+  ## Escaping quotes is needed because else fail if the argument is quoted
+  # shellcheck disable=SC2140
+  eval "${1}"="\"${value}\""
 }
 
-
+## hacky getopts
 while :; do
   case "${1}" in
     -*) opt="${1#*-}"; arg="${2}";;
-    *) opt="${1}"; arg="${2}";;
+    *) opt="${1}";;
   esac
   case "${opt}" in
     c) get_arg cmd_cli; shift 2;;
@@ -295,28 +303,43 @@ while :; do
     t) get_arg sleep_n; shift 2;;
     q) quiet=1; shift 1;;
     w) wait_confirmation=1; shift 1;;
+    d) debug_mode=1; shift 1;;
+    r) dry_run=1; shift 1;;
     h) usage;;
-    -) shift 1; break;; ## this is in fact '--', but one one hifen was removed from 'opt' above
-    -*) error_msg "Unkown option: ${opt}";;
+    -) shift 1; break;;
     "") break;;
-    *) break;;
+    *) break;; ## it could be be usage instead of break, but then would need to use '--' to end option parsing
   esac
 done
-
 
 ############
 ### main ###
 
+## set default values
+: "${debug_mode:=0}"
+: "${quiet:=0}"
+: "${wait_confirmation:=0}"
+
+## check for debug mode
+[ "${debug_mode}" -eq 1 ] && set -x
+
 ## if command was not assigned by '-c' option, get remaining arguments as command
-[ -z "${cmd_cli}" ] && cmd_cli="${*}"
-## accept commands separated by pipes
-cmd_cli="$(printf '%s\n' "${cmd_cli}" | tr -s "|" "\n" | sed "s|^ ||")"
+: "${cmd_cli:="${*}"}"
 
 if [ -n "${cmd_cli}" ]; then
+  ## accept commands separated by new lines
+  cmd_cli="$(printf %s"${cmd_cli}\n" | sed "s|^ ||")"
+  ## check if requirements are fulfilled
   check_progs
-  socket_detection
-  set_progs
+  ## get socket by cli or auto-detection or if both empty set fallback
+  get_socket
+  ## just get variables, don't send commands to the controller
+  get_dry_run
+  ## set options for the socket program
+  check_socket
+  ## get string to authenticate to the controller
   login
+
   ## disable safecookie as it is not working https://github.com/nyxnor/tor-ctrl/issues/1
   safecookie_enabled=""
   if [ -n "${safecookie_enabled}" ] && test -r "${tor_cookie}" && command -v xxd >/dev/null && test -c /dev/urandom; then

@@ -12,21 +12,21 @@ tor-ctrl(8) - Interact with Tor\[aq]s controller via command line tool
 [[\f[B]-c\f[R]|\f[B]--\f[R]] \f[I]command\f[R]]
 .SH DESCRIPTION
 .PP
-\f[B]tor-ctrl\f[R] is a commandline tool for executing commands on a tor
-server via the controlport.
-In order to get this to work, add define the socket that will control
-the tor process, can be a tcp socket \f[I]ControlPort 9051\f[R] or a
-unix domain socket \f[I]ControlSocket /path/to/socket\f[R].
+\f[B]tor-ctrl\f[R] is a commandline tool for executing commands on
+tor\[aq]s controller.
+.PP
+The following configuration lines must be inserted to your torrc and tor
+reloaded to apply the changes.
+.PP
+In order to get this to work, define the socket that will control the
+tor process, can be a tcp socket \f[I]ControlPort 9051\f[R] or a unix
+domain socket \f[I]ControlSocket /path/to/socket\f[R].
+.PP
 To secure the controller, you must setup and authentication method,
 which can be a cookie \f[I]CookieAuthentication 1\f[R] or if you want a
 fixed password, hash a password with \f[I]echo
 \[dq]HashedControlPassword $(tor --hash-password yourpassword)\[dq]\f[R]
 and use the same output given.
-These configuration lines must be inserted to your torrc and tor
-reloaded after making changes.
-.PP
-The script will try to detect a valid control socket even if you
-don\[aq]t especify it on the command line.
 .SH OPTIONS
 .TP
 [\f[B]-c\f[R]|\f[B]--\f[R]] [\f[I]command\f[R]]
@@ -36,6 +36,8 @@ command.
 If the command option is \f[I]--\f[R], option parsing will stop, meaning
 that any option specified after it won\[aq]t be parsed, the benefit is
 that it becomes uncessary to quote your command.
+To use different commands together, you must make shell escape to a new
+line with \f[I]\[rs]\[rs]n\f[R].
 .TP
 \f[B]-s\f[R] [\f[I]socket\f[R]]
 Tor\[aq]s control socket.
@@ -63,30 +65,64 @@ command is \f[I]SETEVENTS STREAM\f[R] (Default: not set)
 \f[B]-q\f[R]
 Quiet mode.
 (Default: not set).
+.SH DEBUGGING OPTIONS
+.TP
+\f[B]-d\f[R]
+Debug mode.
+The shell shall write to standard error a trace for each command after
+it expands the command and before it executes it.
+(Default: not set).
+.TP
+\f[B]-r\f[R]
+Dry-run mode.
+Show what would be done, without sending commands to the controller.
+(Default: not set).
 .SH EXIT CODES
 .TP
 \f[B]0\f[R]
-Fail
+Success.
 .TP
 \f[B]>0\f[R]
-Success.
+Fail.
 .SH EXAMPLES
 .PP
-tor-ctrl -q SETCONF bandwidthrate=1mb
-.PP
+Check your tor software version:
+.IP
+.nf
+\f[C]
 tor-ctrl GETINFO version
+\f[R]
+.fi
 .PP
-tor-ctrl -s 9051 -p foobar -- GETCONF bandwidthrate
+Get your SocksPort configuration and check where tor is listening for
+socks connections:
+.IP
+.nf
+\f[C]
+tor-ctrl -s 9051 -p foobar -- GETCONF SocksPort \[rs]\[rs]\[rs]n GETINFO net/listeners/socks\[rs]\[dq]
+\f[R]
+.fi
+.PP
+Set bandwidth rate:
+.IP
+.nf
+\f[C]
+tor-ctrl -q SETCONF bandwidthrate=1mb
+\f[R]
+.fi
 .PP
 For setting the bandwidth for specific times of the day, I suggest
-calling tor-ctrl via cron, e.g.:
-.PP
-\f[C]0 22 * * * /path/to/tor-ctrl -c \[dq]SETCONF bandwidthrate=1mb\[dq]\f[R]
-.PP
-\f[C]0 7 * * *  /path/to/tor-ctrl -c \[dq]SETCONF bandwidthrate=100kb\[dq]\f[R]
-.PP
-This would set the bandwidth to 100kb at 07:00 and to 1mb at 22:00.
-You can use notations like 1mb, 1kb or the number of bytes.
+calling tor-ctrl via cron.
+e.g: set the bandwidth to 100kb at 07:00 and to 1mb at 22:00.
+You can use notations like 1mb, 1kb or the number of bytes:
+.IP
+.nf
+\f[C]
+0 22 * * * /path/to/tor-ctrl -c \[dq]SETCONF bandwidthrate=1mb\[dq]
+
+0 7 * * *  /path/to/tor-ctrl -c \[dq]SETCONF bandwidthrate=100kb\[dq]
+\f[R]
+.fi
 .SH WWW
 .PP
 https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
@@ -94,6 +130,9 @@ https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 .PP
 This package is produced independently of, and carries no guarantee
 from, The Tor Project.
+.SS SEE ALSO
+.PP
+tor(1)
 .SH LICENSE
 .PP
 Copyright (c) 2007 by Stefan Behte

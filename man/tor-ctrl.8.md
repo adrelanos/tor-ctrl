@@ -12,15 +12,19 @@ tor-ctrl(8) - Interact with Tor's controller via command line tool
 
 # DESCRIPTION
 
-**tor-ctrl** is a commandline tool for executing commands on a tor server via the controlport.  In order to get this to work, add define the socket that will control the tor process, can be a tcp socket *ControlPort 9051* or a unix domain socket *ControlSocket /path/to/socket*. To secure the controller, you must setup and authentication method, which can be a cookie
-*CookieAuthentication 1* or if you want a fixed password, hash a password with *echo "HashedControlPassword $(tor --hash-password yourpassword)"* and use the same output given. These configuration lines must be inserted to your torrc and tor reloaded after making changes.
+**tor-ctrl** is a commandline tool for executing commands on tor's controller.
 
-The script will try to detect a valid control socket even if you don't especify it on the command line.
+The following configuration lines must be inserted to your torrc and tor reloaded to apply the changes.
+
+In order to get this to work, define the socket that will control the tor process, can be a tcp socket *ControlPort 9051* or a unix domain socket *ControlSocket /path/to/socket*.
+
+To secure the controller, you must setup and authentication method, which can be a cookie
+*CookieAuthentication 1* or if you want a fixed password, hash a password with *echo "HashedControlPassword $(tor --hash-password yourpassword)"* and use the same output given.
 
 # OPTIONS
 
 [**-c**|**--**] [*command*]
-: command to execute. If the command option is *-c*, you must "quote" your command. If the command option is *--*, option parsing will stop, meaning that any option specified after it won't be parsed, the benefit is that it becomes uncessary to quote your command.
+: command to execute. If the command option is *-c*, you must "quote" your command. If the command option is *--*, option parsing will stop, meaning that any option specified after it won't be parsed, the benefit is that it becomes uncessary to quote your command. To use different commands together, you must make shell escape to a new line with *\\\\n*.
 
 **-s** [*socket*]
 : Tor's control socket. Accept *tcp socket* in the format [*addr:*]*port* (examples: 9051, 127.0.0.1:9051). Accept *unix domain socket* in the following format [*unix:*]*path* (examples: /run/tor/control, unix:/run/tor/control). (Default: 9051).
@@ -37,29 +41,45 @@ The script will try to detect a valid control socket even if you don't especify 
 **-q**
 : Quiet mode. (Default: not set).
 
+# DEBUGGING OPTIONS
+
+**-d**
+: Debug mode. The shell shall write to standard error a trace for each command after it expands the command and before it executes it. (Default: not set).
+
+**-r**
+: Dry-run mode. Show what would be done, without sending commands to the controller. (Default: not set).
+
 # EXIT CODES
 
 **0**
-: Fail
+: Success.
 
 **>0**
-: Success.
+: Fail.
 
 # EXAMPLES
 
-tor-ctrl -q SETCONF bandwidthrate=1mb
-
+Check your tor software version:
+```
 tor-ctrl GETINFO version
+```
 
-tor-ctrl -s 9051 -p foobar -- GETCONF bandwidthrate
+Get your SocksPort configuration and check where tor is listening for socks connections:
+```
+tor-ctrl -s 9051 -p foobar -- GETCONF SocksPort \\\n GETINFO net/listeners/socks\"
+```
 
-For setting the bandwidth for specific times of the day, I suggest calling tor-ctrl via cron, e.g.:
+Set bandwidth rate:
+```
+tor-ctrl -q SETCONF bandwidthrate=1mb
+```
 
-`0 22 * * * /path/to/tor-ctrl -c "SETCONF bandwidthrate=1mb"`
+For setting the bandwidth for specific times of the day, I suggest calling tor-ctrl via cron. e.g: set the bandwidth to 100kb at 07:00 and to 1mb at 22:00. You can use notations like 1mb, 1kb or the number of bytes:
+```
+0 22 * * * /path/to/tor-ctrl -c "SETCONF bandwidthrate=1mb"
 
-`0 7 * * *  /path/to/tor-ctrl -c "SETCONF bandwidthrate=100kb"`
-
-This would set the bandwidth to 100kb at 07:00 and to 1mb at 22:00.  You can use notations like 1mb, 1kb or the number of bytes.
+0 7 * * *  /path/to/tor-ctrl -c "SETCONF bandwidthrate=100kb"
+```
 
 # WWW
 
@@ -69,6 +89,10 @@ https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 
 This package is produced independently of, and carries no guarantee from, The
 Tor Project.
+
+## SEE ALSO
+
+tor(1)
 
 # LICENSE
 
