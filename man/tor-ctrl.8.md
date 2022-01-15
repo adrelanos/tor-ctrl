@@ -22,8 +22,8 @@ To secure the controller, you must setup and authentication method, which can be
 
 # OPTIONS
 
-[**-c**|**--**] *command*
-: Command to execute. If the command option is *-c*, you must "quote" your command. If the command option is *--*, option parsing will stop and everything after it will be assigned to the *command*, it then becomes uncessary to quote your command. To use different commands together, you must make shell escape to a new line with *\\\\n*.
+[**-c**|**--**] [*command*]
+: command to execute. If the command option is *-c*, you must "quote" your command. If the command option is *--*, option parsing will stop, meaning that any option specified after it won't be parsed, the benefit is that it becomes unnecessary to quote your command. To use different commands together, you must make shell escape to a new line with *\\\\n*.
 
 **-s** *socket*
 : Tor's control socket. Accept *TCP socket* in the format [*addr:*]*port* (examples: 9051, 127.0.0.1:9051). Accept *Unix-domain socket* in the following format [*unix:*]*path* (examples: /run/tor/control, unix:/run/tor/control). (Default: 9051).
@@ -35,7 +35,7 @@ To secure the controller, you must setup and authentication method, which can be
 : Sleep N seconds after each command sent. (Default for socat/nc: 0 second, Default for telnet: 1 second).
 
 **-w**
-: Wait for confirmation with an enter pressed to end the connection after sending the command. Usefult when you want to be warned about events (asynchronous replies), example is when the command is *SETEVENTS STREAM* (Default: not set)
+: Wait for confirmation with an enter pressed to end the connection after sending the command. Useful when you want to be warned about events, example is when the command is *SETEVENTS STREAM* (Default: not set)
 
 **-q**
 : Quiet mode. (Default: not set).

@@ -5,11 +5,12 @@ Source: tor-ctrl
 Section: misc
 Priority: optional
 Maintainer: Patrick Schleizer <adrelanos@whonix.org>
-Build-Depends: debhelper (>= 12)
+Build-Depends: debhelper (>= 13), debhelper-compat (= 13),
 Homepage: https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 Vcs-Browser: https://github.com/nyxnor/tor-ctrl
 Vcs-Git: https://github.com/nyxnor/tor-ctrl.git
-Standards-Version: 5.0.0
+Standards-Version: 4.5.1
+Rules-Requires-Root: no
 
 Package: tor-ctrl
 Architecture: all
