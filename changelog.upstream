@@ -1,694 +1,248 @@
-commit e821f5604ac472655eb82dd95065d39c8742f2aa
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Apr 2 07:22:56 2020 -0400
+commit 80c549f36cb5e4fd57a1333619356f663ec2e11d
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Jan 15 15:02:11 2022 -0500
 
-    readme
+    ./configure.sh man
 
-commit 03063f6bc7935f9878d50167abd1d84413e751bf
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Apr 1 17:35:00 2020 -0400
+commit ed561899bbdd6a1af5f0f3f113298dd9e2bef879
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Jan 15 14:55:15 2022 -0500
 
-    remove 'Build-Depends: ronn' since no longer required
+    typos
 
-commit 420f923edec7745f4cde5f3b06a1cc1d3efa431e
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Apr 1 16:57:34 2020 -0400
+commit 7916e4423def544812c72f2a8d5533fc0d1825fd
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Jan 15 14:53:49 2022 -0500
 
-    remove genmkfile
+    packaging fixes
 
-commit c6111f265ef39e57246b9e9dd6286cf1bce5389a
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Apr 1 16:34:15 2020 -0400
+commit 7839b5415ceef01e8704fa42f50c643a9dd4ced2
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Jan 15 14:46:48 2022 -0500
 
-    add debian install file
+    add new line at the end
 
-commit 3473c696723905acb7490ae31c182db48fc8d298
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Apr 1 15:56:49 2020 -0400
+commit 41a1f6dbf50bbf46dc5c32583557b77c94fd6742
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Jan 15 14:34:50 2022 -0500
 
-    add man pages (generated using "genmkfile manpages")
+    add new lines at the end
 
-commit 5b3d178d4cbb10ef5595d00dcec339654cf11c73
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Apr 1 15:50:02 2020 -0400
+commit aa8c31be0a8c2a3ebd822b5accfcf5d53e446ead
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 14 15:42:42 2022 +0100
 
-    no longer create man pages during build process
-    use pre-created man pages
+    reiterating last commit
 
-commit 694ded9a08cc95d7c981aa72a94ac62d60fc6411
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Apr 1 15:42:56 2020 -0400
+commit f8f02f843ecb06c3522705f654a357338d5fa535
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 14 15:41:45 2022 +0100
 
-    change path to auto generated man pages
+    fix grep to be posix
+    - remove options '-o' and '-h'
 
-commit 8dee7a2d1e1402ff105f09497604c3e8a8ecbf34
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Apr 1 11:06:26 2020 -0400
+commit 98e6b21dbca633d4619f4b0c6648fc1f10c3a2d1
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 14 14:39:19 2022 +0100
 
-    bumped changelog version
+    less code on get_socks function
 
-commit 473e6704dd15638dd203a86e5148becd90b436cb
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Apr 1 08:50:00 2020 -0400
+commit 180bdabdcbc1f9fcb2a2af84e815b3363e114620
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 14 14:14:49 2022 +0100
 
-    update copyright year
+    typo man
 
-commit 1cb0349edb3581713a9b1c15dc7f657b8cc4b564
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Sep 12 12:51:18 2019 +0000
+commit 63a816b43381d7f9055e892ba873e4a032efac2d
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 14 14:08:19 2022 +0100
 
-    bumped changelog version
+    change command delimiter to shell escape to new line
+    - pipe was giving problems on unquoted commands because obviously it was piping it
+    - the format to be used is 2 (two) backlashes (\) and a new line ref (n): \\n
+    - add debug mode to facilitate understanding where it failed if it did
+    - add dry-run mode to be safe and see what configuration it would use instead of running directly. It does not send commands to the controller
+    - organize socket functions, which was causing confusion to read and understand
+    - better comments on functions
 
-commit 9ff66c2b76d1c46dee4edda540da9e997bccad88
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Sep 10 02:17:17 2019 -0400
+commit f7de0772453efeb86fa3ec8aa99caa34e1d02df9
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 14 14:06:24 2022 +0100
 
-    depend on socat
+    improve readme
+
+commit bcdbb212b3fca6c66778340a8283908add4d95f3
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Jan 13 12:59:31 2022 +0100
+
+    improve readbility on readme removing temp files
+
+commit ffecbbe9afdf23502eca5d2f3c2c465799f97c08
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Jan 13 12:57:05 2022 +0100
+
+    instructions on how to build deb package and cleanup
+
+commit dcf02e47bdec3ba2bd5812b88864c64d48321211
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Jan 13 12:56:49 2022 +0100
+
+    cosmetics on comments
+
+commit e0f0800545b80d2b68f868992aa02cbdea81e258
+Merge: d1711c5 651204f
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Jan 13 09:59:59 2022 +0100
+
+    Merge pull request #6 from adrelanos/patch-1
     
-    https://forums.whonix.org/t/tor-ctrl-tor-control-port-command-line-tool/8074
+    Update README.md
 
-commit da964b49335af17ec9c084fa9a73fc71923e446f
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Aug 28 12:49:51 2019 +0000
+commit 651204f6eb45572cc20570da70a9a334599fcd62
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Thu Jan 13 03:06:57 2022 -0500
 
-    bumped changelog version
+    Update README.md
 
-commit 7571e3b100c37d53145437781f337a519c96986f
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Aug 28 11:35:33 2019 +0000
+commit d1711c5f5e279de8c2f3485f6e8344bcf0527fbc
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Jan 13 02:16:06 2022 +0100
 
-    use properly override_dh_installman
+    ignore files produced when creating a debian package
 
-commit 251dbbeca9b92a78fb5dbd039851ced2ad62f9dd
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Aug 1 12:08:39 2019 +0000
+commit 2142e7021bdb5d7c4d39c9b0185a8fc5bad326a1
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Jan 13 02:15:33 2022 +0100
 
-    bumped changelog version
-
-commit bd76e946e90a64b0af5b27ee3056769410fd6267
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Aug 1 11:13:46 2019 +0000
-
-    readme
-
-commit 43fe2716fb32285ebffec017b4f77191750672c3
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Jul 31 07:47:44 2019 +0000
-
-    bumped changelog version
-
-commit d95fd01e6b23ceadb9ddee8a9e41c4c8a37951ea
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Jul 31 03:12:51 2019 -0400
-
-    /var/run -> /run
-
-commit 3571e426c39218329f7949d856d51e6ba5d31de5
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat Jun 8 11:37:38 2019 +0000
-
-    bumped changelog version
-
-commit db64a20eadbd9fc9a6b582e3894771fe68002d99
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat Jun 8 00:05:37 2019 -0400
-
-    fix debian/watch lintian warning debian-watch-contains-dh_make-template
-
-commit 661233e7952e0c451ef546c8afb95adf785c40a7
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri May 24 20:57:32 2019 +0000
-
-    bumped changelog version
-
-commit f8aaaec4728412adbd7a94ffd04dd394c30c4130
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri May 24 12:29:11 2019 -0400
-
-    readme
-
-commit e70405662a52d3075f58777eb078116f69a7e120
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri May 3 11:39:40 2019 +0000
-
-    bumped changelog version
-
-commit 9b3b95ea55c9a02214c522e517cdfea12a440621
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri May 3 10:56:57 2019 +0000
-
-    update
-
-commit f9cf02b5c841145b553732fd57fa75e247a52bd0
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Apr 23 12:40:14 2019 +0000
-
-    bumped changelog version
-
-commit f67b517644d1da353e2b08b6edf0c0c19765e0c3
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:41:30 2019 -0400
-
-    formatting
-
-commit 6beb9f46e2eb50052d4764e225482724c2aa3a18
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:41:17 2019 -0400
-
-    attribution
-
-commit d3f3693555ea83bd8ebd8ab3df52bc3beb17978d
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:37:34 2019 -0400
-
-    upgrade license from GPLv2+ to GPLv3+
-
-commit 0edb6d8ba5e9de3cb0c849245ee1f6e7c4a0ac4a
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:36:18 2019 -0400
-
-    formatting
-
-commit 4ddbd592222e943996ed2452c680353f43d57da5
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:35:17 2019 -0400
-
-    upgrade license from GPLv2+ to GPLv3+
-
-commit ac677365cc9f923d93e647a7a65f0af73b8a6b74
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:32:02 2019 -0400
-
-    simplification
-
-commit 6483ed4be4c4349d5f763a2ed5cfc0a23a4b4ec8
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:31:03 2019 -0400
-
-    typo
-
-commit 3b0941be20850093b42b8efce6aca16fdb847cc8
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:29:39 2019 -0400
-
-    remove never updated changelog
-
-commit 09966c1410c1d68d7d8bc453e249e682dd85d6a6
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:28:59 2019 -0400
-
-    deprecate never updated VERSION variable
-
-commit b5e73f7c7a094b1c9b3bf9ae270e41f2ebadcf11
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:27:38 2019 -0400
-
-    style
-
-commit 00e6a245ba2d72659d414d51445ff02206d42339
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:26:07 2019 -0400
-
-    typo
-
-commit 18b817ce5cc329a5d969e3b99954b7d84912c0f7
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:24:53 2019 -0400
-
-    quotes
-
-commit 49351f005ff4713bf915f3467befb8f3640d052e
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:22:33 2019 -0400
-
-    local
-
-commit 699a39bf15861feea9269a9190f000834f7a3dcc
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:20:47 2019 -0400
-
-    port to unix domain socket files
-
-commit fbccd1a5d51d04e7167ade709939330d8dc48d87
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Apr 22 04:15:19 2019 -0400
-
-    fix
-
-commit 526e0a3ecc314da7343c2d1746f54f264faed77d
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat Apr 6 12:18:56 2019 +0000
-
-    bumped changelog version
-
-commit 0da7e7833b3267786a4051af28ab8dd5a56bf08c
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Apr 4 05:51:08 2019 -0400
-
-    port to debian buster
-
-commit 30b23113ddf783b08b9be0c22949966dbfab3c56
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Apr 3 18:05:57 2019 -0400
-
-    readme
-
-commit 8b11bb8d247a5fe604e0fcc3e76747fadd7d33a4
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri Mar 29 10:08:08 2019 +0000
-
-    bumped changelog version
-
-commit 9e85f83a17539aab15637272a29e89d7e7227f81
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri Mar 29 09:03:19 2019 +0000
-
-    https://www.whonix.org/wiki/Dev/Licensing
-
-commit 80d40cfe80f13ef14bfd3c72b7f65624d0401b22
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Mar 12 11:41:41 2019 +0000
-
-    bumped changelog version
-
-commit 098f060f2144aa2504170e17f5ffa356080ffd89
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri Mar 1 14:32:42 2019 +0000
-
-    add improved legal protections clauses
+    conclude debian package folder
     
-    The license for software created by Whonix is the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version with additional terms applicable per GNU GPL version 3 section 7.
+    https://github.com/nyxnor/tor-ctrl/issues/5
+
+commit 46fa89d5a002ee9ed2eb677b3148db46f3874ea4
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Jan 13 02:14:36 2022 +0100
+
+    fix typo on manual
+
+commit 9c757fd1e0351dd652f5d3623b2b128a39d73f2d
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Jan 13 01:19:53 2022 +0100
+
+    reoganize tor-ctrl, enhance telnet check
+
+commit 061b224dd98dfd65a40c604fc2e4ad2db2d12aaa
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Wed Jan 12 23:20:32 2022 +0100
+
+    move examples script to usr/bin prefixed by tor-ctrl-*
+
+commit 11e7607ffa8c5666407b33618f575ea098325db3
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Wed Jan 12 23:13:38 2022 +0100
+
+    fix manual pages and script path
+
+commit dce1e6eddc4b281cdcd5e433e648cc869a8770f2
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Wed Jan 12 23:10:06 2022 +0100
+
+    start structuring directories for debian package
     
-    The additional terms are based on the Doom 3 license which is Debian refers to as `GPL-3+-with-id-software-additional-terms`, which is Debian DFSG [1] (The Debian Free Software Guidelines) approved and which is therefore suitable for Debian `main`. Whonix made applied minimal changes to it:
+    https://github.com/nyxnor/tor-ctrl/issues/5
+
+commit 6e7034615d9728b79397acc2b07329033f9c17a9
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Wed Jan 12 22:48:52 2022 +0100
+
+    check if socket exist on unix domains
     
-    * Rewrite `The Doom 3 BFG Edition GPL Source Code` to the more common `this program` which is used throughout the GPL.
-    * Added a "trump clause" [2], in other words, any conflicts or disputes between the additional terms and the GPLv3 shall be resolved in favor of the GPLv3 by adding `Notwithstanding any other provision of this License` (as mentioned in GPL FAQ [3]) at the beginning of the additional terms.
+    fix https://github.com/nyxnor/tor-ctrl/issues/4
+
+commit 2d40c46d8ea0cbe1fbe8e9b79c099080700d3d8a
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Wed Jan 12 03:24:38 2022 +0100
+
+    explain how socket is auto-detected on the readme
+
+commit a81848377d3c2588a91011a0308684d10f86a8ca
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Wed Jan 12 03:21:51 2022 +0100
+
+    remove necessity to quote commands if they are the only or last options, or after '--'.
+
+commit 542ba2de76de03b96fd1cea712dd0346afc00197
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Wed Jan 12 03:21:48 2022 +0100
+
+    correct usage on examples scripts
+
+commit f25bd624753b2892241415d851b7c49cc7a09385
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Wed Jan 12 02:39:33 2022 +0100
+
+    autodetect control socket
+
+commit 73c5ae0a5f87cc2d9e856fa2346f4f38a8858dd6
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Jan 10 22:48:04 2022 +0100
+
+    make *-c* an optional option if command is the last positional argument
+    if the command was in the middle and not preceded by the -c, getopts would exit there and not parse options after it, which is not what we want. By making it the last positional argument, we avoid that error.
+
+commit df0e0dbec1aa8c7d99172b3bdd288780ecb925c0
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 9 17:48:12 2022 +0100
+
+    improve manual pages
+
+commit 90f46fb6227cb408e9e1761aeb8d9588bc21539f
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 9 17:41:48 2022 +0100
+
+    rename scripts dir tor examples
+
+commit 4214d8be47fc701fdccefb94c300e207fde9a325
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 9 17:41:14 2022 +0100
+
+    rename scripts dir tor examples
+
+commit a966b5b8250594a04a11909025ab5c415ca73ac1
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 9 17:35:27 2022 +0100
+
+    add folders
+
+commit b3f631a9d8f00ce8fcd46ddbe341e8a4c0bfefd8
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 9 17:34:15 2022 +0100
+
+    give less cli options and rename files to original name
+
+commit b7ab527f7f88cd31f4a0459a0055f1c85758fe2a
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 9 17:09:35 2022 +0100
+
+    change mode verbose to quiet, and be verbose by default, fix exit status
+
+commit 9ca14380f7753b13b2c9bffce7a65a5ec166d540
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sat Jan 8 23:48:48 2022 +0100
+
+    fix no socket being selected
     
-    [1] https://www.debian.org/social_contract#guidelines
-    [2] https://www.fsf.org/news/canonical-updated-licensing-terms
-    [3] https://www.gnu.org/licenses/gpl-faq.html#v3Notwithstanding
+    https://github.com/nyxnor/tor-controller/issues/2
+
+commit eb8d10d991850051bc1fc5b43a0530ddfba5a733
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sat Jan 8 23:42:51 2022 +0100
+
+    improve tor-controller to specify less options
     
-    For more considerations, see also:
-    https://www.whonix.org/wiki/Dev/Licensing
+    https://github.com/nyxnor/tor-controller/issues/2
 
-commit 51e884ea33cfc4291286de86c42c24addbc510d6
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Aug 27 16:55:13 2018 +0000
+commit 366801ee39fba1ef6bf1e401566f5ad9ffae844d
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Tue Jan 4 23:39:16 2022 +0100
 
-    bumped changelog version
-
-commit 497ce72e8fc2b415c61b8ebb4fadae084d892519
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Aug 21 05:18:41 2018 +0800
-
-    readme
-
-commit 4c60af7324f1cf1145eed9f9df8b624c3b897100
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Aug 9 16:03:50 2018 +0000
-
-    bumped changelog version
-
-commit 1d591e8c120f29f8cd23011dbab1b7ca29bd9d1b
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Jul 25 17:06:29 2018 +0800
-
-    remove unneeded dependency vim-common
-
-commit 792d1ff91223fcb1ecba5e8d8550e6112646ae9f
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Jul 3 05:42:17 2018 +0000
-
-    bumped changelog version
-
-commit 9540968fe984d8dc7cbdd5ccec41952b4429d4b6
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri Jun 22 04:21:03 2018 +0000
-
-    update hyperlink
-    
-    fixes https://github.com/Whonix/tor-ctrl/issues/1
-
-commit 12c675856e37f80f540f619630219eb1c99be65f
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Feb 1 15:25:27 2018 +0000
-
-    bumped changelog version
-
-commit 8956589eb020b93150625554262d7919d8c0e3d6
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Jan 29 15:50:39 2018 +0000
-
-    readme
-
-commit fa593d1ffdf6342f2cf17df751c4ca798756e497
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Jan 29 15:39:01 2018 +0000
-
-    update copyright
-
-commit c785608299d01fa3c1bd83fb02a861f53885e5ad
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Jan 29 15:22:09 2018 +0000
-
-    update copyright
-
-commit b426b95389380427aa5bd52fb578a36bdd856a6e
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Jan 29 15:15:21 2018 +0000
-
-    update copyright
-
-commit 2f8953f6edfdb543d6bb59233107a14560e84319
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Jan 29 15:09:46 2018 +0000
-
-    update copyright
-
-commit 257111fd844ad6612d164d0d4d684ff13606713d
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri Feb 17 14:11:33 2017 +0000
-
-    bumped changelog version
-
-commit c7a1b2d1148b5a832b326de384f58bfa0afb6023
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri Feb 10 15:47:52 2017 +0000
-
-    remove faketime from Build-Depends:
-    
-    since no longer used for reproducible builds
-
-commit 5044e85659c7ecae863f4dad914ffb07d885ad98
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri Feb 10 15:35:26 2017 +0000
-
-    remove debian/gain-root-command workaround
-
-commit 8beb3830eec8000ef07b700b5c8445d834f5803f
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri Feb 10 15:26:23 2017 +0000
-
-    packaging simplification ruby-ronn (>= 0.7.3) -> ruby-ronn
-
-commit 2124461b55a886d312952befaf32aa0d37a1613e
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sun Jan 15 15:36:50 2017 +0000
-
-    bumped changelog version
-
-commit f70cc5670a63fb920cf433015a64781cc2ff0530
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sun Jan 15 08:35:43 2017 +0100
-
-    packaging, bumped Standards-Version from 3.9.6 to 3.9.8 for jessie support
-
-commit 69e5eced64ec188898c382d3ef9fff7f97d60852
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat Dec 10 02:34:52 2016 +0000
-
-    bumped changelog version
-
-commit bbdc65f2610c0d1fb15dc965791806d47e704779
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Nov 21 17:43:36 2016 +0000
-
-    readme
-
-commit 6af42ba65446225e4275c0fa17055066aa1c747a
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Aug 25 14:08:27 2015 +0000
-
-    bumped changelog version
-
-commit 907587cc4778ce904d34940bf4dc1caace1a5434
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Jun 3 15:00:27 2015 +0000
-
-    bumped changelog version
-
-commit 07cb38693370d34207a15bc2796818eee1ab0ee5
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat May 9 15:06:47 2015 +0000
-
-    bumped changelog version
-
-commit c54bcb08e9915e10728a8f95a3f555ada7ab1986
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat May 9 15:00:46 2015 +0000
-
-    removed obsolete comments
-
-commit 7d49e7968b35a3702303ddab2dea987c5eca7e76
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Apr 30 17:57:01 2015 +0000
-
-    bumped changelog version
-
-commit ef147f94803dfb16fa83840c07aee85fbc1f760a
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Apr 28 13:43:27 2015 +0000
-
-    added debian/source/lintian-overrides with debian-watch-may-check-gpg-signature to fix lintian warning - https://phabricator.whonix.org/T277
-
-commit a12d73ed01068baf32db067811c208034ced87fd
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sun Apr 26 23:16:17 2015 +0000
-
-    packaging, bumped Standards-Version from 3.9.4 to 3.9.6 for jessie support
-
-commit 1dc07fe7dbc201ad25473bf8a5dc757104769ab2
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Apr 7 17:42:58 2015 +0000
-
-    bumped changelog version
-
-commit b5d2ddeb0a895bda1958949fb940b278df96b6da
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Apr 2 18:41:29 2015 +0000
-
-    added genmkfile to Build-Depends
-
-commit 1c326b232b1f328a6542ae51f3f3afa3e1e44a55
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Apr 2 17:45:51 2015 +0000
-
-    updated debian/rules for makefile generic to version 1.5
-
-commit f707beb948c60ad2165ffad5ec43f3de8c95eddf
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Apr 2 17:24:50 2015 +0000
-
-    updated makefile generic to version 1.5
-
-commit 2b21554b4b1ee8c4215ecdd26da6f88a62270fdf
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Mar 24 17:36:57 2015 +0000
-
-    bumped changelog version
-
-commit 0c290e968e46921c40d83594195e8990029905e4
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Mar 24 17:26:55 2015 +0000
-
-    updated makefile generic to version 1.4
-
-commit 3f604e835853008b7c1d5a85459d2dfd1ad4fedb
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Feb 4 00:56:36 2015 +0000
-
-    bumped changelog version
-
-commit a946271225d04fe033100ac2271f34a28889fd61
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Feb 4 00:45:03 2015 +0000
-
-    added changelog.upstream
-
-commit e17bbf100b4285cf40a0f69c79cc65059ccd6026
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Feb 4 00:40:56 2015 +0000
-
-    updated makefile generic to version 1.3
-
-commit 1885a179834f1fe6bf2972446c92b355d790dd45
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Feb 3 23:58:57 2015 +0000
-
-    Added creation of upstream changelog to debian/rules
-
-commit 477a906f322e9a02894e572c1c2d3f89a642f084
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Jan 7 19:34:58 2015 +0000
-
-    bumped compat from 8 to 9
-
-commit fe1a3d1d452585791427e932e4304582cc61cf7b
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Fri Dec 5 19:01:22 2014 +0000
-
-    updated generic makefile
-
-commit d99375cced97b403b7782de553892b42afe55263
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Oct 28 22:35:32 2014 +0000
-
-    makefile: refactoring, avoid using IFS
-
-commit d97587282142d0291a1a667a7a0aed782076f3c1
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat Oct 25 01:58:54 2014 +0000
-
-    makefile:
-    - make debdist; make undebdist
-    - cleanup
-    - refactoring
-
-commit 822c7e838893316707f8e71eea476d4ebb7d9616
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Oct 23 22:43:05 2014 +0000
-
-    makefile:
-    - new target "make undist", which deletes the upstream tarball
-    - $DISTDIR variable for make (un)dist, which defaults to ".." and can be used to create upstream tarballs in arbitrary locations
-    - refactoring, all function names and global variables now start with "make_" to make the script `source`ing friendly
-    - made `source`able
-
-commit f63c82c572bf47a00e5303a00e3bc0046b53c501
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Oct 13 12:36:58 2014 +0000
-
-    readme
-
-commit 773a02c4aa5cc28f948a098a1ed66005b7b054e9
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Aug 19 18:52:45 2014 +0000
-
-    makefile: added new feature "make deb-chl-bumpup" - Bump upstream version number in debian/changelog.
-
-commit 122e07d71a2a2d20744e87d03e741b37431ddc86
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sun Aug 17 20:54:27 2014 +0000
-
-    Updated debian/changelog.
-
-commit 27906df13c790fb73583af7bc852afdb9abdfd8d
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sun Aug 17 20:47:30 2014 +0000
-
-    Fixed changelog date.
-
-commit bdb567ccdfebdc641065dc1165063c44e25daee8
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sun Aug 17 18:03:32 2014 +0000
-
-    bump version number
-
-commit 0ae24b296547e13090c478551099568315c272bc
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu Aug 14 13:35:21 2014 +0000
-
-    Implemented make deb-icup: Combination of make deb-pkg, make deb-pkg-install and make deb-pkg-cleanup.
-
-commit 39326791f19a1130d8eafd36dd273a951be9b825
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sun Jul 27 12:42:30 2014 +0000
-
-    packaging
-
-commit 20bd4b34f9a22b32e3e9f3d7edfa4cc421105567
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sun Jul 27 04:01:15 2014 +0000
-
-    packaging
-
-commit c604c67e350e75e70ec8081e146f00280c04d6e5
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat Jul 26 15:26:40 2014 +0000
-
-    packaging
-
-commit 51d914174b27e8344bc1a90d12f878b282eb70f1
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat Jul 26 15:16:08 2014 +0000
-
-    packaging: removed build dependency on git, since the .git folder won't be included in the upstream tarball.
-
-commit 6dc294609317c1f7a0fbff3f304de9436c3c8ef2
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat Jul 12 17:31:28 2014 +0000
-
-    packaging
-
-commit 8d88ea92db5194059e0d58972cf22637306dfdb2
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat Jul 12 17:11:04 2014 +0000
-
-    packaging
-
-commit 9dd71ee0608f9436f27339e3962c02a6529c8fd4
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat Jul 12 15:34:21 2014 +0000
-
-    packaging
-
-commit 50260dd35de501c7d6192f5e88ce782c275911e7
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sun Jul 6 13:26:38 2014 +0000
-
-    use $BASH_SOURCE instead of $0
-
-commit 4550dcd7acb7528302b79f9f5b793589ebd0f9bb
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat Jul 5 08:11:53 2014 +0000
-
-    Bumped debian revision number to avoid lintian warning "new-package-should-close-itp-bug" so we can use lintian --fail-on-warnings as sanity test.
-
-commit b309e82b7bab3533f8dec664e8aab628a956a884
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Jun 24 15:45:15 2014 +0000
-
-    added debian epoch; added dotglob
-
-commit 2b304cfa859cb6cfba8f82899bad1c97804a3aa7
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Tue Jun 3 18:27:38 2014 +0000
-
-    readme
-
-commit d6e0cda4c944eee5a1c0c346da530442f102052c
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Mon Jun 2 14:38:56 2014 +0000
-
-    packaging
-
-commit 24ce22cd945ef762c000bb32cef2ff7ab9ae18ed
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sun Jun 1 15:38:37 2014 +0000
-
-    readme
-
-commit d1a58d322fb723e32ec7542ea65fee3689016772
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat May 31 16:56:15 2014 +0000
-
-    adjusted default control authcookie part to debian-tor's default /var/run/tor/control.authcookie
-
-commit fb243053dc1e84d6841b1342f621f17b394a0253
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Sat May 31 14:39:45 2014 +0000
-
-    # On branch master
-    nothing to commit (working directory clean)
-
-commit 5e1128efb357de3780859a6ca8eb8a8ab72c0da7
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu May 22 16:53:18 2014 +0000
-
-    .
-
-commit 13f5ebd241084bc306b6bf242909b20306f816c3
-Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Thu May 22 16:52:30 2014 +0000
-
-    .
+    wip of tor-controller, examples on scripts/ dir
