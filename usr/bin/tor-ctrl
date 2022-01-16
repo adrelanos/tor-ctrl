@@ -185,7 +185,7 @@ check_socket(){
         ;;
         socat)
           socket_prog_connect="${socket_prog} - UNIX-CONNECT:${tor_control_unix}"
-          ${socket_prog} "UNIX-CONNECT:${tor_control_unix}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
+          ${socket_prog} /dev/null "UNIX-CONNECT:${tor_control_unix}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
         ;;
         *) error_msg "${socket_prog##*/} doesn't support Unix-domain sockets";;
       esac
