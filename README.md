@@ -82,6 +82,11 @@ sudo ./configure.sh install
 
 ### Build the package
 
+Install developer scripts:
+```sh
+sudo apt install -y devscripts
+```
+
 Install build dependencies.
 ```sh
 sudo mk-build-deps --remove --install
