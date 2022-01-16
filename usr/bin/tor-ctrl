@@ -80,9 +80,9 @@ Debugging options:
 
   Examples:      ${me} GETCONF User
                  ${me} -q SETCONF bandwidthrate=1mb
-                 ${me} -s 9051 -p foobar -- GETCONF bandwidthrate
+                 ${me} -s 9051 -p foobar GETCONF bandwidthrate
                  ${me} GETINFO config-defaults-file config-file config-text
-                 ${me} GETCONF SocksPort \\\n GETINFO net/listeners/socks\"
+                 ${me} GETCONF SocksPort \\\n GETINFO net/listeners/socks
                  ${me} -w -- SETEVENTS STREAM
 
 You should have a look at
