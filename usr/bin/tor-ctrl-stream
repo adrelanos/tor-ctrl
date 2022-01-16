@@ -40,12 +40,12 @@ list_streams(){
         # shellcheck disable=SC2086
         circuit_all="$(tor-ctrl -c "GETINFO circuit-status" ${cli_args})"
         circuit="$(printf '%s\n' "${circuit_all}" | grep "^${circuit_id} " | sed "/250 OK/d;/250+circuit-status=/d;/250 closing connection/d")"
-        circuit_status="$(printf '%s\n' "${circuit}" | awk '{print $2}')"
-        circuit_path="$(printf '%s\n' "${circuit}" | awk '{print $3}')"
-        circuit_purpose="$(printf '%s\n' "${circuit}" | awk '{print $5}' | sed "s/PURPOSE=//")"
+        circuit_status="$(printf '%s\n' "${circuit}" | cut -d " " -f2)"
+        circuit_path="$(printf '%s\n' "${circuit}" | cut -d " " -f3)"
+        circuit_purpose="$(printf '%s\n' "${circuit}" | cut -d " " -f5 | sed "s/PURPOSE=//")"
         [ -z "${circuit_status}" ] && break
         if [ "${circuit_status}" = "BUILT" ]; then
-          printf %s"\n${bold}------------------------------------------------------------------------------------------${nocolor}\n"
+          printf %s"${bold}------------------------------------------------------------------------------------------${nocolor}\n"
           printf %s"${bold}Stream: ${stream_id}, Target: ${target}${nocolor}\n"
           printf %s"${bold}Circuit: ${circuit_id}, Purpose: ${circuit_purpose}${nocolor}\n"
           printf %s"${bold}n. fingerprint                              address        nickname     locale${nocolor}\n"

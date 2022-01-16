@@ -95,7 +95,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Thu Jan 13 09:59:59 2022 +0100
 
     Merge pull request #6 from adrelanos/patch-1
-    
+
     Update README.md
 
 commit 651204f6eb45572cc20570da70a9a334599fcd62
@@ -115,7 +115,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Thu Jan 13 02:15:33 2022 +0100
 
     conclude debian package folder
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/5
 
 commit 46fa89d5a002ee9ed2eb677b3148db46f3874ea4
@@ -147,7 +147,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Wed Jan 12 23:10:06 2022 +0100
 
     start structuring directories for debian package
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/5
 
 commit 6e7034615d9728b79397acc2b07329033f9c17a9
@@ -155,7 +155,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Wed Jan 12 22:48:52 2022 +0100
 
     check if socket exist on unix domains
-    
+
     fix https://github.com/nyxnor/tor-ctrl/issues/4
 
 commit 2d40c46d8ea0cbe1fbe8e9b79c099080700d3d8a
@@ -230,7 +230,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sat Jan 8 23:48:48 2022 +0100
 
     fix no socket being selected
-    
+
     https://github.com/nyxnor/tor-controller/issues/2
 
 commit eb8d10d991850051bc1fc5b43a0530ddfba5a733
@@ -238,7 +238,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sat Jan 8 23:42:51 2022 +0100
 
     improve tor-controller to specify less options
-    
+
     https://github.com/nyxnor/tor-controller/issues/2
 
 commit 366801ee39fba1ef6bf1e401566f5ad9ffae844d

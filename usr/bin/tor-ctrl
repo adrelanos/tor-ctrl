@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 
-## tor-ctrl is a commandline tool for send_cmding commands to the tor's controller
+## Command line tool for setting up stream for communication from the
+## Tor Controller's (client) to a Tor process (server). The client send
+## commands using TCP sockets or Unix-domain sockets and receive replies
+## from the server.
+##
 ## In order to get this to work, read tor-ctrl's and tor's man page
 ## to configure the conrol method (ControlPort/ControlSocket) and the
 ## authentication method (CookieAuthentication/HashedControlPassword).
@@ -30,6 +34,9 @@
 ## further developed by Patrick Schleizer
 ## and later enhanced by Nyxnor
 
+## script version
+torctrl_version="5.0.0"
+
 ## script name
 me="${0##*/}"
 
@@ -54,11 +61,13 @@ usage(){
                  default: 0 second
 
   -w             wait to read confirmation by pressing ENTER before closing the connection
-                 notice: useful when you want to be informed about events
+                 notice: useful when you want to be informed about events (asynchronous replies)
                  default: not set
 
   -q             quiet mode.
                  default: not set.
+
+  -V             print version information and exit
 
 Debugging options:
 
@@ -122,8 +131,10 @@ get_socket(){
   ## don't evaluate the exit code of '--verify-config' as it will fail if not running as root or the tor user
   ## if 'default_torrc' is empty, tor will try: @CONFDIR@/torrc-defaults.
   ## if 'f_torrc' is empty, tor will try: @CONFDIR@/torrc, or $HOME/.torrc if that file is not found
+  ## example line that has to be cleanse: print only last arg in line, remove '"', remove '.', remove '//'.
+  ## Jan 1 00:00:00.000 [notice] Including configuration file "/usr/local/etc/torrc.d//50_user.conf".
   # shellcheck disable=SC2086
-  tor_config_files="$(tor --verify-config ${default_torrc} ${f_torrc} | grep -E " Read configuration file [^ ]*| Including configuration file [^ ]*" | awk '{print $NF}' | sed "s/\"//;s/\"\.//")"
+  tor_config_files="$(tor --verify-config ${default_torrc} ${f_torrc} | grep -E " Read configuration file [^ ]*| Including configuration file [^ ]*" | awk '{print $NF}' | sed "s/\"//;s/\".//;s/\/\//\//")"
 
   ## only one option is needed, use head
   # shellcheck disable=SC2086
@@ -132,7 +143,7 @@ get_socket(){
   ## only modify 'tor_control_socket' if it is not empty, meaning not inserted as a cli option
   tor_control_socket="${tor_control_socket_alternative}"
 
-  ## assign detected socket to the variable or if still empty, fallback to tcp 127.0.0.1:9051
+  ## assign detected socket to the variable or if still empty, fallback to TCP 127.0.0.1:9051
   if [ -n "${tor_control_socket_alternative}" ]; then
     tor_control_socket="${tor_control_socket_alternative}"
   else
@@ -141,7 +152,7 @@ get_socket(){
 }
 
 check_socket(){
-  ## find if tor_control_socket is a unix domain socket or a tcp socket and do sanity checks
+  ## find if tor_control_socket is a unix domain socket or a TCP socket and do sanity checks
   case "${tor_control_socket}" in
     "unix:/"*|"/"*)
       socket_type="unix"
@@ -173,10 +184,10 @@ check_socket(){
           ${socket_prog_connect} -zv || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
         ;;
         socat)
-          socket_prog_connect="${socket_prog} UNIX-CONNECT:${tor_control_unix} -"
+          socket_prog_connect="${socket_prog} - UNIX-CONNECT:${tor_control_unix}"
           ${socket_prog} "UNIX-CONNECT:${tor_control_unix}" /dev/null || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
         ;;
-        *) error_msg "${socket_prog##*/} doesn't support unix domain sockets";;
+        *) error_msg "${socket_prog##*/} doesn't support Unix-domain sockets";;
       esac
     ;;
     tcp)
@@ -305,6 +316,7 @@ while :; do
     d) debug_mode=1; shift 1;;
     r) dry_run=1; shift 1;;
     h) usage;;
+    V) printf '%s\n' "tor-ctrl ${torctrl_version}"; exit 0;;
     -) shift 1; break;;
     "") break;;
     *) break;; ## it could be be usage instead of break, but then would need to use '--' to end option parsing

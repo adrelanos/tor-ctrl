@@ -16,7 +16,10 @@ Package: tor-ctrl
 Architecture: all
 Depends: socat, xxd, ${misc:Depends}
 Description: Tor controller command line tool
- Command line tool for executing Tor controller commands easily.
+ Command line tool for setting up stream for communication from the
+ Tor Controller's (client) to a Tor process (server). The client send
+ commands using TCP sockets or Unix-domain sockets and receive replies
+ from the server.
  .
  https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
  .
