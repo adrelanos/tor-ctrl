@@ -136,12 +136,12 @@ get_socket(){
   # shellcheck disable=SC2086
   tor_config_files="$(tor --verify-config ${default_torrc} ${f_torrc} | grep -E " Read configuration file [^ ]*| Including configuration file [^ ]*" | awk '{print $NF}' | sed "s/\"//;s/\".//;s/\/\//\//")"
 
-  ## only one option is needed, use head
-  # shellcheck disable=SC2086
-  tor_control_socket_alternative="$(grep -E "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2 | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
-
-  ## only modify 'tor_control_socket' if it is not empty, meaning not inserted as a cli option
-  tor_control_socket="${tor_control_socket_alternative}"
+  ## grepping no file will be stuck forever
+  if [ -n "${tor_config_files}" ]; then
+    ## only one option is needed, use head
+    # shellcheck disable=SC2086
+    tor_control_socket_alternative="$(grep -E "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2 | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
+  fi
 
   ## assign detected socket to the variable or if still empty, fallback to TCP 127.0.0.1:9051
   if [ -n "${tor_control_socket_alternative}" ]; then
@@ -185,7 +185,7 @@ check_socket(){
         ;;
         socat)
           socket_prog_connect="${socket_prog} - UNIX-CONNECT:${tor_control_unix}"
-          ${socket_prog} "UNIX-CONNECT:${tor_control_unix}" /dev/null || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
+          ${socket_prog} "UNIX-CONNECT:${tor_control_unix}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
         ;;
         *) error_msg "${socket_prog##*/} doesn't support Unix-domain sockets";;
       esac
