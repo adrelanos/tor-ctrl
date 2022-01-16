@@ -241,12 +241,10 @@ login(){
 
 ## just get variables, don't send commands to the controller
 get_dry_run(){
-  if [ "${dry_run:-}" = "1" ]; then
-    for key in cmd_cli tor_control_socket tor_password sleep_n quiet wait_confirmation debug_mode dry_run; do
-      eval val='$'"${key}" && printf '%s\n' "${key}=${val:-""}"
-    done
-    exit 0
-  fi
+  for key in cmd_cli tor_control_socket tor_password sleep_n quiet wait_confirmation debug_mode dry_run; do
+    eval val='$'"${key}" && printf '%s\n' "${key}=${val:-""}"
+  done
+  exit 0
 }
 
 ## send command to the controller and sleep after it if required
@@ -323,6 +321,7 @@ done
 ## set default values
 : "${debug_mode:=0}"
 : "${quiet:=0}"
+: "${dry_run:=0}"
 : "${wait_confirmation:=0}"
 
 ## check for debug mode
@@ -339,7 +338,7 @@ if [ -n "${cmd_cli}" ]; then
   ## if socket was not assigned on the command line, try auto-detection
   [ -z "${tor_control_socket}" ] && get_socket
   ## just get variables, don't send commands to the controller
-  get_dry_run
+  [ "${dry_run}" = "1" ] && get_dry_run
   ## set options for the socket program
   check_socket
   ## get string to authenticate to the controller
