@@ -214,17 +214,13 @@ check_socket(){
 login(){
   auth="$({ send_cmd "PROTOCOLINFO"; send_cmd "QUIT"; } | ${socket_prog_connect} 2>/dev/null | grep "AUTH")"
   auth_methods="$(printf '%s\n' "${auth}" | sed "s/250-AUTH METHODS=//" | cut -d " " -f1 | tr "," "\n")"
-
-  if printf %s"${auth}" | grep -q "AUTH METHODS=NULL"; then
-    printf '%s\n' "Configure an authentication method to connect to tor's controller on your torrc."
-    printf '%s\n' "Chose either or both options: HashedControlPassword or CookieAuthentication"
-    printf '%s\n' "Read the manual: https://2019.www.torproject.org/docs/tor-manual-dev.html.en"
-    exit 1
-  fi
-
-  hashedpassword_enabled="$(printf '%s\n' "${auth_methods}" | grep "^HASHEDPASSWORD$")"
   tor_cookie="$(printf '%s\n' "${auth}" | sed "s/.*COOKIEFILE=//" | tr -d "\"" | tr -d "\\r")"
-  if test -r "${tor_cookie}"; then
+
+  if printf '%s\n' "${auth_methods}" | grep -q "NULL"; then
+    auth_string="AUTHENTICATE"
+  elif printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" && [ -n "${tor_password}" ]; then
+    auth_string="AUTHENTICATE \"${tor_password}\""
+  elif test -r "${tor_cookie}"; then
     safecookie_enabled="$(printf '%s\n' "${auth_methods}" | grep "^SAFECOOKIE$")"
     cookie_enabled="$(printf '%s\n' "${auth_methods}" | grep "^COOKIE$")"
     if [ -n "${cookie_enabled}" ]; then
@@ -240,8 +236,6 @@ login(){
         od) auth_string="AUTHENTICATE $(od -t x1 "${tor_cookie}" | head -n 2 | cut -d " " -f2- | tr -d "\n" | tr -d " ")";;
       esac
     fi
-  elif [ -n "${hashedpassword_enabled}" ] && [ -n "${tor_password}" ]; then
-    auth_string="AUTHENTICATE \"${tor_password}\""
   fi
 }
 
