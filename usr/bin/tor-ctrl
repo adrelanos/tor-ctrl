@@ -217,8 +217,6 @@ login(){
 
   if printf '%s\n' "${auth_methods}" | grep -q "NULL"; then
     auth_string="AUTHENTICATE"
-  elif printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" && [ -n "${tor_password}" ]; then
-    auth_string="AUTHENTICATE \"${tor_password}\""
   elif test -r "${tor_cookie}"; then
     safecookie_enabled="$(printf '%s\n' "${auth_methods}" | grep "^SAFECOOKIE$")"
     cookie_enabled="$(printf '%s\n' "${auth_methods}" | grep "^COOKIE$")"
@@ -235,6 +233,19 @@ login(){
         od) auth_string="AUTHENTICATE $(od -t x1 "${tor_cookie}" | head -n 2 | cut -d " " -f2- | tr -d "\n" | tr -d " ")";;
       esac
     fi
+  elif printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" && [ -n "${tor_password}" ]; then
+    auth_string="AUTHENTICATE \"${tor_password}\""
+  fi
+
+  if [ -z "${auth_string}" ]; then
+    printf '%s\n' "${me}: Authentication string not detected."
+    if printf '%s\n' "${auth_methods}" | grep -q "^COOKIE$" && ! test -r "${tor_cookie}"; then
+      printf '%s\n' "${me}: COOKIE is enabled but not readable by user ${USER}"
+    fi
+    if printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" && [ -z "${tor_password}" ]; then
+      printf '%s\n' "${me}: HASHEDPASSWORD is enabled but no password provided on the command line."
+    fi
+    exit 1
   fi
 }
 
