@@ -140,7 +140,7 @@ get_socket(){
   if [ -n "${tor_config_files}" ]; then
     ## only one option is needed, use head
     # shellcheck disable=SC2086
-    tor_control_socket_alternative="$(grep -E "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2 | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
+    tor_control_socket_alternative="$(grep -E "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2- | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
   fi
 
   ## assign detected socket to the variable or if still empty, fallback to TCP 127.0.0.1:9051
