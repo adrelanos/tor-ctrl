@@ -204,7 +204,6 @@ check_socket(){
           socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
           printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q "Connected to ${tor_control_host}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
         ;;
-        #bash) socket_prog_connect="bash";;
       esac
     ;;
   esac
