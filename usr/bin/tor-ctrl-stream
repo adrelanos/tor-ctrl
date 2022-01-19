@@ -6,24 +6,43 @@ bold="\033[1m"
 me="${0##*/}"
 
 usage(){
-  printf '%s\n' "usage: ${me} [-CaPp] [argument]
+  printf '%s\n' "usage: ${me} [-s socket] [-p password]
 
   -s [socket]    tor's control socket
                  notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
                  notice: unix: [unix:]path: /run/tor/control, unix:/run/tor/control
                  default: 9051
 
-  -p [pwd]       use password [var] instead of Tor's control_auth_cookie
+  -p [pwd]       use password [pwd] instead of Tor's control_auth_cookie
                  default: not used
 "
   exit 1
 }
 
+
 list_streams(){
+  ## how to send all output to /dev/null? It is printing 'Terminated'
+  ##https://stackoverflow.com/a/22644006 and https://stackoverflow.com/a/53714583
+  # shellcheck disable=SC2154
+  trap "exit \$exit_code" INT TERM
+  trap "exit_code=\$?; kill 0" EXIT
+
+  while :; do
+    getinfo_stream_status="$(tor-ctrl -c "GETINFO stream-status" | grep "250-stream-status=" | sed "s|250-stream-status=\s||")"
+    if [ -n "${getinfo_stream_status}" ]; then
+      printf '%s\n' "${getinfo_streams_saved}" | grep -q "${getinfo_stream_status}" || printf '%s\n' "${getinfo_stream_status}"
+      getinfo_streams_saved="$(printf '%s\n%s\n' "${getinfo_streams_saved}" "${getinfo_stream_status}")"
+    fi
+    sleep 0.3 ## just to not cause overhead
+  done &
+
   # shellcheck disable=SC2086
   listen_stream="$(tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args})"
   listen_stream="$(printf '%s\n' "${listen_stream}" | sed "/250 OK/d;/250 closing connection/d")"
   printf '%s\n' "${listen_stream}" | while IFS="$(printf '\n')" read -r stream_line || [ -n "${stream_line}" ]; do
+#  IFS=" " read -r stream_code stream_event stream_id stream_status circuit_id target _ <<-EOF
+#    $(printf '%s\n' "${stream_line}")
+#EOF
     stream_code="$(printf '%s\n' "${stream_line}" | cut -d " " -f1)"
     stream_event="$(printf '%s\n' "${stream_line}" | cut -d " " -f2)"
     stream_id="$(printf '%s\n' "${stream_line}" | cut -d " " -f3)"
