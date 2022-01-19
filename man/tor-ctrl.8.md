@@ -1,5 +1,5 @@
 % TOR-CTRL(8) tor-ctrl manual
-% tor-ctrl was written by Stefan Behte (stefan.behte@gmx.net), later developed by and Patrick Schleizer (adrelanos@riseup.net) and futher improved by nyxnor (nyxnor@protonmail.com)
+% tor-ctrl was written by Stefan Behte (stefan.behte@gmx.net), later developed by and Patrick Schleizer (adrelanos@riseup.net) and further improved by nyxnor (nyxnor@protonmail.com)
 % default_date
 
 # NAME
