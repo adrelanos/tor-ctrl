@@ -68,7 +68,7 @@ tor-ctrl GETINFO version
 
 Get your SocksPort configuration and check where tor is listening for socks connections:
 ```
-tor-ctrl -s 9051 -p foobar -- GETCONF SocksPort \\n GETINFO net/listeners/socks\"
+tor-ctrl -s 9051 -p foobar -- GETCONF SocksPort \\n GETINFO net/listeners/socks
 ```
 
 Set bandwidth rate:

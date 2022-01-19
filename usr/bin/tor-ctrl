@@ -62,6 +62,7 @@ usage(){
 
   -w             wait to read confirmation by pressing ENTER before closing the connection
                  notice: useful when you want to be informed about events (asynchronous replies)
+                 notice: incompatible with '-q' - quiet mode.
                  default: not set
 
   -q             quiet mode.
@@ -80,9 +81,9 @@ Debugging options:
 
   Examples:      ${me} GETCONF User
                  ${me} -q SETCONF bandwidthrate=1mb
-                 ${me} -s 9051 -p foobar -- GETCONF bandwidthrate
+                 ${me} -s 9051 -p foobar GETCONF bandwidthrate
                  ${me} GETINFO config-defaults-file config-file config-text
-                 ${me} GETCONF SocksPort \\\n GETINFO net/listeners/socks\"
+                 ${me} GETCONF SocksPort \\\n GETINFO net/listeners/socks
                  ${me} -w -- SETEVENTS STREAM
 
 You should have a look at
@@ -140,7 +141,7 @@ get_socket(){
   if [ -n "${tor_config_files}" ]; then
     ## only one option is needed, use head
     # shellcheck disable=SC2086
-    tor_control_socket_alternative="$(grep -E "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2 | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
+    tor_control_socket_alternative="$(grep -E "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2- | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
   fi
 
   ## assign detected socket to the variable or if still empty, fallback to TCP 127.0.0.1:9051
@@ -204,7 +205,6 @@ check_socket(){
           socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
           printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q "Connected to ${tor_control_host}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
         ;;
-        #bash) socket_prog_connect="bash";;
       esac
     ;;
   esac
@@ -218,8 +218,6 @@ login(){
 
   if printf '%s\n' "${auth_methods}" | grep -q "NULL"; then
     auth_string="AUTHENTICATE"
-  elif printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" && [ -n "${tor_password}" ]; then
-    auth_string="AUTHENTICATE \"${tor_password}\""
   elif test -r "${tor_cookie}"; then
     safecookie_enabled="$(printf '%s\n' "${auth_methods}" | grep "^SAFECOOKIE$")"
     cookie_enabled="$(printf '%s\n' "${auth_methods}" | grep "^COOKIE$")"
@@ -236,23 +234,37 @@ login(){
         od) auth_string="AUTHENTICATE $(od -t x1 "${tor_cookie}" | head -n 2 | cut -d " " -f2- | tr -d "\n" | tr -d " ")";;
       esac
     fi
+  elif printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" && [ -n "${tor_password}" ]; then
+    auth_string="AUTHENTICATE \"${tor_password}\""
+  fi
+
+  if [ -z "${auth_string}" ]; then
+    printf '%s\n' "${me}: Authentication string not detected."
+    if printf '%s\n' "${auth_methods}" | grep -q "^COOKIE$" && ! test -r "${tor_cookie}"; then
+      printf '%s\n' "${me}: COOKIE is enabled but not readable by user ${USER}"
+    fi
+    if printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" && [ -z "${tor_password}" ]; then
+      printf '%s\n' "${me}: HASHEDPASSWORD is enabled but no password provided on the command line."
+    fi
+    exit 1
   fi
 }
 
 ## just get variables, don't send commands to the controller
 get_dry_run(){
-  if [ "${dry_run:-}" = "1" ]; then
-    for key in cmd_cli tor_control_socket tor_password sleep_n quiet wait_confirmation debug_mode dry_run; do
-      eval val='$'"${key}" && printf '%s\n' "${key}=${val:-""}"
-    done
-    exit 0
-  fi
+  for key in cmd_cli tor_control_socket tor_password sleep_n quiet wait_confirmation debug_mode dry_run; do
+    eval val='$'"${key}" && printf '%s\n' "${key}=${val:-""}"
+  done
+  exit 0
 }
 
 ## send command to the controller and sleep after it if required
 send_cmd(){
-  printf '%s\n' "${1}"
-  sleep "${sleep_n}"
+  ## avoid sending empty lines and cycle sleep for every line sent if cmd_cli has multiple lines
+  printf '%s\n' "${1}" | while IFS="$(printf '\n')" read -r line || [ -n "${line}" ]; do
+    printf '%s\n' "${line}"
+    sleep "${sleep_n}"
+  done
 }
 
 ## piping commands to be sent
@@ -260,7 +272,7 @@ cmd_pipe(){
   # shellcheck disable=SC2030,2031
   send_cmd "${auth_string}"
   send_cmd "${cmd_cli}"
-  # shellcheck disable=SC2034
+  ## shellcheck disable=SC2034
   [ "${wait_confirmation}" -eq 1 ] && read -r confirmation
   send_cmd "QUIT"
 }
@@ -269,7 +281,8 @@ cmd_pipe(){
 finish(){
   str="$(cat)"
   [ "${quiet}" -eq 0 ] && printf '%s\n' "${str}"
-  printf '%s\n' "${str}" | if [ "$(grep -c ^"250 ")" = 3 ]; then
+  ## more than 3 '^250 ' reply status code occurs when $cmd_cli has multiple lines (\\n)
+  printf '%s\n' "${str}" | if [ "$(grep -c "^250 ")" -ge 3 ]; then
     exit 0
   else
     exit 1
@@ -281,15 +294,12 @@ finish(){
 
 ## if option requires argument, check if it was provided, if yes, assign the arg to the opt
 get_arg(){
+  ## if argument is empty or starts with '-', fail as it possibly is an option
   case "${arg}" in
     ""|-*) error_msg "Option '${opt}' requires an argument.";;
   esac
-
-  case "${arg}" in
-    -*) value="${arg#-}";;
-    *) value="${arg}"
-  esac
-  ## Escaping quotes is needed because else fail if the argument is quoted
+  value="${arg}"
+  ## Escaping quotes is needed because else it will fail if the argument is quoted
   # shellcheck disable=SC2140
   eval "${1}"="\"${value}\""
 }
@@ -323,6 +333,7 @@ done
 ## set default values
 : "${debug_mode:=0}"
 : "${quiet:=0}"
+: "${dry_run:=0}"
 : "${wait_confirmation:=0}"
 
 ## check for debug mode
@@ -336,10 +347,14 @@ if [ -n "${cmd_cli}" ]; then
   cmd_cli="$(printf %s"${cmd_cli}\n" | sed "s|^ ||")"
   ## check if requirements are fulfilled
   check_progs
+  ## sleep was assigned on check_progs if empty because of telnet, see if it is valid.
+  if ! printf '%d' "${sleep_n}" >/dev/null 2>&1 && ! printf '%g' "${sleep_n}" >/dev/null 2>&1; then
+    error_msg "Sleep time '${sleep_n}' is not an integer nor a floating point."
+  fi
   ## if socket was not assigned on the command line, try auto-detection
   [ -z "${tor_control_socket}" ] && get_socket
   ## just get variables, don't send commands to the controller
-  get_dry_run
+  [ "${dry_run}" = "1" ] && get_dry_run
   ## set options for the socket program
   check_socket
   ## get string to authenticate to the controller
@@ -347,7 +362,7 @@ if [ -n "${cmd_cli}" ]; then
 
   ## disable safecookie as it is not working https://github.com/nyxnor/tor-ctrl/issues/1
   safecookie_enabled=""
-  if [ -n "${safecookie_enabled}" ] && test -r "${tor_cookie}" && command -v xxd >/dev/null && test -c /dev/urandom; then
+  if [ -n "${safecookie_enabled}" ] && test -r "${tor_cookie}" && has xxd && test -c /dev/urandom; then
     {
       cookie_string="$(xxd -u -p -c 32 "${tor_cookie}")"
       client_nonce="$(xxd -u -p -l 32 -c 32 < /dev/urandom)"
@@ -362,10 +377,14 @@ if [ -n "${cmd_cli}" ]; then
       send_cmd "${cmd_cli}"
       # shellcheck disable=SC2034
       [ -n "${wait_confirmation}" ] && read -r confirmation
-      send_cmd "QUIT"
+      #send_cmd "QUIT"
     } 3>&1 2>/dev/null | ${socket_prog_connect} | finish
   else
-    cmd_pipe | ${socket_prog_connect} 2>/dev/null | finish
+    if [ "${wait_confirmation}" -eq 1 ]; then
+      cmd_pipe | ${socket_prog_connect} 2>/dev/null
+    else
+      cmd_pipe | ${socket_prog_connect} 2>/dev/null | finish
+    fi
   fi
 else
   usage
