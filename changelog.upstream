@@ -1,3 +1,181 @@
+commit ee3489c34e904be3326c0dad6476d1d59387786b
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Wed Jan 19 07:11:52 2022 -0500
+
+    typo
+
+commit 49ed37d40010eb2f7cd94d632b22c7268837a334
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Wed Jan 19 07:09:40 2022 -0500
+
+    bumped changelog version
+
+commit 4e1d02d8fb43c2d52a1155a99cd1185f6fb39910
+Merge: e4af561 6c09bfc
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Wed Jan 19 06:51:19 2022 -0500
+
+    Merge remote-tracking branch 'nyxnor/master'
+
+commit 6c09bfc1430a7225e7681f2f05013d66af800974
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Wed Jan 19 03:04:08 2022 +0100
+
+    remove/uninstall option on configure.sh
+
+commit 3107bf8065aa2f0a7d0a135b911b2e4a3645b55c
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Wed Jan 19 03:03:52 2022 +0100
+
+    update man
+
+commit c7a295ddc10872526efd83fb2b6346a8f71ea9ea
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Wed Jan 19 03:03:31 2022 +0100
+
+    show streams before pressing enter
+    
+    fix for tor-ctrl and tor-ctrl-stream. Unfortunately, on tor-ctrl-stream, I couldn't find a way to print the streams at the same time as saving them, it is closing the connection if I send the process to background with '$ tor-ctrl -w SETEVENTS STREAM &', so looping GETINFO stream-status is the workaround.
+
+commit bc6cfef968df32f2979750fa030c36b68cd998f5
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Jan 17 22:09:48 2022 +0100
+
+    medicate auth_string not assigned
+    happens when cookie is not readable or password not provided.
+    be informative rather than try to send nothing to the controller.
+
+commit 4a557e43b073bfd9e7ef36cb50c39425f7a51216
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Jan 17 21:49:18 2022 +0100
+
+    fix detection of ControlPort [unix:]path
+    Normally unix:path is on ControlSocket, which the value is just the path without the unix prefix, but in the case someone use unix:path for ControlPort, detect it correctly.
+    previous code was resulting in "unix", not in "path" and we want path.
+
+commit 9dbb1a7dc3bf25126110f5f29604f7bbe11e71fd
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Jan 17 21:35:12 2022 +0100
+
+    remove bash as a socket program which was never completed
+
+commit 49997728b22e1bde2406074b9b1f1170aa6ff72c
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 16 21:25:54 2022 +0100
+
+    place dry-run default value in a central location as other variables
+
+commit e7c003f762f8a27c8b78d802e26121a0bc56c7f6
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 16 21:19:31 2022 +0100
+
+    fix typo in usage on tor-ctrl
+
+commit 860a003c7ac94e47055320f380835e262dc00e9b
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 16 21:19:08 2022 +0100
+
+    update generated man pages
+
+commit e4af561f215200a77c6ecc754b1c3d2e902501b4
+Merge: e1f2379 ab8f9d2
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sun Jan 16 14:16:50 2022 -0500
+
+    Merge remote-tracking branch 'nyxnor/master'
+
+commit ab8f9d2b86f84bdc82402112f5bbe282df43e36e
+Merge: eb69c02 1532991
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 16 20:04:31 2022 +0100
+
+    Merge branch 'master' of https://github.com/nyxnor/tor-ctrl
+
+commit eb69c022f981b2d1600ea4b1596114b637c727aa
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 16 20:03:53 2022 +0100
+
+    put /dev/null in socat option list
+
+commit e1f23794030a19ae9047e0c118d4817e138f1c19
+Merge: ecdfef1 1532991
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sun Jan 16 14:03:35 2022 -0500
+
+    Merge remote-tracking branch 'nyxnor/master'
+
+commit 15329917393cc4388867f1c12f83b43ca55deecc
+Merge: 205571a 83071ec
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 16 19:59:00 2022 +0100
+
+    Merge pull request #12 from adrelanos/patch-2
+    
+    switch to netcat-openbsd
+
+commit 205571a8409c69cb0c55fd6dfb319d0f189ebfd0
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 16 19:57:05 2022 +0100
+
+    dont grep no file
+
+commit 83071ec54a5675b52f78c1a3f4d89c821b87e877
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sun Jan 16 13:57:03 2022 -0500
+
+    switch to netcat-openbsd
+    
+    https://github.com/nyxnor/tor-ctrl/issues/9
+
+commit ecdfef1a05ee2e2ddaaac9278603c2b8310da209
+Merge: ec9de97 71988e5
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sun Jan 16 12:54:47 2022 -0500
+
+    Merge remote-tracking branch 'nyxnor/master'
+
+commit 71988e5a10ffb76cb27873fbf2691aeb84ca9735
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 16 18:43:41 2022 +0100
+
+    accept NULL auth method
+    https://github.com/nyxnor/tor-ctrl/issues/9
+
+commit ec9de97553315f01178be3adacf61aceda726256
+Merge: 19f8731 719b0be
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sun Jan 16 12:41:44 2022 -0500
+
+    Merge remote-tracking branch 'nyxnor/master'
+
+commit 719b0becfae73f8e4da1d1d23bcc6c1e217a6765
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 16 02:37:46 2022 +0100
+
+    move socat stdin to middle, fix double '//' on files extracted from tor --verify-config
+
+commit 2986ca0ded9c2daef8c3f897d95a746d3d2fd553
+Merge: adacd31 ab3ebd4
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sat Jan 15 22:33:59 2022 +0100
+
+    Merge branch 'master' of https://github.com/nyxnor/tor-ctrl
+
+commit ab3ebd4ea6e75ce7d21d03136e2e1a328a129474
+Merge: aa8c31b 19f8731
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sat Jan 15 22:29:08 2022 +0100
+
+    Merge pull request #8 from Whonix/master
+    
+    add new lines at the end
+
+commit 19f8731866caff49e81e6868bef09604bed3fc04
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Jan 15 15:02:59 2022 -0500
+
+    bumped changelog version
+
 commit 80c549f36cb5e4fd57a1333619356f663ec2e11d
 Author: Patrick Schleizer <adrelanos@whonix.org>
 Date:   Sat Jan 15 15:02:11 2022 -0500
@@ -27,6 +205,30 @@ Author: Patrick Schleizer <adrelanos@whonix.org>
 Date:   Sat Jan 15 14:34:50 2022 -0500
 
     add new lines at the end
+
+commit adacd317b58a2533c8acc80dd1552ea90e6e9464
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 14 19:55:39 2022 +0100
+
+    update tor-ctrl description to be more accurate
+
+commit 8148523ff730b6bcc1fe2030919f7ce1a80e696c
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 14 19:54:57 2022 +0100
+
+    update man
+
+commit 7856d5b266e72da717a5714ed83173c95f922c07
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 14 19:53:36 2022 +0100
+
+    s/awk/cut on auxiliary scripts
+
+commit d172a63b9646d95f0c8d2795fc089858f57693be
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 14 19:53:15 2022 +0100
+
+    improve manual pages
 
 commit aa8c31be0a8c2a3ebd822b5accfcf5d53e446ead
 Author: nyxnor <nyxnor@protonmail.com>
@@ -95,7 +297,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Thu Jan 13 09:59:59 2022 +0100
 
     Merge pull request #6 from adrelanos/patch-1
-
+    
     Update README.md
 
 commit 651204f6eb45572cc20570da70a9a334599fcd62
@@ -115,7 +317,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Thu Jan 13 02:15:33 2022 +0100
 
     conclude debian package folder
-
+    
     https://github.com/nyxnor/tor-ctrl/issues/5
 
 commit 46fa89d5a002ee9ed2eb677b3148db46f3874ea4
@@ -147,7 +349,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Wed Jan 12 23:10:06 2022 +0100
 
     start structuring directories for debian package
-
+    
     https://github.com/nyxnor/tor-ctrl/issues/5
 
 commit 6e7034615d9728b79397acc2b07329033f9c17a9
@@ -155,7 +357,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Wed Jan 12 22:48:52 2022 +0100
 
     check if socket exist on unix domains
-
+    
     fix https://github.com/nyxnor/tor-ctrl/issues/4
 
 commit 2d40c46d8ea0cbe1fbe8e9b79c099080700d3d8a
@@ -230,7 +432,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sat Jan 8 23:48:48 2022 +0100
 
     fix no socket being selected
-
+    
     https://github.com/nyxnor/tor-controller/issues/2
 
 commit eb8d10d991850051bc1fc5b43a0530ddfba5a733
@@ -238,7 +440,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sat Jan 8 23:42:51 2022 +0100
 
     improve tor-controller to specify less options
-
+    
     https://github.com/nyxnor/tor-controller/issues/2
 
 commit 366801ee39fba1ef6bf1e401566f5ad9ffae844d
