@@ -20,6 +20,8 @@ This package is produced independently of, and carries no guarantee from, The To
     * [Install the package](#install-the-package)
     * [Clean up](#clean-up)
 * [Usage](#usage)
+  * [Circuits](#circuits)
+  * [Streams](#streams)
   * [Debugging](#debugging)
     * [Permission denied](#permission-denied)
     * [Unkown](#unknown)
@@ -80,7 +82,7 @@ the result of the above operation should be used as the configuration line.
 
 ### Apply the changes
 
-If you have made any changes to the tor run commands file (torrc), you will need to HUP tor to apply the new configuration as root:
+If you have made any changes to the tor run commands file (torrc), you will need to send a HUP signal to tor as root to apply the new configuration:
 ```sh
 pkill -sighup tor
 ## or
@@ -154,7 +156,6 @@ sudo rm -f ../tor-ctrl_*.deb ../tor-ctrl_*.buildinfo ../tor-ctrl_*.changes
 
 It is required to read the [tor manual](https://gitweb.torproject.org/tor.git/tree/doc/man/tor.1.txt) and the [control-spec](https://gitweb.torproject.org/torspec.git/tree/control-spec.txt).
 
-
 Read tor-ctrl's manual:
 ```sh
 man tor-ctrl
@@ -164,6 +165,13 @@ See usage:
 ```sh
 tor-ctrl -h
 ```
+
+Run your first command: get your tor user:
+```sh
+tor-ctrl GETCONF User
+```
+
+### Circuits
 
 Switch to clean circuits:
 ```sh
@@ -179,17 +187,28 @@ That is not very clean to read, too much information, so lets organize it:
 ```sh
 tor-ctrl-circuit
 ```
-Much better now huh?
+
+### Streams
+
+Start listening for streams:
+```sh
+tor-ctrl -w SETEVENTS STREAM
+```
+From another terminal, connect via Tor to where you wish
+```sh
+curl -x socks5h://127.0.0.1:9050 https://check.torproject.org/api/ip
+```
+Return to the script and and watch the streams. Use the interrupt signal (Ctrl+C) to stop.
 
 And if we could see the streams and to which circuit they are attached to and what is their target?
 ```sh
 tor-ctrl-stream
 ```
-Now, from another terminal, connect via Tor to where you wish:
+From another terminal, connect via Tor to where you wish:
 ```sh
 curl -x socks5h://127.0.0.1:9050 github.com
 ```
-Now, return to the script and press enter to print out the stream events received.
+Return to the script and use the interrupt signal (Ctrl+C) to print out the stream events received.
 
 ### Debugging
 
@@ -209,3 +228,5 @@ doas -u _tor tor-ctrl GETINFO version
 #### Unknown
 
 If the response is unexpected, run with option `-r` to get the information that will be used to connect to tor's controller. If they are correct, use option `-d` to debug the script and be very verbose.
+
+**Warning: You should review the information before you want to share before posting on a issue, because it can contain the authentication string (password and cookie hex) and the control host, in the case the host is external (not localhost), anyone with both information will be able to authenticate to your controller. If you haven't set the authentication method and the control host is external and shared, this is far worse as there is no authentication string, so strongly recommended to configure an [authentication method for your controller](#authentication-method).**
