@@ -21,23 +21,11 @@ usage(){
 
 
 list_streams(){
-  ## how to send all output to /dev/null? It is printing 'Terminated'
-  ##https://stackoverflow.com/a/22644006 and https://stackoverflow.com/a/53714583
+  # ##https://stackoverflow.com/a/22644006 and https://stackoverflow.com/a/53714583
   # shellcheck disable=SC2154
   trap "exit \$exit_code" INT TERM
   trap "exit_code=\$?; kill 0" EXIT
 
-  while :; do
-    getinfo_stream_status="$(tor-ctrl -c "GETINFO stream-status" | grep "250-stream-status=" | sed "s|250-stream-status=\s||")"
-    if [ -n "${getinfo_stream_status}" ]; then
-      printf '%s\n' "${getinfo_streams_saved}" | grep -q "${getinfo_stream_status}" || printf '%s\n' "${getinfo_stream_status}"
-      getinfo_streams_saved="$(printf '%s\n%s\n' "${getinfo_streams_saved}" "${getinfo_stream_status}")"
-    fi
-    sleep 0.3 ## just to not cause overhead
-  done &
-
-  # shellcheck disable=SC2086
-  listen_stream="$(tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args})"
   listen_stream="$(printf '%s\n' "${listen_stream}" | sed "/250 OK/d;/250 closing connection/d")"
   printf '%s\n' "${listen_stream}" | while IFS="$(printf '\n')" read -r stream_line || [ -n "${stream_line}" ]; do
 #  IFS=" " read -r stream_code stream_event stream_id stream_status circuit_id target _ <<-EOF
@@ -101,7 +89,23 @@ while getopts ":s:p:h" Option; do
 done
 
 cli_args=""
-[ -n "${tor_control_port}" ] && cli_args="${cli_args} -s ${tor_control_socket}"
+[ -n "${tor_control_socket}" ] && cli_args="${cli_args} -s ${tor_control_socket}"
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
 
-list_streams
+
+trap "kill 0" EXIT
+trap "list_streams" INT TERM
+
+get_intr="$(stty -a | sed -n '/.*intr = / {s///;s/;.*$//;p;}')"
+
+printf '%s\n' "Waiting for assynchronous replies, resume with (${get_intr})"
+while :; do
+  getinfo_stream_status="$(tor-ctrl -c "GETINFO stream-status" | grep "250-stream-status=" | sed "s|250-stream-status=\s||")"
+  if [ -n "${getinfo_stream_status}" ]; then
+    printf '%s\n' "${getinfo_streams_saved}" | grep -q "${getinfo_stream_status}" || printf '%s\n' "${getinfo_stream_status}"
+    getinfo_streams_saved="$(printf '%s\n%s\n' "${getinfo_streams_saved}" "${getinfo_stream_status}")"
+  fi
+done &
+
+# shellcheck disable=SC2086
+listen_stream="$(tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args})"

@@ -54,7 +54,7 @@ while getopts ":s:p:h" Option; do
 done
 
 cli_args=""
-[ -n "${tor_control_port}" ] && cli_args="${cli_args} -s ${tor_control_socket}"
+[ -n "${tor_control_socket}" ] && cli_args="${cli_args} -s ${tor_control_socket}"
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
 
 list_circuits

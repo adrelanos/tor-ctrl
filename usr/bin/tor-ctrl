@@ -60,9 +60,10 @@ usage(){
                  notice: if the socket program is telnet, fallback to 1 second
                  default: 0 second
 
-  -w             wait to read confirmation by pressing ENTER before closing the connection
+  -w             After sending the command, wait for interrupt signal (Ctrl+C), before closing the connection.
                  notice: useful when you want to be informed about events (asynchronous replies)
-                 notice: incompatible with '-q' - quiet mode.
+                 notice: incompatible with '-q' quiet mode.
+                 notice: exit code shall not be evaluated.
                  default: not set
 
   -q             quiet mode.
@@ -234,17 +235,25 @@ login(){
         od) auth_string="AUTHENTICATE $(od -t x1 "${tor_cookie}" | head -n 2 | cut -d " " -f2- | tr -d "\n" | tr -d " ")";;
       esac
     fi
-  elif printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" && [ -n "${tor_password}" ]; then
+  elif
+    # shellcheck disable=SC2154
+    [ -n "${tor_password}" ] && printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" ; then
     auth_string="AUTHENTICATE \"${tor_password}\""
   fi
 
   if [ -z "${auth_string}" ]; then
+    auth_failed=0
     printf '%s\n' "${me}: Authentication string not detected."
     if printf '%s\n' "${auth_methods}" | grep -q "^COOKIE$" && ! test -r "${tor_cookie}"; then
-      printf '%s\n' "${me}: COOKIE is enabled but not readable by user ${USER}"
+      printf '%s\n' "${me}: COOKIE is enabled but not readable by user ${USER}."
+      auth_failed=1
     fi
     if printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" && [ -z "${tor_password}" ]; then
       printf '%s\n' "${me}: HASHEDPASSWORD is enabled but no password provided on the command line."
+      auth_failed=1
+    fi
+    if [ "${auth_failed}" -eq 0 ]; then
+      printf '%s\n' "${me}: ${tor_control_socket} does not seems to be tor's controller socket."
     fi
     exit 1
   fi
@@ -272,8 +281,14 @@ cmd_pipe(){
   # shellcheck disable=SC2030,2031
   send_cmd "${auth_string}"
   send_cmd "${cmd_cli}"
-  ## shellcheck disable=SC2034
-  [ "${wait_confirmation}" -eq 1 ] && read -r confirmation
+  # shellcheck disable=SC2034
+  if [ "${wait_confirmation}" -eq 1 ]; then
+    trap 'kill 0' INT
+    ## infinite loop that can be terminated with interrrupt signal
+    while :; do
+      sleep 1h
+    done
+  fi
   send_cmd "QUIT"
 }
 
