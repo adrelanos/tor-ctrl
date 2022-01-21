@@ -18,7 +18,10 @@ The following configuration lines must be inserted to your torrc and tor reloade
 In order to get this to work, define the socket that will control the tor process, can be a TCP socket *ControlPort 9051* or a Unix-domain socket *ControlSocket /path/to/socket*.
 
 To secure the controller, you must setup and authentication method, which can be a cookie
-*CookieAuthentication 1* or if you want a fixed password, hash a password with *echo "HashedControlPassword $(tor --hash-password yourpassword)"* and use the same output given as the configuration line.
+*CookieAuthentication 1* or if you want a fixed password, hash a password with command below and use the same output given as the configuration line (change `YOUR_PASSOWRD`, but maintain it double quoted):
+```
+echo "HashedControlPassword $(tor --hash-password "YOUR_PASSWORD")"
+```
 
 # OPTIONS
 
@@ -35,7 +38,7 @@ To secure the controller, you must setup and authentication method, which can be
 : Sleep N seconds after each command sent. (Default for socat/nc: 0 second, Default for telnet: 1 second).
 
 **-w**
-: Wait for confirmation with an enter pressed to end the connection after sending the command. Useful when you want to be warned about events, example is when the command is *SETEVENTS STREAM* (Default: not set)
+: After sending the command, wait for interrupt signal, normally Ctrl+C, before closing the connection. Useful when you want to be warned about events (assynchronous replies), example is when the command is *SETEVENTS STREAM*. The exit code shall not be evaluated. (Default: not set)
 
 **-q**
 : Quiet mode. (Default: not set).

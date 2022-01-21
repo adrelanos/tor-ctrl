@@ -4,12 +4,29 @@ Command line tool for setting up stream for communication from the Tor Controlle
 
 This package is produced independently of, and carries no guarantee from, The Tor Project.
 
-## Requirements
+## Table of contents
 
-At least one of each item is necessary:
+* [History](#history)
+* [Features](#features)
+* [Configuration](#configuration)
+  * [Control method](#control-method)
+  * [Authentication method](#authentication-method)
+  * [Apply the changes](#apply-the-changes)
+* [Installation](#installation)
+  * [Requirements](#requirements)
+  * [How to install tor-ctrl on any unix system](#how-to-install-tor-ctrl-on-any-unix-system)
+  * [How to build deb package from source sode](#how-to-build-deb-package-from-source-sode)
+    * [Build the package](#build-the-package)
+    * [Install the package](#install-the-package)
+    * [Clean up](#clean-up)
+* [Usage](#usage)
+  * [Debugging](#debugging)
+    * [Permission denied](#permission-denied)
+    * [Unkown](#unknown)
 
-* Networking tool: **nc**/**socat**/**telnet**
-* Hex converter: **xxd**/**hexdump**/**od**
+## History
+
+**tor-ctrl** was created by Stefan Behte, later developed by Patrick Schleizer and further improved by nyxnor.
 
 ## Features
 
@@ -25,62 +42,74 @@ If still unknown, will try TCP socket 127.0.0.1:9051.
 * COOKIE - discover it by sending PROTOCOLINFO, so no need to specify the file.
 * HASHEDPASSWORD - needs to be specifiedo on the command line
 
-## Installation
+## Configuration
+
+The configuration lines below must be set inside your tor configuration file (torrc).
 
 ### Control method
 
 This will be the socket that allows those connections to control the Tor process. Choose between `ControlPort` and `ControlSocket` (setting both means either control can be used).
 
-Note: the options must be set inside your torrc.
-
-TCP socket:
+**TCP socket**:
 ```sh
 ControlPort 9051
 ```
 
-Unix domain socket:
+**Unix domain socket**:
 ```sh
 ControlSocket /var/run/tor/control
+## or
+#ControlPort unix:/var/lib/tor/control
 ```
 
 ### Authentication method
 
 This is will be the method you will authenticate to the controller. Choose between `CookieAuthentication` and `HashedControlPassword` (Setting both authentication methods means either method is sufficient to authenticate to Tor)
 
-Note: the options must be set inside your torrc.
-
-Cookie:
+**Cookie**:
 ```sh
 CookieAuthentication 1
 ```
-or
-Password (change `yourpassword`, but maintain it double quoted)
+
+**Password**
+Change `YOUR_PASSOWRD`, but maintain it double quoted)
 ```
-printf '%s\n' "HashedControlPassword $(tor --hash-password "yourpassword")"
+printf '%s\n' "HashedControlPassword $(tor --hash-password "YOUR_PASSOWRD")"
 ```
-the result of the above operation should be used as the configuration.
+the result of the above operation should be used as the configuration line.
 
 ### Apply the changes
 
 If you have made any changes to the tor run commands file (torrc), you will need to HUP tor to apply the new configuration as root:
-
 ```sh
 pkill -sighup tor
 ## or
 #ps -o user,pid,command -A | grep -E "/usr/bin/tor|/usr/local/bin/tor"
-#kill -sighup PID_FROM_ABOVE
+#kill -hup PID_FROM_ABOVE
 ```
 
-## How to install tor-ctrl on any unix system
+If you have tor running with `SandBox 1`, you will need to restart tor.
+
+## Installation
+
+### Requirements
+
+At least one of each item is necessary:
+
+* Networking tool: **nc**/**socat**/**telnet**
+* Hex converter: **xxd**/**hexdump**/**od**
+
+
+### How to install tor-ctrl on any unix system
 
 Install the script and the manual:
 ```sh
 sudo ./configure.sh install
 ```
 
-## How to build deb package from source sode
+### How to build deb package from source sode
 
-### Build the package
+#### Build the package
 
 Install developer scripts:
 ```sh
@@ -91,14 +120,14 @@ Install build dependencies.
 ```sh
 sudo mk-build-deps --remove --install
 ```
-If that did not work, have a look in debian/control file and manually install all packages listed under Build-Depends and Depends.
+If that did not work, have a look in `debian/control` file and manually install all packages listed under Build-Depends and Depends.
 
 Build the package without signing it (not required for personal use) and install it.
 ```sh
 dpkg-buildpackage -b
 ```
 
-### Install the package
+#### Install the package
 
 The package can be found in the parent folder.
 Install the package:
@@ -106,7 +135,7 @@ Install the package:
 sudo dpkg -i ../tor-ctrl_*.deb
 ```
 
-### Clean up
+#### Clean up
 
 Delete temporary debhelper files in package source folder as well as debhelper artifacts:
 ```sh
@@ -123,14 +152,22 @@ sudo rm -f ../tor-ctrl_*.deb ../tor-ctrl_*.buildinfo ../tor-ctrl_*.changes
 
 ## Usage
 
+It is required to read the [tor manual](https://gitweb.torproject.org/tor.git/tree/doc/man/tor.1.txt) and the [control-spec](https://gitweb.torproject.org/torspec.git/tree/control-spec.txt).
+
+
+Read tor-ctrl's manual:
+```sh
+man tor-ctrl
+```
+
 See usage:
 ```sh
 tor-ctrl -h
 ```
 
-Get your tor user:
+Switch to clean circuits:
 ```sh
-tor-ctrl GETCONF User
+tor-ctrl SIGNAL NEWNYM
 ```
 
 Get your circuits (raw):
@@ -154,15 +191,21 @@ curl -x socks5h://127.0.0.1:9050 github.com
 ```
 Now, return to the script and press enter to print out the stream events received.
 
-## Useful links
+### Debugging
 
-* [tor manual](https://gitweb.torproject.org/tor.git/tree/doc/man/tor.1.txt)
-* [control-spec](https://gitweb.torproject.org/torspec.git/tree/control-spec.txt)
+#### Permission denied
 
-## History
+If you receive permission denied, probably you are not running tor-ctrl with the user that can connect to tor's controller socket, which is the tor user.
 
-**tor-ctrl** was created by Stefan Behte, later developed by Patrick Schleizer and further improved by nyxnor.
+On Tails:
+```sh
+sudo -u debian-tor tor-ctrl GETINFO version
+```
+On OpenBSD:
+```sh
+doas -u _tor tor-ctrl GETINFO version
+```
 
-## License
+#### Unknown
 
-tor-ctrl is GPLv3
+If the response is unexpected, run with option `-r` to get the information that will be used to connect to tor's controller. If they are correct, use option `-d` to debug the script and be very verbose.
