@@ -9,6 +9,11 @@ error_msg(){
   exit 1
 }
 
+# case "$()" in
+#   Linux) prefix="/usr";;
+#   *[Bb][Sd][Dd]|*) prefix="/usr/local";;
+# esac
+
 case "${1}" in
   install)
     [ "$(id -u)" -ne 0 ] && error_msg "${1} as root"
@@ -33,5 +38,9 @@ case "${1}" in
     pandoc -s -f markdown-smart -V header="Tor System Manager's Manual" -V footer="${torctrl_version}" -t man "${toplevel}/man/tor-ctrl.8.md" -o "${toplevel}/auto-generated-man-pages/tor-ctrl.8"
     sed -i'' "s/default_date/$(date +%Y-%m-%d)/" "${toplevel}/auto-generated-man-pages/tor-ctrl.8"
   ;;
-  *) printf '%s\n' "Usage: [install|remove|man|help]" && exit 1
+  check)
+    command -v shellcheck >/dev/null || error_msg "Install 'shellcheck' to linter scripts"
+    shellcheck "${toplevel}"/usr/bin/*
+  ;;
+  *) printf '%s\n' "Usage: [install|remove|man|check|help]" && exit 1
 esac
