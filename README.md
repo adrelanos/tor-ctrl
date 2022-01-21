@@ -214,7 +214,7 @@ Return to the script and use the interrupt signal (Ctrl+C) to print out the stre
 
 #### Permission denied
 
-If you receive permission denied, probably you are not running tor-ctrl with the user that can connect to tor's controller socket, which is the tor user.
+If you receive permission denied, probably you are not running tor-ctrl with the user that can connect to tor's controller socket, which is the tor user in some cases.
 
 On Tails:
 ```sh
