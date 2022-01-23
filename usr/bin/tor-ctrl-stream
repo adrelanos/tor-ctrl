@@ -52,11 +52,11 @@ list_streams(){
         circuit_purpose="$(printf '%s\n' "${circuit}" | cut -d " " -f5 | sed "s/PURPOSE=//")"
         [ -z "${circuit_status}" ] && break
         if [ "${circuit_status}" = "BUILT" ]; then
-          printf %s"${bold}------------------------------------------------------------------------------------------${nocolor}\n"
+          printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n"
           printf %s"${bold}Stream: ${stream_id}, Target: ${target}${nocolor}\n"
           printf %s"${bold}Circuit: ${circuit_id}, Purpose: ${circuit_purpose}${nocolor}\n"
-          printf %s"${bold}n. fingerprint                              address        nickname     locale${nocolor}\n"
-          printf %s"${bold}------------------------------------------------------------------------------------------${nocolor}\n"
+          printf %s"${bold}n. Locale\t\tFingerprint\t\t Address  \t\tBandwidth  \tNickname${nocolor}\n"
+          printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n"
           hop=0
           for relay in $(printf '%s\n' "${circuit_path}" | tr "," " "); do
             hop=$((hop+1))
@@ -72,10 +72,9 @@ list_streams(){
             # shellcheck disable=SC2086
             relay_locale="$(tor-ctrl -c "GETINFO ip-to-country/${relay_host}" ${cli_args})"
             relay_locale="$(printf '%s\n' "${relay_locale}" | grep "250-ip-to-country/${relay_host}=" | sed "s/.*=//;s/\\r//")"
-            printf '%s. %s [%s, %s, (%s), %s]\n' "${hop}" "${relay_fingerprint}" "${relay_nickname}" "${relay_host}" "${relay_locale}" "${relay_bandwidth}"
+            printf '%s. (%s) %s %s  \t%s  \t%s\n' "${hop}" "${relay_locale}" "${relay_fingerprint}" "${relay_host}" "${relay_bandwidth}" "${relay_nickname}"
           done
-          printf %s"${bold}------------------------------------------------------------------------------------------${nocolor}\n"
-          printf "\n"
+          printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n\n"
         fi
       fi
     fi

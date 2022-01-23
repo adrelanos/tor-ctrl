@@ -102,7 +102,7 @@ At least one of each item is necessary:
 * Hex converter: **xxd**/**hexdump**/**od**
 
 
-### How to install tor-ctrl on any unix system
+### How to install on any unix system
 
 Install the script and the manual:
 ```sh
@@ -141,8 +141,8 @@ sudo dpkg -i ../tor-ctrl_*.deb
 
 Delete temporary debhelper files in package source folder as well as debhelper artifacts:
 ```sh
-sudo rm -rf tor-ctrl-build-deps_*.buildinfo tor-ctrl-build-deps_*.changes \
-debian/tor-ctrl.debhelper.log debian/tor-ctrl.substvars \
+sudo rm -rf *-build-deps_*.buildinfo *-build-deps_*.changes \
+debian/*.debhelper.log debian/*.substvars \
 debian/.debhelper debian/files \
 debian/debhelper-build-stamp debian/tor-ctrl
 ```
