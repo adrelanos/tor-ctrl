@@ -100,13 +100,7 @@ trap "list_streams" INT TERM
 get_intr="$(stty -a | sed -n '/.*intr = / {s///;s/;.*$//;p;}')"
 
 printf '%s\n' "Waiting for assynchronous replies, resume with (${get_intr})"
-while :; do
-  getinfo_stream_status="$(tor-ctrl -c "GETINFO stream-status" | grep "250-stream-status=" | sed "s|250-stream-status=\s||")"
-  if [ -n "${getinfo_stream_status}" ]; then
-    printf '%s\n' "${getinfo_streams_saved}" | grep -q "${getinfo_stream_status}" || printf '%s\n' "${getinfo_stream_status}"
-    getinfo_streams_saved="$(printf '%s\n%s\n' "${getinfo_streams_saved}" "${getinfo_stream_status}")"
-  fi
-done &
 
+tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} &
 # shellcheck disable=SC2086
 listen_stream="$(tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args})"
