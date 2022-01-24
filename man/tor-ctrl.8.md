@@ -38,7 +38,7 @@ echo "HashedControlPassword $(tor --hash-password "YOUR_PASSWORD")"
 : Sleep N seconds after each command sent. (Default for socat/nc: 0 second, Default for telnet: 1 second).
 
 **-w**
-: After sending the command, wait for interrupt signal, normally Ctrl+C, before closing the connection. Useful when you want to be warned about events (assynchronous replies), example is when the command is *SETEVENTS STREAM*. The exit code shall not be evaluated. (Default: not set)
+: After sending the command, wait for interrupt signal, normally Ctrl+C, before closing the connection. Useful when you want to be warned about events (asynchronous replies), example is when the command is *SETEVENTS STREAM*. The exit code shall not be evaluated. (Default: not set)
 
 **-q**
 : Quiet mode. (Default: not set).
