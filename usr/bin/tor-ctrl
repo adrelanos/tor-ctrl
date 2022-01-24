@@ -286,7 +286,7 @@ cmd_pipe(){
     trap "kill 0" INT
     ## infinite loop that can be terminated with interrrupt signal
     while :; do
-      sleep 1h
+      sleep 24h
     done
   fi
   send_cmd "QUIT"
