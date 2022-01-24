@@ -55,7 +55,8 @@ list_streams(){
           printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n"
           printf %s"${bold}Stream:${nocolor} ${stream_id}, ${bold}Target:${nocolor} ${target}${nocolor}\n"
           printf %s"${bold}Circuit:${nocolor} ${circuit_id}, ${bold}Purpose:${nocolor} ${circuit_purpose}${nocolor}\n"
-          printf '%1s. %-40s %-15s %-19s %2s %9s\n' "n" "Fingerprint" "Address" "Nickname" "Locale" "Bandwidth"
+          printf %s"${bold}"
+          printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "n" "Fingerprint" "Address" "Nickname" "Geo" "Bandwidth"
           printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n"
           hop=0
           for relay in $(printf '%s\n' "${circuit_path}" | tr "," " "); do
@@ -72,7 +73,7 @@ list_streams(){
             # shellcheck disable=SC2086
             relay_locale="$(tor-ctrl -c "GETINFO ip-to-country/${relay_host}" ${cli_args})"
             relay_locale="$(printf '%s\n' "${relay_locale}" | grep "250-ip-to-country/${relay_host}=" | sed "s/.*=//;s/\\r//")"
-            printf '%1s. %-40s %-15s %-19s (%2s) %9s\n' "${hop}" "${relay_fingerprint}" "${relay_host}" "${relay_nickname}" "${relay_locale}" "${relay_bandwidth}"
+            printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "${hop}" "${relay_fingerprint}" "${relay_host}" "${relay_nickname}" "(${relay_locale})" "${relay_bandwidth}"
           done
           printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n\n"
         fi
