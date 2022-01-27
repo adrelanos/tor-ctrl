@@ -60,10 +60,14 @@ usage(){
                  notice: if the socket program is telnet, fallback to 1 second
                  default: 0 second
 
-  -w             After sending the command, wait for interrupt signal (Ctrl+C), before closing the connection.
-                 notice: useful when you want to be informed about events (asynchronous replies)
+  -w             after sending the command, wait for interrupt signal (Ctrl+C), before closing the connection.
+                 notice: useful to be informed about events (asynchronous replies), command SETEVENTS
                  notice: incompatible with '-q' quiet mode.
                  notice: exit code shall not be evaluated.
+                 default: not set
+
+  -v             verbose mode
+                 notice: informational messages will be printed to stdout alongside controller's replies
                  default: not set
 
   -q             quiet mode.
@@ -252,6 +256,7 @@ login(){
       printf '%s\n' "${me}: HASHEDPASSWORD is enabled but no password provided on the command line."
       auth_failed=1
     fi
+    ## this will only run if it can connect to the socket but is not receiving replies expected by a tor's controller
     if [ "${auth_failed}" -eq 0 ]; then
       printf '%s\n' "${me}: ${tor_control_socket} does not seems to be tor's controller socket."
     fi
@@ -270,9 +275,8 @@ get_dry_run(){
 ## send command to the controller and sleep after it if required
 send_cmd(){
   ## avoid sending empty lines and cycle sleep for every line sent if cmd_cli has multiple lines
-  printf '%s\n' "${1}" | while IFS="$(printf '\n')" read -r line || [ -n "${line}" ]; do
-    printf '%s\n' "${line}"
-    sleep "${sleep_n}"
+  printf '%s\n' "${1}" | while IFS="$(printf '\n')" read -r line; do
+    [ -n "${line}" ] && { printf '%s\n' "${line}"; sleep "${sleep_n}"; }
   done
 }
 
