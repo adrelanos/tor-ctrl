@@ -60,7 +60,8 @@ case "${1}" in
 
   install-deb)
     [ "$(id -u)" -ne 0 ] && error_msg "${1} as root"
-    dpkg -i ../"${script_name}"_*.deb
+    package_highest_version="$(find ../ -maxdepth 1 -type f -name "${script_name}*.deb" | head -n 1)"
+    dpkg -i "${package_highest_version}"
   ;;
 
   clean-deb)
