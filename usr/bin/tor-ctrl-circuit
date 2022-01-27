@@ -12,6 +12,10 @@ usage(){
 
   -p [pwd]       use password [pwd] instead of Tor's control_auth_cookie
                  default: not used
+
+  -m             machine mode
+                 notice: script informational and warning messages won't be printed to stdout
+                 default: not set
 "
   exit 1
 }
@@ -51,10 +55,11 @@ list_circuits(){
   done
 }
 
-while getopts ":s:p:h" Option; do
+while getopts ":s:p:mh" Option; do
   case ${Option} in
-    s) tor_control_socket="${OPTARG}";;
-    p) tor_password="${OPTARG}";;
+    s) tor_control_socket="${OPTARG}"; shift 2;;
+    p) tor_password="${OPTARG}"; shift 2;;
+    m) machine_mode=1; shift 1;;
     h|*) usage;;
   esac
 done
@@ -62,5 +67,9 @@ done
 cli_args=""
 [ -n "${tor_control_socket}" ] && cli_args="${cli_args} -s ${tor_control_socket}"
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
+[ -n "${machine_mode}" ] && cli_args="${cli_args} -m"
+
+## set default values
+: "${machine_mode:=0}"
 
 list_circuits

@@ -8,7 +8,7 @@ tor-ctrl - Interact with Tor's controller via command line tool
 
 # SYNOPSIS
 
-**tor-ctrl** [**-qVw**] [**-p** *pwd*] [**-s** *socket*] [**-t** *time*] [[**-c**|**--**] *command*]
+**tor-ctrl** [**-qmVw**] [**-p** *pwd*] [**-s** *socket*] [**-t** *time*] [[**-c**|**--**] *command*]
 
 # DESCRIPTION
 
@@ -39,6 +39,9 @@ echo "HashedControlPassword $(tor --hash-password "YOUR_PASSWORD")"
 
 **-w**
 : After sending the command, wait for interrupt signal, normally Ctrl+C, before closing the connection. Useful when you want to be warned about events (asynchronous replies), example is when the command is *SETEVENTS STREAM*. The exit code shall not be evaluated. (Default: not set)
+
+**-m**
+: Machine mode. Script informational and warning messages won't be printed to stdout. (Default: not set).
 
 **-q**
 : Quiet mode. (Default: not set).

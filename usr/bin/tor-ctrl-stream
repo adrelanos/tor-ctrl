@@ -15,6 +15,10 @@ usage(){
 
   -p [pwd]       use password [pwd] instead of Tor's control_auth_cookie
                  default: not used
+
+  -m             machine mode
+                 notice: script informational and warning messages won't be printed to stdout
+                 default: not set
 "
   exit 1
 }
@@ -82,10 +86,11 @@ list_streams(){
   done
 }
 
-while getopts ":s:p:h" Option; do
+while getopts ":s:p:mh" Option; do
   case ${Option} in
-    s) tor_control_socket="${OPTARG}";;
-    p) tor_password="${OPTARG}";;
+    s) tor_control_socket="${OPTARG}"; shift 2;;
+    p) tor_password="${OPTARG}"; shift 2;;
+    m) machine_mode=1; shift 1;;
     h|*) usage;;
   esac
 done
@@ -93,19 +98,26 @@ done
 cli_args=""
 [ -n "${tor_control_socket}" ] && cli_args="${cli_args} -s ${tor_control_socket}"
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
+[ -n "${machine_mode}" ] && cli_args="${cli_args} -m"
 
-sig_intr="$(stty -a | sed -n '/.*intr = / {s///;s/;.*$//;s/\^//p;}')"
-sig_quit="$(stty -a | sed -n '/.*quit = / {s///;s/;.*$//;s/\^//p;}')"
+## set default values
+: "${machine_mode:=0}"
 
+if [ "${machine_mode}" -eq 0 ]; then
+  printf '%s\n' "${me}: [info]: subscribed to Tor stream events, as soon as streams are created, output will be shown below."
+  printf '%s\n' "${me}: [warn]: posting these contents online can deanonymize the tor client."
+fi
+
+## it will print the streams table after receiving an INT signal
+## other signals such as QUIT, TERM and EXIT should kill the process tree and exit
 trap "list_streams" INT
 trap "exit" QUIT TERM
 trap "kill 0" EXIT
 
-printf '%s\n' "${me}: info: subscribed to Tor stream events, as soon as streams are created, output will be shown below."
-printf '%s\n' "${me}: warn: posting these contents online can deanonymize the tor client."
-printf '%s\n' "${me}: info: resume with Ctrl+${sig_intr} (print stream table and exit), quit with Ctrl+${sig_quit} (exit)."
-
+## this call will print to screen and sent to background
 # shellcheck disable=SC2086
 tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} &
+
+## this call will save the events to a variable so it can be used later
 # shellcheck disable=SC2086
 listen_stream="$(tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args})"
