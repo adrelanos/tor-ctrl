@@ -32,56 +32,57 @@ list_streams(){
 
   listen_stream="$(printf '%s\n' "${listen_stream}" | sed "/250 OK/d;/250 closing connection/d")"
   printf '%s\n' "${listen_stream}" | while IFS="$(printf '\n')" read -r stream_line || [ -n "${stream_line}" ]; do
-#  IFS=" " read -r stream_code stream_event stream_id stream_status circuit_id target _ <<-EOF
-#    $(printf '%s\n' "${stream_line}")
-#EOF
-    stream_code="$(printf '%s\n' "${stream_line}" | cut -d " " -f1)"
-    stream_event="$(printf '%s\n' "${stream_line}" | cut -d " " -f2)"
-    stream_id="$(printf '%s\n' "${stream_line}" | cut -d " " -f3)"
-    stream_status="$(printf '%s\n' "${stream_line}" | cut -d " " -f4)"
-    circuit_id="$(printf '%s\n' "${stream_line}" | cut -d " " -f5)"
-    target="$(printf '%s\n' "${stream_line}" | cut -d " " -f6)"
+ IFS=" " read -r stream_code stream_event stream_id stream_status circuit_id target _ <<-EOF
+   $(printf '%s\n' "${stream_line}")
+EOF
+    # stream_code="$(printf '%s\n' "${stream_line}" | cut -d " " -f1)"
+    # stream_event="$(printf '%s\n' "${stream_line}" | cut -d " " -f2)"
+    # stream_id="$(printf '%s\n' "${stream_line}" | cut -d " " -f3)"
+    # stream_status="$(printf '%s\n' "${stream_line}" | cut -d " " -f4)"
+    # circuit_id="$(printf '%s\n' "${stream_line}" | cut -d " " -f5)"
+    # target="$(printf '%s\n' "${stream_line}" | cut -d " " -f6)"
     if [ "${stream_code}" = "650" ] && [ "${stream_event}" = "STREAM" ]; then
-      if [ "${stream_status}" = "SENTCONNECT" ]; then
-        target_clear="$(printf '%s\n' "${stream_line}" | cut -d " " -f6)"
-      elif [ "${stream_status}" = "REMAP" ]; then
-        target_clear="$(printf '%s\n' "${target} (${target_clear})")"
-      elif [ "${stream_status}" = "SUCCEEDED" ]; then
-        [ -n "${target_clear}" ] && target="${target_clear}"
-        # shellcheck disable=SC2086
-        circuit_all="$(tor-ctrl -c "GETINFO circuit-status" ${cli_args})"
-        circuit="$(printf '%s\n' "${circuit_all}" | grep "^${circuit_id} " | sed "/250 OK/d;/250+circuit-status=/d;/250 closing connection/d")"
-        circuit_status="$(printf '%s\n' "${circuit}" | cut -d " " -f2)"
-        circuit_path="$(printf '%s\n' "${circuit}" | cut -d " " -f3)"
-        circuit_purpose="$(printf '%s\n' "${circuit}" | cut -d " " -f5 | sed "s/PURPOSE=//")"
-        [ -z "${circuit_status}" ] && break
-        if [ "${circuit_status}" = "BUILT" ]; then
-          printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n"
-          printf %s"${bold}Stream:${nocolor} ${stream_id}, ${bold}Target:${nocolor} ${target}${nocolor}\n"
-          printf %s"${bold}Circuit:${nocolor} ${circuit_id}, ${bold}Purpose:${nocolor} ${circuit_purpose}${nocolor}\n"
-          printf %s"${bold}"
-          printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "n" "Fingerprint" "Address" "Nickname" "Geo" "Bandwidth"
-          printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n"
-          hop=0
-          for relay in $(printf '%s\n' "${circuit_path}" | tr "," " "); do
-            hop=$((hop+1))
-            [ ${hop} -gt 3 ] && break
-            relay="$(printf '%s\n' "${relay}" | tr -d "$" | tr "~" " ")"
-            relay_fingerprint="$(printf '%s\n' "${relay}" | cut -d " " -f1)"
-            relay_nickname="$(printf '%s\n' "${relay}" | cut -d " " -f2)"
-            # shellcheck disable=SC2086
-            relay_status="$(tor-ctrl -c "GETINFO ns/id/${relay_fingerprint}" ${cli_args})"
-            relay_host="$(printf '%s\n' "${relay_status}" | grep "^r " | cut -d " " -f7)"
-            relay_bandwidth="$(printf '%s\n' "${relay_status}" | grep "^w " | sed "s/w Bandwidth=//;s/\\r//")"
-            relay_bandwidth="$((relay_bandwidth*512/1024/1024)) MiB/s"
-            # shellcheck disable=SC2086
-            relay_locale="$(tor-ctrl -c "GETINFO ip-to-country/${relay_host}" ${cli_args})"
-            relay_locale="$(printf '%s\n' "${relay_locale}" | grep "250-ip-to-country/${relay_host}=" | sed "s/.*=//;s/\\r//")"
-            printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "${hop}" "${relay_fingerprint}" "${relay_host}" "${relay_nickname}" "(${relay_locale})" "${relay_bandwidth}"
-          done
-          printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n\n"
-        fi
-      fi
+      case "${stream_status}" in
+        #SENTCONNECT|SENTRESOLVE) target_clear="$(printf '%s\n' "${stream_line}" | cut -d " " -f6)";;
+        NEW|NEWRESOLVE) target_clear="$(printf '%s\n' "${stream_line}" | cut -d " " -f6)";;
+        REMAP) target_clear="$(printf '%s\n' "${target} (${target_clear})")";;
+        CLOSED) ## SUCCEEDED
+          [ -n "${target_clear}" ] && target="${target_clear}"
+          # shellcheck disable=SC2086
+          circuit_all="$(tor-ctrl -c "GETINFO circuit-status" ${cli_args})"
+          circuit="$(printf '%s\n' "${circuit_all}" | grep "^${circuit_id} " | sed "/250 OK/d;/250+circuit-status=/d;/250 closing connection/d")"
+          circuit_status="$(printf '%s\n' "${circuit}" | cut -d " " -f2)"
+          circuit_path="$(printf '%s\n' "${circuit}" | cut -d " " -f3)"
+          circuit_purpose="$(printf '%s\n' "${circuit}" | cut -d " " -f5 | sed "s/PURPOSE=//")"
+          [ -z "${circuit_status}" ] && break
+          if [ "${circuit_status}" = "BUILT" ]; then
+            printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n"
+            printf %s"${bold}Stream:${nocolor} ${stream_id}, ${bold}Target:${nocolor} ${target}${nocolor}\n"
+            printf %s"${bold}Circuit:${nocolor} ${circuit_id}, ${bold}Purpose:${nocolor} ${circuit_purpose}${nocolor}\n"
+            printf %s"${bold}"
+            printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "n" "Fingerprint" "Address" "Nickname" "Geo" "Bandwidth"
+            printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n"
+            hop=0
+            for relay in $(printf '%s\n' "${circuit_path}" | tr "," " "); do
+              hop=$((hop+1))
+              [ ${hop} -gt 3 ] && break
+              relay="$(printf '%s\n' "${relay}" | tr -d "$" | tr "~" " ")"
+              relay_fingerprint="$(printf '%s\n' "${relay}" | cut -d " " -f1)"
+              relay_nickname="$(printf '%s\n' "${relay}" | cut -d " " -f2)"
+              # shellcheck disable=SC2086
+              relay_status="$(tor-ctrl -c "GETINFO ns/id/${relay_fingerprint}" ${cli_args})"
+              relay_host="$(printf '%s\n' "${relay_status}" | grep "^r " | cut -d " " -f7)"
+              relay_bandwidth="$(printf '%s\n' "${relay_status}" | grep "^w " | sed "s/w Bandwidth=//;s/\\r//")"
+              relay_bandwidth="$((relay_bandwidth*512/1024/1024)) MiB/s"
+              # shellcheck disable=SC2086
+              relay_locale="$(tor-ctrl -c "GETINFO ip-to-country/${relay_host}" ${cli_args})"
+              relay_locale="$(printf '%s\n' "${relay_locale}" | grep "250-ip-to-country/${relay_host}=" | sed "s/.*=//;s/\\r//")"
+              printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "${hop}" "${relay_fingerprint}" "${relay_host}" "${relay_nickname}" "(${relay_locale})" "${relay_bandwidth}"
+            done
+            printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n\n"
+          fi
+        ;;
+      esac
     fi
   done
 }
