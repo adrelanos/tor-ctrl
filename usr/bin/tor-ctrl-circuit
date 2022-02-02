@@ -55,6 +55,8 @@ list_circuits(){
   done
 }
 
+command -v tor-ctrl || error_msg "Install tor-ctrl"
+
 while getopts ":s:p:mh" Option; do
   case ${Option} in
     s) tor_control_socket="${OPTARG}"; shift 2;;

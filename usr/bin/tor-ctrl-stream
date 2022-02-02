@@ -93,6 +93,8 @@ list_streams(){
 	done
 }
 
+command -v tor-ctrl || error_msg "Install tor-ctrl"
+
 while getopts ":s:p:mzh" Option; do
 	case ${Option} in
 		s) tor_control_socket="${OPTARG}"; shift 2;;
