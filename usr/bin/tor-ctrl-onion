@@ -1,0 +1,156 @@
+#!/usr/bin/env sh
+
+## ADD_ONION - https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n1748
+## DEL_ONION - https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n1925
+## ONION_CLIENT_AUTH_ADD - https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n1990
+## ONION_CLIENT_AUTH_REMOVE - https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n2033
+## ONION_CLIENT_AUTH_VIEW - https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n2051
+
+## Once created the new Onion Service will remain active until either:
+##  - the Onion Service is removed via "DEL_ONION",
+##  - the server terminates,
+##  - the control connection that originated the "ADD_ONION" command is closed.
+## It is possible to override disabling the Onion Service on control connection close by specifying the "Detach" flag.
+
+
+#nocolor="\033[0m"
+#bold="\033[1m"
+
+me="${0##*/}"
+
+usage(){
+  printf '%s\n' "usage: ${me} [-mzh] [-s socket] [-p password]
+
+  -s [socket]    tor's control socket
+                 notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
+                 notice: unix: [unix:]path: /run/tor/control, unix:/run/tor/control
+                 default: 9051
+
+  -p [pwd]       use password [pwd] instead of Tor's control_auth_cookie
+                 default: not used
+
+  -A             add onion
+                 default: not set
+
+  -k [key_type:key_blob]
+                 generate a key with 'NEW:BEST' or 'NEW:ED25519-V3', currently, they mean the same
+                 notice: useful to restore keys: 'ED25519-V3:onion_private_key
+                 default: NEW:BEST
+
+  -l [virtport,[target]]
+                 notice: virtport: The virtual TCP Port for the Onion Service
+                 notice: target: The (optional) target for the given VirtPort
+                 default: not set
+
+  -u [client_pub_key]
+                 client's base32-encoded ed25519 public key
+
+  -e             detach onion service from controller
+                 notice: the service will remain active after the control connection closes
+                 default: not set
+
+  -i             discard service private key
+                 notice: this is irreversible, it will not be possible to recreate the same hostname
+
+  -D [service]   delete onion
+                 notice: service is the hostname without '.onion'
+
+  -L             A newline-separated list of the detached services created
+
+  -m             machine mode
+                 notice: script informational and warning messages won't be printed to stdout
+                 default: not set
+
+  -h             print this help message
+"
+  exit 1
+}
+
+error_msg(){
+  printf %s"${me}: ${1}\n" >&2
+  exit 1
+}
+
+while getopts ":s:p:Ak:l:weu:iLD:mzh" Option; do
+  case ${Option} in
+    s) tor_control_socket="${OPTARG}"; shift 2;;
+    p) tor_password="${OPTARG}"; shift 2;;
+    m) machine_mode=1; shift 1;;
+    A) add_onion=1; shift 1;;
+    k) private_key="${OPTARG}"; shift 2;;
+    l) port="${OPTARG}"; shift 2;;
+    w) detach=0; shift 1;;
+    e) detach=1; shift 1;;
+    u) client_pub_key="${OPTARG}"; shift 2;;
+    i) discard_pk=1; shift 1;;
+    L) list_onion=1; shift 1;;
+    D) del_onion="${OPTARG}"; shift 2;;
+    h|*) usage;;
+  esac
+done
+
+
+cli_args=""
+[ -n "${tor_control_socket}" ] && cli_args="${cli_args} -s ${tor_control_socket}"
+[ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
+[ -n "${machine_mode}" ] && cli_args="${cli_args} -m"
+
+## set default values
+: "${list_onion:=0}"
+: "${add_onion:=0}"
+: "${detach:=0}"
+: "${discard_pk:=0}"
+
+if [ "${list_onion}" -eq 1 ]; then
+  # shellcheck disable=SC2086
+  tor-ctrl ${cli_args} GETINFO onions/detached
+  exit "$?"
+fi
+
+if [ -n "${del_onion}" ]; then
+  # shellcheck disable=SC2086
+  tor-ctrl ${cli_args} DEL_ONION "${del_onion}"
+  exit "$?"
+fi
+
+if [ "${add_onion}" -eq 1 ]; then
+  [ -z "${port}" ] && error_msg "Missing port number"
+  [ "${detach}" -eq 1 ] && flags="${flags}Detach,"
+  [ "${discard_pk}" -eq 1 ] && flags="DiscardPK,"
+  [ -n "${client_pub_key}" ] && flags="${flags}AuthV3," && client_pub_key="ClientAuthV3=${client_pub_key}"
+  [ -n "${flags}" ] && flags="Flags=${flags}"
+  # shellcheck disable=SC2086
+  tor-ctrl ${cli_args} ADD_ONION ${private_key:="NEW:BEST"} "Port=${port}" ${client_pub_key} ${flags}
+  exit "$?"
+fi
+
+usage
+
+## Create service listening on port 80 by default
+## tor-ctrl-onion -A
+#tor-ctrl ADD_ONION NEW:BEST Port=80
+
+## Create service listening on port 8080 (detached)
+## tor-ctrl-onion -A -l 8080
+#tor-ctrl ADD_ONION NEW:BEST Port=8080
+
+## Create service and detach from controller
+## tor-ctrl-onion -A -e
+#tor-ctrl ADD_ONION NEW:BEST Port=80
+
+## Create service and use client authorization
+## tor-ctrl-onion -A -u clientpubkeybase32
+#tor-ctrl ADD_ONION NEW:BEST Port=80 Flags=V3Auth ClientAuthV3=clientpubkeybase32
+
+## Delete service
+## tor-ctrl-onion -D hostnamestringwithoutdotonion
+#tor-ctrl DEL_ONION hostnamestringwithoutdotonion
+
+## List detached services
+## tor-ctrl-onion -L
+#tor-ctrl GETINFO onions/detached
+
+
+## Generate base64 private key or convert from existing file
+## echo "ED25519-V3:$(dd if=hs_ed25519_secret_key bs=1 skip=32 | base64 | tr -d "\n")" > v3_onion_private_key
+## dd if=v3_onion_private_key bs=1 skip=11 | base64 -d | dd of=hs_ed25519_secret_key bs=1 seek=32
