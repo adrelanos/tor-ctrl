@@ -33,7 +33,9 @@ usage(){
                  default: not set
 
   -k [key_type:key_blob]
-                 generate a key with 'NEW:BEST' or 'NEW:ED25519-V3', currently, they mean the same
+                 use key specified by the argument
+                 if 'key_type' is NEW, will create a new key using the 'key_blob' BEST algorithM, which currently is ED25519-V3
+                 if 'key_type' is an algorithm, e.g. ED25519-V3, 'key_blob' must be a private key to derive the service id
                  notice: useful to restore keys: 'ED25519-V3:onion_private_key
                  default: NEW:BEST
 
@@ -45,8 +47,9 @@ usage(){
   -u [client_pub_key]
                  client's base32-encoded ed25519 public key
 
-  -e             detach onion service from controller
-                 notice: the service will remain active after the control connection closes
+  -w             don't detach onion service from controller
+                 notice: the service will remain active until Ctrl+C
+                 notice: the service won't be shown by 'GETINFO onions/current'
                  default: not set
 
   -i             discard service private key
@@ -62,6 +65,12 @@ usage(){
                  default: not set
 
   -h             print this help message
+
+Examples:
+                 ${me} -A -l 80
+                 ${me} -A -l 80,127.0.0.1:8080 -w -i
+                 ${me} -D service_hostname_without_dot_onion
+                 ${me} -L
 "
   exit 1
 }
@@ -71,16 +80,17 @@ error_msg(){
   exit 1
 }
 
+command -v tor-ctrl || error_msg "Install tor-ctrl"
+
 while getopts ":s:p:Ak:l:weu:iLD:mzh" Option; do
   case ${Option} in
     s) tor_control_socket="${OPTARG}"; shift 2;;
     p) tor_password="${OPTARG}"; shift 2;;
     m) machine_mode=1; shift 1;;
     A) add_onion=1; shift 1;;
-    k) private_key="${OPTARG}"; shift 2;;
+    k) key="${OPTARG}"; shift 2;;
     l) port="${OPTARG}"; shift 2;;
     w) detach=0; shift 1;;
-    e) detach=1; shift 1;;
     u) client_pub_key="${OPTARG}"; shift 2;;
     i) discard_pk=1; shift 1;;
     L) list_onion=1; shift 1;;
@@ -90,16 +100,18 @@ while getopts ":s:p:Ak:l:weu:iLD:mzh" Option; do
 done
 
 
+## set default values
+: "${list_onion:=0}"
+: "${add_onion:=0}"
+: "${detach:=1}"
+: "${discard_pk:=0}"
+
+
 cli_args=""
 [ -n "${tor_control_socket}" ] && cli_args="${cli_args} -s ${tor_control_socket}"
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
 [ -n "${machine_mode}" ] && cli_args="${cli_args} -m"
-
-## set default values
-: "${list_onion:=0}"
-: "${add_onion:=0}"
-: "${detach:=0}"
-: "${discard_pk:=0}"
+[ "${detach}" -eq 0 ] && cli_args="${cli_args} -w"
 
 if [ "${list_onion}" -eq 1 ]; then
   # shellcheck disable=SC2086
@@ -116,11 +128,11 @@ fi
 if [ "${add_onion}" -eq 1 ]; then
   [ -z "${port}" ] && error_msg "Missing port number"
   [ "${detach}" -eq 1 ] && flags="${flags}Detach,"
-  [ "${discard_pk}" -eq 1 ] && flags="DiscardPK,"
-  [ -n "${client_pub_key}" ] && flags="${flags}AuthV3," && client_pub_key="ClientAuthV3=${client_pub_key}"
+  [ "${discard_pk}" -eq 1 ] && flags="${flags}DiscardPK,"
+  [ -n "${client_pub_key}" ] && flags="${flags}V3Auth," && client_pub_key="ClientAuthV3=${client_pub_key}"
   [ -n "${flags}" ] && flags="Flags=${flags}"
   # shellcheck disable=SC2086
-  tor-ctrl ${cli_args} ADD_ONION ${private_key:="NEW:BEST"} "Port=${port}" ${client_pub_key} ${flags}
+  tor-ctrl ${cli_args} ADD_ONION ${key:="NEW:BEST"} "Port=${port}" ${client_pub_key} ${flags}
   exit "$?"
 fi
 
