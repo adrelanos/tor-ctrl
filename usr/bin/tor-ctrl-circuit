@@ -55,13 +55,13 @@ list_circuits(){
   done
 }
 
-command -v tor-ctrl || error_msg "Install tor-ctrl"
+command -v tor-ctrl >/dev/null || error_msg "Install tor-ctrl"
 
 while getopts ":s:p:mh" Option; do
   case ${Option} in
-    s) tor_control_socket="${OPTARG}"; shift 2;;
-    p) tor_password="${OPTARG}"; shift 2;;
-    m) machine_mode=1; shift 1;;
+    s) tor_control_socket="${OPTARG}";;
+    p) tor_password="${OPTARG}";;
+    m) machine_mode=1;;
     h|*) usage;;
   esac
 done
