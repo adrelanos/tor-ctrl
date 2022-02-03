@@ -68,6 +68,11 @@ SERVER
   -i             discard service private key
                  notice: this is irreversible, it will not be possible to recreate the same hostname
 
+  -y             add a non-anonymous Single Onion Service.
+
+  -x [max_streams]
+                 when the number of max stream is reached, close circuit.
+
  Delete onion:
 
   -D             delete onion
@@ -164,7 +169,7 @@ while :; do
     u) getarg client_pub_key; shift 2;;
     i) discard_pk=1; shift 1;;
     y) non_anonymous=1; shift 1;;
-    x) max_streams=1; shift 1;;
+    x) get_arg max_streams; shift 1;;
 
     L) list_onion=1; shift 1;;
     D) del_onion; shift 2;;
@@ -231,7 +236,7 @@ if [ "${add_onion}" -eq 1 ]; then
   [ "${discard_pk}" -eq 1 ] && flags="${flags}DiscardPK,"
   [ -n "${client_pub_key}" ] && flags="${flags}V3Auth," && client_pub_key="ClientAuthV3=${client_pub_key}"
   [ "${non_anonymous}" -eq 1 ] && flags="${flags}NonAnonymous,"
-  [ "${max_streams}" -eq 1 ] && flags="${flags}MaxStreamsCloseCircuit," max_streams="MaxStreams=${max_streams}"
+  [ -n "${max_streams}" ] && flags="${flags}MaxStreamsCloseCircuit," max_streams="MaxStreams=${max_streams}"
   [ -n "${flags}" ] && flags="Flags=${flags}"
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} ADD_ONION ${key:="NEW:BEST"} "Port=${port}" ${client_pub_key} ${flags}
