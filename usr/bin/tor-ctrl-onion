@@ -126,12 +126,12 @@ error_msg(){
 validate_onion(){
   ## remove .onion suffix
   onion=${onion%.onion*}
-  ## protocol (http://, git:// etc)
+  ## remove protocol (http://, git:// etc)
   onion=${onion##*://}
   ## count characters
   [ "${#onion}" = "56" ] || error_msg "Onion '${onion}' is invalid\n\t length '${#onion}' should be exactly 56 characters long (not counting .onion)"
   ## check for base32 and lower case letters
-  [ "${onion%%*[^a-zA-Z2-7]*}" ] || error_msg "Onion '${onion}' is invalid\n\t it is not within base32 alphabet lower-case encoding [a-z2-7]"
+  [ "${onion%%*[^a-z2-7]*}" ] || error_msg "Onion '${onion}' is invalid\n\t it is not within base32 alphabet lower-case encoding [a-z2-7]"
 }
 
 
