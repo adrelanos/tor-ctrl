@@ -89,7 +89,7 @@ EOF
             ! test -f stream.loop && {
               touch stream.loop
               printf %s"${bold}"
-              printf "StreamId StreamPurpose StreamTarget CircuitId CircuitPurpose\n"
+              printf "\nStreamId StreamPurpose StreamTarget CircuitId CircuitPurpose\n"
               printf %s"--------------------------------------------------------------------------------------------------------------${nocolor}\n"
             }
             printf %s"${stream_id} ${stream_purpose} ${stream_target} ${circuit_id}  ${circuit_purpose}\n"
