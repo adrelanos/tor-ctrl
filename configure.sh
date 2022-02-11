@@ -53,7 +53,7 @@ case "${1}" in
 
   build-deb)
     [ "$(id -u)" -ne 0 ] && error_msg "${1} as root"
-    command -v mk-build-deps >/dev/null && apt update -y && apt install -y devscripts
+    command -v mk-build-deps >/dev/null || { apt update -y && apt install -y devscripts ; }
     mk-build-deps --remove --install
     dpkg-buildpackage -b --no-sign
   ;;
