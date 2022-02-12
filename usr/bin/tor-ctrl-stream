@@ -48,7 +48,7 @@ EOF
         REMAP)
           stream_target_cache="$(printf '%s\n' "$(cat stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
           printf '%s\n' "${stream_target_cache}" | tee stream.hosts >/dev/null
-          stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
+          stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep -F "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
           stream_target_clean="$(printf '%s\n' "${stream_target}-(${stream_target_hostname})")"
         ;;
         CLOSED|SUCCEEDED)
