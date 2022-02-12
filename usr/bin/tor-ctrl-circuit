@@ -46,7 +46,7 @@ list_circuits(){
         relay_bandwidth="$((relay_bandwidth*512/1024/1024)) MiB/s"
         # shellcheck disable=SC2086
         relay_locale="$(tor-ctrl -c "GETINFO ip-to-country/${relay_host}" ${cli_args})"
-        relay_locale="$(printf '%s\n' "${relay_locale}" | grep "250-ip-to-country/${relay_host}=" | sed "s/.*=//;s/\\r//")"
+        relay_locale="$(printf '%s\n' "${relay_locale}" | grep -F "250-ip-to-country/${relay_host}=" | sed "s/.*=//;s/\\r//")"
         #printf '%s. %s [%s, %s, (%s), %s]\n' "${hop}" "${relay_fingerprint}" "${relay_nickname}" "${relay_host}" "${relay_locale}" "${relay_bandwidth}"
         printf '%1s. %-40s %-15s %-19s (%-2s) %9s\n' "${hop}" "${relay_fingerprint}" "${relay_host}" "${relay_nickname}" "${relay_locale}" "${relay_bandwidth}"
       done
