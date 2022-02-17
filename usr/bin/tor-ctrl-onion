@@ -231,7 +231,7 @@ if [ "${del_onion}" -eq 1 ]; then
 fi
 
 if [ "${add_onion}" -eq 1 ]; then
-  [ -n "${port}" ] && "Port=${port}"
+  [ -n "${port}" ] && port="Port=${port}"
   [ "${detach}" -eq 1 ] && flags="${flags}Detach,"
   [ "${discard_pk}" -eq 1 ] && flags="${flags}DiscardPK,"
   [ -n "${client_pub_key}" ] && flags="${flags}V3Auth," client_pub_key="ClientAuthV3=${client_pub_key}"
