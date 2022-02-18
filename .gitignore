@@ -1,7 +1,7 @@
-tor-ctrl-build-deps_*.buildinfo
-tor-ctrl-build-deps_*.changes
-debian/tor-ctrl.debhelper.log
-debian/tor-ctrl.substvars
+*-build-deps_*.buildinfo
+*-build-deps_*.changes
+debian/*.debhelper.log
+debian/*.substvars
 debian/.debhelper
 debian/files
 debian/debhelper-build-stamp

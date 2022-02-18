@@ -60,9 +60,14 @@ usage(){
                  notice: if the socket program is telnet, fallback to 1 second
                  default: 0 second
 
-  -w             wait to read confirmation by pressing ENTER before closing the connection
-                 notice: useful when you want to be informed about events (asynchronous replies)
-                 notice: incompatible with '-q' - quiet mode.
+  -w             after sending the command, wait for interrupt signal (Ctrl+C), before closing the connection.
+                 notice: useful to be informed about events (asynchronous replies), command SETEVENTS
+                 notice: incompatible with '-q' quiet mode.
+                 notice: exit code shall not be evaluated.
+                 default: not set
+
+  -m             machine mode
+                 notice: script informational and warning messages won't be printed to stdout
                  default: not set
 
   -q             quiet mode.
@@ -234,17 +239,26 @@ login(){
         od) auth_string="AUTHENTICATE $(od -t x1 "${tor_cookie}" | head -n 2 | cut -d " " -f2- | tr -d "\n" | tr -d " ")";;
       esac
     fi
-  elif printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" && [ -n "${tor_password}" ]; then
+  elif
+    # shellcheck disable=SC2154
+    [ -n "${tor_password}" ] && printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" ; then
     auth_string="AUTHENTICATE \"${tor_password}\""
   fi
 
   if [ -z "${auth_string}" ]; then
+    auth_failed=0
     printf '%s\n' "${me}: Authentication string not detected."
     if printf '%s\n' "${auth_methods}" | grep -q "^COOKIE$" && ! test -r "${tor_cookie}"; then
-      printf '%s\n' "${me}: COOKIE is enabled but not readable by user ${USER}"
+      printf '%s\n' "${me}: COOKIE is enabled but not readable by user ${USER}."
+      auth_failed=1
     fi
     if printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" && [ -z "${tor_password}" ]; then
       printf '%s\n' "${me}: HASHEDPASSWORD is enabled but no password provided on the command line."
+      auth_failed=1
+    fi
+    ## this will only run if it can connect to the socket but is not receiving replies expected by a tor's controller
+    if [ "${auth_failed}" -eq 0 ]; then
+      printf '%s\n' "${me}: ${tor_control_socket} does not seems to be tor's controller socket."
     fi
     exit 1
   fi
@@ -261,9 +275,8 @@ get_dry_run(){
 ## send command to the controller and sleep after it if required
 send_cmd(){
   ## avoid sending empty lines and cycle sleep for every line sent if cmd_cli has multiple lines
-  printf '%s\n' "${1}" | while IFS="$(printf '\n')" read -r line || [ -n "${line}" ]; do
-    printf '%s\n' "${line}"
-    sleep "${sleep_n}"
+  printf '%s\n' "${1}" | while IFS="$(printf '\n')" read -r line; do
+    [ -n "${line}" ] && { printf '%s\n' "${line}"; sleep "${sleep_n}"; }
   done
 }
 
@@ -272,8 +285,14 @@ cmd_pipe(){
   # shellcheck disable=SC2030,2031
   send_cmd "${auth_string}"
   send_cmd "${cmd_cli}"
-  ## shellcheck disable=SC2034
-  [ "${wait_confirmation}" -eq 1 ] && read -r confirmation
+  # shellcheck disable=SC2034
+  if [ "${wait_confirmation}" -eq 1 ]; then
+    trap "kill 0" INT
+    ## infinite loop that can be terminated with interrrupt signal
+    while :; do
+      sleep 24h
+    done
+  fi
   send_cmd "QUIT"
 }
 
@@ -319,6 +338,7 @@ while :; do
     w) wait_confirmation=1; shift 1;;
     d) debug_mode=1; shift 1;;
     r) dry_run=1; shift 1;;
+    m) machine_mode=1; shift 1;;
     h) usage;;
     V) printf '%s\n' "tor-ctrl ${torctrl_version}"; exit 0;;
     -) shift 1; break;;
@@ -330,7 +350,11 @@ done
 ############
 ### main ###
 
+# sig_intr="$(stty -a | sed -n '/.*intr = / {s///;s/;.*$//;s/\^//p;}')"
+# sig_quit="$(stty -a | sed -n '/.*quit = / {s///;s/;.*$//;s/\^//p;}')"
+
 ## set default values
+: "${machine_mode:=0}"
 : "${debug_mode:=0}"
 : "${quiet:=0}"
 : "${dry_run:=0}"
@@ -381,6 +405,9 @@ if [ -n "${cmd_cli}" ]; then
     } 3>&1 2>/dev/null | ${socket_prog_connect} | finish
   else
     if [ "${wait_confirmation}" -eq 1 ]; then
+      if [ "${machine_mode}" -eq 0 ]; then
+        printf '%s\n' "${me}: [info]: stop listening with Ctrl+C"
+      fi
       cmd_pipe | ${socket_prog_connect} 2>/dev/null
     else
       cmd_pipe | ${socket_prog_connect} 2>/dev/null | finish

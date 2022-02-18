@@ -1,0 +1,274 @@
+#!/usr/bin/env sh
+
+## ADD_ONION - https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n1748
+## DEL_ONION - https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n1925
+## ONION_CLIENT_AUTH_ADD - https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n1990
+## ONION_CLIENT_AUTH_REMOVE - https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n2033
+## ONION_CLIENT_AUTH_VIEW - https://gitweb.torproject.org/torspec.git/tree/control-spec.txt#n2051
+
+## Once created the new Onion Service will remain active until either:
+##  - the Onion Service is removed via "DEL_ONION",
+##  - the server terminates,
+##  - the control connection that originated the "ADD_ONION" command is closed.
+## It is possible to override disabling the Onion Service on control connection close by specifying the "Detach" flag.
+
+
+#nocolor="\033[0m"
+#bold="\033[1m"
+
+me="${0##*/}"
+
+usage(){
+  printf '%s\n' "usage: ${me} [-mzh] [-s socket] [-p password]
+
+  -s [socket]    tor's control socket
+                 notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
+                 notice: unix: [unix:]path: /run/tor/control, unix:/run/tor/control
+                 default: 9051
+
+  -p [pwd]       use password [pwd] instead of Tor's control_auth_cookie
+                 default: not used
+
+  -m             machine mode
+                 notice: script informational and warning messages won't be printed to stdout
+                 default: not set
+
+  -h             print this help message
+
+  -o             tor hostname, also known as HSAddress or ServiceId
+                 notice: '.onion' is optional, it will be stripped
+
+SERVER
+
+ Add onion:
+
+  -A             add onion
+                 default: not set
+
+  -k [key_type:key_blob]
+                 use key specified by the argument
+                 if 'key_type' is NEW, will create a new key using the 'key_blob' BEST algorithm, which currently is ED25519-V3
+                 if 'key_type' is an algorithm, e.g. ED25519-V3, 'key_blob' is the private key in base64
+                 notice: useful to restore keys: 'ED25519-V3:onion_private_key
+                 default: NEW:BEST
+
+  -l [virtport,[target]]
+                 notice: virtport: The virtual TCP Port for the Onion Service
+                 notice: target: The (optional) target for the given VirtPort
+                 default: not set
+
+  -u [client_pub_key]
+                 client public key in base64 encoding
+
+  -w             don't detach onion service from controller
+                 notice: the service will remain active until Ctrl+C
+                 notice: the service won't be shown by 'GETINFO onions/current'
+                 default: not set
+
+  -i             discard service private key
+                 notice: this is irreversible, it will not be possible to recreate the same hostname
+
+  -y             add a non-anonymous Single Onion Service.
+
+  -x [max_streams]
+                 when the number of max stream is reached, close circuit.
+
+ Delete onion:
+
+  -D             delete onion
+                 notice: service is the hostname without '.onion'
+
+ List onions:
+
+  -L             a newline-separated list of the detached services created
+
+
+CLIENT
+
+ Add onion client authorization:
+
+  -U [key_type:client_priv_key]
+                 add client-side v3 client auth credentials for the onion service
+                 key_type: 'x2551' is the only one supported right now
+                 client_priv_key: base64 encoding of x25519 key
+
+  -n             permanent flag: this client's credentials should be stored in the filesystem.
+                 notice: If this is not set, the client's credentials are ephemeral and stored in memory.
+
+ Remove onion client authorization:
+
+  -R             remove the client-side v3 client auth credentials for the onion service
+
+ View onion client authorizations:
+
+  -W             view client-side credentials for specified onion service or all credentials if none service was provided
+
+Examples:
+  Server
+                 ${me} -A -l 80
+                 ${me} -A -l 80,127.0.0.1:8080 -w -i
+                 ${me} -D service_hostname_without_dot_onion
+                 ${me} -L
+  Client
+                 ${me} -U x25519:client_priv_key_base64 -o some_onion
+                 ${me} -R -o some_onion
+                 ${me} -W
+                 ${me} -W -o some_onion
+"
+  exit 1
+}
+
+error_msg(){
+  printf %s"${me}: ${1}\n" >&2
+  exit 1
+}
+
+validate_onion(){
+  ## remove .onion suffix
+  onion=${onion%.onion*}
+  ## remove protocol (http://, git:// etc)
+  onion=${onion##*://}
+  ## count characters
+  [ "${#onion}" = "56" ] || error_msg "Onion '${onion}' is invalid\n\t length '${#onion}' should be exactly 56 characters long (not counting .onion)"
+  ## check for base32 and lower case letters
+  [ "${onion%%*[^a-z2-7]*}" ] || error_msg "Onion '${onion}' is invalid\n\t it is not within base32 alphabet lower-case encoding [a-z2-7]"
+}
+
+
+command -v tor-ctrl >/dev/null || error_msg "Install tor-ctrl"
+
+############
+### opts ###
+
+## if option requires argument, check if it was provided, if yes, assign the arg to the opt
+get_arg(){
+  ## if argument is empty or starts with '-', fail as it possibly is an option
+  case "${arg}" in
+    ""|-*) error_msg "Option '${opt}' requires an argument.";;
+  esac
+  value="${arg}"
+  ## Escaping quotes is needed because else it will fail if the argument is quoted
+  # shellcheck disable=SC2140
+  eval "${1}"="\"${value}\""
+}
+
+## hacky getopts
+while :; do
+  case "${1}" in
+    -*) opt="${1#*-}"; arg="${2}";;
+    *) opt="${1}";;
+  esac
+  case "${opt}" in
+    o) get_arg onion; shift 2;;
+
+    ## server
+    A) add_onion=1; shift 1;;
+    k) get_arg client_pub_key; shift 2;;
+    l) get_arg port; shift 2;;
+    w) detach=0; shift 1;;
+    u) getarg client_pub_key; shift 2;;
+    i) discard_pk=1; shift 1;;
+    y) non_anonymous=1; shift 1;;
+    x) get_arg max_streams; shift 1;;
+
+    L) list_onion=1; shift 1;;
+    D) del_onion; shift 2;;
+
+    ## client
+    U) get_arg onion_client_auth_add; shift 2;;
+    n) permanent_auth=1; shift 1;;
+    R) onion_client_auth_remove=1; shift 1;;
+    W) onion_client_auth_view=1; shift 1;;
+
+    ## general
+    s) get_arg tor_control_socket; shift 2;;
+    p) get_arg tor_password; shift 2;;
+    m) machine_mode=1; shift 1;;
+
+    h) usage;;
+    -) shift 1; break;;
+    "") break;;
+    *) break;; ## it could be be usage instead of break, but then would need to use '--' to end option parsing
+  esac
+done
+
+
+## set default values
+: "${machine_mode:=0}"
+## server
+: "${add_onion:=0}"
+: "${detach:=1}"
+: "${discard_pk:=0}"
+: "${non_anonymous:=0}"
+: "${max_streams:=0}"
+: "${del_onion:=0}"
+: "${list_onion:=0}"
+## client
+: "${permanent_auth:=0}"
+: "${onion_client_auth_remove:=0}"
+: "${onion_client_auth_view:=0}"
+
+
+cli_args=""
+[ -n "${tor_control_socket}" ] && cli_args="${cli_args} -s ${tor_control_socket}"
+[ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
+[ "${machine_mode}" -eq 1 ] && cli_args="${cli_args} -m"
+[ "${detach}" -eq 0 ] && cli_args="${cli_args} -w"
+
+#########
+## Server
+
+if [ "${list_onion}" -eq 1 ]; then
+  # shellcheck disable=SC2086
+  tor-ctrl ${cli_args} GETINFO onions/detached
+  exit "$?"
+fi
+
+if [ "${del_onion}" -eq 1 ]; then
+  # shellcheck disable=SC2086
+  tor-ctrl ${cli_args} DEL_ONION "${del_onion}"
+  exit "$?"
+fi
+
+if [ "${add_onion}" -eq 1 ]; then
+  [ -n "${port}" ] && port="Port=${port}"
+  [ "${detach}" -eq 1 ] && flags="${flags}Detach,"
+  [ "${discard_pk}" -eq 1 ] && flags="${flags}DiscardPK,"
+  [ -n "${client_pub_key}" ] && flags="${flags}V3Auth," client_pub_key="ClientAuthV3=${client_pub_key}"
+  [ "${non_anonymous}" -eq 1 ] && flags="${flags}NonAnonymous,"
+  [ -n "${max_streams}" ] && flags="${flags}MaxStreamsCloseCircuit," max_streams="MaxStreams=${max_streams}"
+  [ -n "${flags}" ] && flags="Flags=${flags}"
+  # shellcheck disable=SC2086
+  tor-ctrl ${cli_args} ADD_ONION ${key:="NEW:BEST"} "${port}" ${client_pub_key} ${max_streams} ${flags}
+  exit "$?"
+fi
+
+#########
+## Client
+
+if [ -n "${onion_client_auth_add}" ]; then
+  [ -z "${onion}" ] && error_msg "This option requires an onion service to be specified, use with '-o address.onion'"
+  validate_onion
+  # shellcheck disable=SC2086
+  tor-ctrl ${cli_args} ONION_CLIENT_AUTH_ADD "${onion}" "${onion_client_auth_add}"
+  exit "$?"
+fi
+
+if [ "${onion_client_auth_remove}" -eq 1 ]; then
+  [ -z "${onion}" ] && error_msg "This option requires an onion service to be specified, use with '-o address.onion'"
+  validate_onion
+  # shellcheck disable=SC2086
+  tor-ctrl ${cli_args} ONION_CLIENT_AUTH_REMOVE "${onion}"
+  exit "$?"
+fi
+
+if [ "${onion_client_auth_view}" -eq 1 ]; then
+  [ -n "${onion}" ] && validate_onion
+  # shellcheck disable=SC2086
+  tor-ctrl ${cli_args} ONION_CLIENT_AUTH_VIEW ${onion}
+  exit "$?"
+fi
+
+######
+## if reached here and no major option was specified, show help message as nothing was run
+usage

@@ -12,6 +12,10 @@ usage(){
 
   -p [pwd]       use password [pwd] instead of Tor's control_auth_cookie
                  default: not used
+
+  -m             machine mode
+                 notice: script informational and warning messages won't be printed to stdout
+                 default: not set
 "
   exit 1
 }
@@ -28,33 +32,46 @@ list_circuits(){
     [ -z "${circuit_status}" ] && break
     if [ "${circuit_status}" = "BUILT" ]; then
       printf '%s\n' "Circuit: ${circuit_id}, status: ${circuit_status}, purpose: ${circuit_purpose}"
-      r=0
+      hop=0
       for relay in $(printf '%s\n' "${circuit_path}" | tr "," " "); do
-        r=$((r+1))
-        [ ${r} -gt 3 ] && break
+        hop=$((hop+1))
+        [ ${hop} -gt 3 ] && break
         relay="$(printf '%s\n' "${relay}" | tr -d "$" | tr "~" " ")"
         relay_fingerprint="$(printf '%s\n' "${relay}" | cut -d " " -f1)"
         relay_nickname="$(printf '%s\n' "${relay}" | cut -d " " -f2)"
         # shellcheck disable=SC2086
         relay_status="$(tor-ctrl -c "GETINFO ns/id/${relay_fingerprint}" ${cli_args})"
         relay_host="$(printf '%s\n' "${relay_status}" | grep "^r " | cut -d " " -f7)"
-        printf '%s\n' "${r}. ${relay_fingerprint} (${relay_nickname}, ${relay_host})"
+        relay_bandwidth="$(printf '%s\n' "${relay_status}" | grep "^w " | sed "s/w Bandwidth=//;s/\\r//")"
+        relay_bandwidth="$((relay_bandwidth*512/1024/1024)) MiB/s"
+        # shellcheck disable=SC2086
+        relay_locale="$(tor-ctrl -c "GETINFO ip-to-country/${relay_host}" ${cli_args})"
+        relay_locale="$(printf '%s\n' "${relay_locale}" | grep -F "250-ip-to-country/${relay_host}=" | sed "s/.*=//;s/\\r//")"
+        #printf '%s. %s [%s, %s, (%s), %s]\n' "${hop}" "${relay_fingerprint}" "${relay_nickname}" "${relay_host}" "${relay_locale}" "${relay_bandwidth}"
+        printf '%1s. %-40s %-15s %-19s (%-2s) %9s\n' "${hop}" "${relay_fingerprint}" "${relay_host}" "${relay_nickname}" "${relay_locale}" "${relay_bandwidth}"
       done
       printf "\n"
     fi
   done
 }
 
-while getopts ":s:p:h" Option; do
+command -v tor-ctrl >/dev/null || error_msg "Install tor-ctrl"
+
+while getopts ":s:p:mh" Option; do
   case ${Option} in
     s) tor_control_socket="${OPTARG}";;
     p) tor_password="${OPTARG}";;
+    m) machine_mode=1;;
     h|*) usage;;
   esac
 done
 
 cli_args=""
-[ -n "${tor_control_port}" ] && cli_args="${cli_args} -s ${tor_control_socket}"
+[ -n "${tor_control_socket}" ] && cli_args="${cli_args} -s ${tor_control_socket}"
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
+[ -n "${machine_mode}" ] && cli_args="${cli_args} -m"
+
+## set default values
+: "${machine_mode:=0}"
 
 list_circuits
