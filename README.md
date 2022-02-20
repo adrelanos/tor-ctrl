@@ -210,6 +210,20 @@ curl -x socks5h://127.0.0.1:9050 github.com
 ```
 Return to the script and use the interrupt signal (Ctrl+C) to print out the stream events received.
 
+### Tor Browser Bundle
+
+tor-ctrl can connect to any Tor socket, even to the Tor Browser Bundle socket.
+
+Open Tor Browser but don't connect to the network yet. The default socket is `127.0.0.1:9151`, so specify it when running tor-ctrl:
+```sh
+tor-ctrl-stream -s 9151
+```
+Note: On Whonix-Gateway, there is no need to specify the socket, it will be auto-detected.
+
+Connect to the network, you will watch every stream that is made. Browse to any website you'd like to visit.
+
+If you plan to share your streams because you saw some unwanted connections being made, don't forget to use the `-z` option, so circuits paths are not shown.
+
 ### Debugging
 
 #### Permission denied
