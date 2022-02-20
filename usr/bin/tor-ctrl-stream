@@ -35,7 +35,7 @@ list_streams(){
   trap "exit" INT QUIT TERM
   trap "rm -f stream.hosts stream.tmp stream.loop; kill 0" EXIT
 
-  for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v -E "^$|^250" ); do
+  for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v "^$" | grep -v "^250" ); do
     printf '%s\n' "${listen_stream}" | grep "^650 STREAM ${stream_ordered}" | while IFS="$(printf '\n')" read -r stream_line; do
       IFS=" " read -r _ _ stream_id stream_status circuit_id stream_target _ <<-EOF
         $(printf '%s\n' "${stream_line}")
