@@ -107,13 +107,13 @@ Examples:
   Server
                  ${me} -A -l 80
                  ${me} -A -l 80,127.0.0.1:8080 -w -i
-                 ${me} -D service_hostname_without_dot_onion
+                 ${me} -D website.onion
                  ${me} -L
   Client
-                 ${me} -U x25519:client_priv_key_base64 -o some_onion
-                 ${me} -R -o some_onion
+                 ${me} -U x25519:client_priv_key_base64 -o website.onion
+                 ${me} -R -o website.onion
                  ${me} -W
-                 ${me} -W -o some_onion
+                 ${me} -W -o website.onion
 "
   exit 1
 }
@@ -124,7 +124,7 @@ error_msg(){
 }
 
 validate_onion(){
-  ## remove .onion suffix
+  ## remove .onion suffix and everything after it
   onion=${onion%.onion*}
   ## remove protocol (http://, git:// etc)
   onion=${onion##*://}
