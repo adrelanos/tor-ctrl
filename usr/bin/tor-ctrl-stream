@@ -124,7 +124,7 @@ cli_args=""
 
 if [ "${machine_mode}" -eq 0 ]; then
   printf '%s\n' "${me}: [info]: subscribed to Tor stream events, as soon as streams are created, output will be shown below."
-  printf '%s\n' "${me}: [warn]: posting these contents online can deanonymize the tor client."
+  [ "${no_circuit}" -eq 0 ] && printf '%s\n' "${me}: [warn]: posting these contents online can deanonymize the tor client."
 fi
 
 ## it will print the streams table after receiving an INT signal
