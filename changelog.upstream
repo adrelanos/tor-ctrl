@@ -1,3 +1,340 @@
+commit 8119c6233e44ab35fea88df5861895456a74d2d5
+Merge: 827469c ece5e97
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Feb 18 09:47:40 2022 -0500
+
+    Merge remote-tracking branch 'nyxnor/master'
+
+commit ece5e97a69bf636dd5b4af9cfd17a9bacddaee2d
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Feb 17 11:10:22 2022 +0000
+
+    fix tor-ctrl-onion port arg
+
+commit 91aadedc1f7feb6f7d58c68c23b6bd0330f6b2b8
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Feb 13 00:59:55 2022 +0100
+
+    grep fixed strings where to avoid problems with ipv6 relays
+
+commit 9051de5a494f8ed7c29d6ab957e6f71b105df689
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Feb 13 00:57:11 2022 +0100
+
+    invert hostname order
+
+commit 185050d6d8e051dccf9e7fc280b082a384cad8aa
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Feb 13 00:50:56 2022 +0100
+
+    grep fixed string to not fail on []
+    
+    fix https://github.com/nyxnor/tor-ctrl/issues/25
+
+commit 7d822a2f566a5070b417597f34dae5750f387ad1
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sat Feb 12 20:14:39 2022 +0100
+
+    add tor as a dependency as we use --verify-config
+
+commit 15ad2c65341c7e0a8cf1a6a5617af4bfd2fb5069
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Feb 11 14:33:58 2022 +0100
+
+    configure.sh
+
+commit fd6c4888368ca0152a711159ce67727ba3fd0a41
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Feb 10 13:09:04 2022 +0100
+
+    add newline
+
+commit 9f31740e88dbd40fd8cd098df59799d8c8d6bf71
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Feb 10 02:26:42 2022 +0100
+
+    make streams without circuits cleaner
+
+commit f5879a8a0d10053b64a9cd427d0910e2c9fbdbd5
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Feb 4 14:13:37 2022 +0100
+
+    onion hostname is only lower-case
+
+commit 78cf43f6c17e8d1c63f220f1fd828340fe533bf3
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Feb 4 01:31:40 2022 +0100
+
+    fix max stream close circuit
+
+commit dae0098e0044b48ed72443320eaa39aba344ddb6
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Feb 4 00:16:44 2022 +0100
+
+    fix tor-ctrl-onion max streams
+
+commit 5029208dc077ab279983325de61d1820b5b3eb71
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Feb 3 23:43:18 2022 +0100
+
+    add nonanonymous and maxtreams for tor-ctrl-onion
+    
+    https://github.com/nyxnor/tor-ctrl/issues/17
+
+commit 2860b60c3b2d809616f2c760f953e4d870e5377a
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Feb 3 18:31:08 2022 +0100
+
+    add ONION_CLIENT_AUTH_{ADD,REMOVE,VIEW} to tor-ctrl-onion
+    
+    https://github.com/nyxnor/tor-ctrl/issues/24 and https://github.com/nyxnor/tor-ctrl/issues/17
+
+commit 510029a9a43fa1e8102abf5d47bd9499e90c5186
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Feb 3 18:30:06 2022 +0100
+
+    remove shift from getopts
+
+commit cced9d2c280ba5aba81b0b44168458c3112549eb
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Feb 3 00:19:48 2022 +0100
+
+    check if tor-ctrl is installed to use secondary scripts
+
+commit b08676b061227e5287c84eb109c2793d8a44e7e4
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Feb 3 00:19:27 2022 +0100
+
+    fix V3Auth
+
+commit 33e10e991643cc831e992923705d1c3add255c66
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Wed Feb 2 22:27:35 2022 +0100
+
+    initial tor-ctrl-onion
+    
+    https://github.com/nyxnor/tor-ctrl/issues/17
+
+commit f33e9ac39e9017d9d0e736fa973b82a9f028a9f6
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Tue Feb 1 18:04:13 2022 +0100
+
+    fix double quoting
+
+commit 37ada279c7bd3a95ca322d738c7bf002d20fdd59
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Tue Feb 1 17:33:46 2022 +0100
+
+    fix https://github.com/nyxnor/tor-ctrl/issues/21
+
+commit 48140da8fbc7812aad7dc5eaaa6986aeaa0f624d
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Tue Feb 1 17:25:09 2022 +0100
+
+    move hostname to inside ()
+    
+    fix for https://github.com/nyxnor/tor-ctrl/issues/22
+
+commit 922823236273b4bfd9cd5627e8e220f3cdacab39
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Tue Feb 1 17:19:36 2022 +0100
+
+    fix catting no file for the first run
+    
+    fix for https://github.com/nyxnor/tor-ctrl/issues/22
+
+commit 7db9aacc25e4ee0f92cf241c38ac49219883a4cd
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Tue Feb 1 17:14:07 2022 +0100
+
+    saving hostname to a temporary file
+    
+    fix https://github.com/nyxnor/tor-ctrl/issues/22
+
+commit 62ead28cdf8de507cef34ef0d97d061fc3bbcbcd
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 28 23:31:40 2022 +0100
+
+    save strean information as soon as client tried to connect
+    "SENTCONNECT"  / ; Sent a connect cell along a circuit
+    "SENTRESOLVE"  / ; Sent a resolve cell along a circuit
+    
+    Now, stream does not need to succeed or be closed, it is better this way cause we can see all tried connections/resolves
+
+commit 96ffbdf42ea8eeef3340827411cd77fbb8f5d163
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 28 23:26:06 2022 +0100
+
+    add stream purpose
+
+commit 64160ce977c575ab67d11194428c559ef886aae6
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 28 23:11:02 2022 +0100
+
+    even if the stream does not close, print it
+    SUCCEEDED does not appear on stream NEWRESOLVE that is for DNS_REQUEST, so we need to keep the CLOSED option
+    but in the case it has SUCCEEDED to connect but not closed yet, still print it
+
+commit acce8d07a7178bdc5450581774ef807ff5d4342f
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 28 22:44:44 2022 +0100
+
+    print stream ordered by number
+    fix https://github.com/nyxnor/tor-ctrl/issues/23
+
+commit 731e1bc4383aee7c48abb67ad4c2aa27b341f8ad
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 28 16:02:57 2022 +0100
+
+    fix tor-ctrl-stream listening to torscosk requests
+    
+    https://github.com/nyxnor/tor-ctrl/issues/22
+
+commit 0136eab410e590a872de2ff5b82b3011f82a5d91
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 28 00:45:58 2022 +0100
+
+    add machine mode (default not set), this means info messages will be printed by default
+    https://github.com/nyxnor/tor-ctrl/issues/19
+
+commit d96c6de6ac04a03d3d209008e4afff6df8d3fc34
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 28 00:32:13 2022 +0100
+
+    just attempt to install highest package version from parent directory
+
+commit 8d6e855321cc34087ae528e465582b724d7143a3
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 28 00:26:07 2022 +0100
+
+    --no-sign package on configure.sh
+    
+    I presume whonix automated script takes care of this for signing new releases without depending on this custom script
+
+commit 75349b8f777643cbed8d2435db986d4835a74446
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 28 00:20:59 2022 +0100
+
+    fix sending empty line has two or more consecutives \n \n
+    
+    this occurs if there is a user made typo, just avoid it
+
+commit 20a8fe7fcdb1b2b2ac44229509820b73be502ccc
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 28 00:14:32 2022 +0100
+
+    don't attempt to sign package from readme instructions
+    
+    if not signed, error code is 25,lets use flag --no-sign so error code is zero and not red alarming on the screen
+
+commit eb991be83864c8434d3f411b5bfc5dd90996ed21
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Jan 24 11:04:57 2022 +0100
+
+    fix bold header on tor-ctrl-stream
+
+commit 5854005ca2262b42d30c3da0fcb91cb2f23a81b8
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Jan 24 10:53:16 2022 +0100
+
+    update manuals
+
+commit 117aefcc3b015c78d9b9a328d6274ff7ee0dabf3
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Jan 24 10:53:05 2022 +0100
+
+    format text to left and numbers to right
+
+commit ea1ddcd507f480113626563b129d47800065481c
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Jan 24 02:12:11 2022 +0100
+
+    fix tor-ctrl-stream trap signal
+    
+    https://github.com/nyxnor/tor-ctrl/issues/18
+
+commit 443426965d4516b509642a595576d2598c78ed44
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 23 23:00:49 2022 +0100
+
+    tor-ctrl-stream prints whole stream without format first
+    fix https://github.com/nyxnor/tor-ctrl/issues/18
+
+commit 5f97b2e632a3203d291590f465b69b4d8ebcaf22
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jan 23 22:38:49 2022 +0100
+
+    formatting
+
+commit 79ffc9d3af684c2c8513eda901a61bd9c05195a0
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sat Jan 22 12:17:42 2022 +0100
+
+    fix https://github.com/nyxnor/tor-ctrl/issues/15. Print bandwidth and contry for circuits
+
+commit 52a86589ee509075de81618b4802cf2501621cc5
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sat Jan 22 12:17:11 2022 +0100
+
+    add deb option to configure.sh and make .gitignore pattern more broad
+
+commit 79532c0a9516e7f0c505a3be133d758516eeb3dd
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 21 14:17:28 2022 +0100
+
+    readme'
+
+commit 42b8ac0cf0399ce59cf6cc343334a5aebdce412f
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 21 14:16:39 2022 +0100
+
+    typo readme
+
+commit df3e9c1312580640a02f26ac633aac444abf660d
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 21 14:14:30 2022 +0100
+
+    update readme about sharing private info
+
+commit 123a848e7658898f4c059d60c087b756760ed24c
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 21 12:08:51 2022 +0100
+
+    'tor-ctrl -w' quits with INT and 'tor-ctrl-stream' resumes with INT. Closes https://github.com/nyxnor/tor-ctrl/issues/13
+
+commit a9ea0782141e018b4d9284d556ff98c7c13b6b12
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 21 12:06:23 2022 +0100
+
+    add shellcheck option in configure.sh
+
+commit 4827f423ad2f823d38748fcf59d0458478dc5cff
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 21 12:06:09 2022 +0100
+
+    update docs
+
+commit 77e0d5a07f236a5b3bd72ee6bfc7bc632bbbc102
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Jan 21 12:05:52 2022 +0100
+
+    add dot files
+
+commit 1755a692921d20f006cdd174f9479c1b5d913675
+Merge: 6c09bfc 827469c
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Thu Jan 20 02:13:26 2022 +0100
+
+    Merge pull request #14 from Whonix/master
+    
+    typo and bump deb package changelog version
+
+commit 827469c38682714157bcc9e4e2c0eaf5ac9f603b
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Wed Jan 19 07:12:47 2022 -0500
+
+    bumped changelog version
+
 commit ee3489c34e904be3326c0dad6476d1d59387786b
 Author: Patrick Schleizer <adrelanos@whonix.org>
 Date:   Wed Jan 19 07:11:52 2022 -0500
