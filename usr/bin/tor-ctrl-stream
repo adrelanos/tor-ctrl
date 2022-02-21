@@ -96,6 +96,7 @@ EOF
             ## unknown us being specified for proper field separation
             printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${stream_target} ${circuit_id}  ${circuit_purpose}\n" | tr -s " " | grep -v " DIR_FETCH " | grep -F -v ".exit:"
           fi
+          ## return to avoid duplicates (happens when there is CLOSED and SUCCEEDED)
           return
         ;;
       esac

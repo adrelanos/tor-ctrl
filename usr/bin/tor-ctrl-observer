@@ -2,6 +2,8 @@
 
 ## This is the script you tell people to run and avoid leaking private information
 
+nocolor="\033[0m"
+bold="\033[1m"
 
 me="${0##*/}"
 
@@ -60,6 +62,8 @@ EOF
           ## Stream purpose is unkown for tor-ctrl if it was an end of stream that we didn't catch the creation
           ## unknown us being specified for proper field separation
           printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${stream_target} ${circuit_id}  ${circuit_purpose}\n" | tr -s " " | grep -v " DIR_FETCH " | grep -F -v ".exit:"
+          ## return to avoid duplicates (happens when there is CLOSED and SUCCEEDED)
+          return
         ;;
       esac
     done
