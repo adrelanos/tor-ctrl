@@ -73,6 +73,10 @@ SERVER
   -x [max_streams]
                  when the number of max stream is reached, close circuit.
 
+  -P [dir]       directory where to save permanent onions
+
+  -E [dir|file]  directory or difle search for onion(s) to restore
+
  Delete onion:
 
   -D             delete onion
@@ -107,7 +111,9 @@ Examples:
   Server
                  ${me} -A -l 80
                  ${me} -A -l 80,127.0.0.1:8080 -w -i
-                 ${me} -D website.onion
+                 ${me} -A -P ~/.${me} -l 80
+                 ${me} -A -E ~/.${me}
+                 ${me} -D -o website.onion
                  ${me} -L
   Client
                  ${me} -U x25519:client_priv_key_base64 -o website.onion
@@ -140,15 +146,12 @@ command -v tor-ctrl >/dev/null || error_msg "Install tor-ctrl"
 ############
 ### opts ###
 
-## if option requires argument, check if it was provided, if yes, assign the arg to the opt
 get_arg(){
   ## if argument is empty or starts with '-', fail as it possibly is an option
   case "${arg}" in
     ""|-*) error_msg "Option '${opt}' requires an argument.";;
   esac
   value="${arg}"
-  ## Escaping quotes is needed because else it will fail if the argument is quoted
-  # shellcheck disable=SC2140
   eval "${1}"="\"${value}\""
 }
 
@@ -170,9 +173,11 @@ while :; do
     i) discard_pk=1; shift 1;;
     y) non_anonymous=1; shift 1;;
     x) get_arg max_streams; shift 1;;
+    P) get_arg permanent_onion_save; shift 2;;
+    E) get_arg permanent_onion_restore; shift 2;;
 
     L) list_onion=1; shift 1;;
-    D) del_onion; shift 2;;
+    D) del_onion=1; shift 1;;
 
     ## client
     U) get_arg onion_client_auth_add; shift 2;;
@@ -221,13 +226,14 @@ cli_args=""
 if [ "${list_onion}" -eq 1 ]; then
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} GETINFO onions/detached
-  exit "$?"
+  exit "${?}"
 fi
 
 if [ "${del_onion}" -eq 1 ]; then
+  validate_onion
   # shellcheck disable=SC2086
-  tor-ctrl ${cli_args} DEL_ONION "${del_onion}"
-  exit "$?"
+  tor-ctrl ${cli_args} DEL_ONION "${onion}"
+  exit "${?}"
 fi
 
 if [ "${add_onion}" -eq 1 ]; then
@@ -238,10 +244,42 @@ if [ "${add_onion}" -eq 1 ]; then
   [ "${non_anonymous}" -eq 1 ] && flags="${flags}NonAnonymous,"
   [ -n "${max_streams}" ] && flags="${flags}MaxStreamsCloseCircuit," max_streams="MaxStreams=${max_streams}"
   [ -n "${flags}" ] && flags="Flags=${flags}"
-  # shellcheck disable=SC2086
-  tor-ctrl ${cli_args} ADD_ONION ${key:="NEW:BEST"} "${port}" ${client_pub_key} ${max_streams} ${flags}
-  exit "$?"
+  if [ -n "${permanent_onion_save}" ] && [ "${discard_pk}" -eq 1 ]; then
+    error_msg "Permanent onion mode is not compatible with the flag that discards the private key."
+  fi
+  if [ -n "${permanent_onion_save}" ]; then
+    test -d "${permanent_onion_save}" || error_msg "Permanent directory to save onion does not exist: ${permanent_onion_save}"
+    trap "rm -f -- ${permanent_onion_save%*/}/onion.tmp" INT EXIT
+    printf '%s\n' "${port} ${client_pub_key} ${max_streams} ${flags}" | tee "${permanent_onion_save%*/}"/onion.tmp
+    # shellcheck disable=SC2086
+    tor-ctrl ${cli_args} ADD_ONION ${key:="NEW:BEST"} "${port}" ${client_pub_key} ${max_streams} ${flags} | grep -v "^250 " | tee -a "${permanent_onion%*/}"/onion.tmp
+    exit_code="${?}"
+    [ "${exit_code}" -ne 0 ] && error_msg "Failed to create onion"
+    onion_id_file="$(grep "250-ServiceID=" "${permanent_onion_save}"/onion.tmp | sed "s/250-ServiceID=//")"
+    ## save file with its Service Identification
+    mv "${permanent_onion_save%*/}"/onion.tmp "${permanent_onion_save%*/}/${onion_id_file}"
+    exit "${?}"
+  elif [ -n "${permanent_onion_restore}" ]; then
+    test -d "${permanent_onion_restore}" || error_msg "Permanent directory to restore onion does not exist: ${permanent_onion_save}"
+    for file in "${permanent_onion_restore%*/}"/*; do
+      restore_parameters="$(grep -E "Port=|Flags=|ClientAuthV3=|MaxStreams=" "${file}" | tr "\n" " ")"
+      restore_key="$(grep "250-PrivateKey=" "${file}" | sed "s/250-PrivateKey=//")"
+      # shellcheck disable=SC2086
+      tor-ctrl ${cli_args} ADD_ONION ${restore_key} ${restore_parameters} | grep -v "^250 "
+    done
+    ## yes, just the last try of exit code
+    exit "${?}"
+  else
+    # shellcheck disable=SC2086
+    tor-ctrl ${cli_args} ADD_ONION ${key:="NEW:BEST"} "${port}" ${client_pub_key} ${max_streams} ${flags} | grep -v "^250 "
+  fi
+  exit "${?}"
 fi
+
+
+
+alg:pk Port= ClientAuthV3= MaxStreams= Flags=
+
 
 #########
 ## Client
@@ -251,7 +289,7 @@ if [ -n "${onion_client_auth_add}" ]; then
   validate_onion
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} ONION_CLIENT_AUTH_ADD "${onion}" "${onion_client_auth_add}"
-  exit "$?"
+  exit "${?}"
 fi
 
 if [ "${onion_client_auth_remove}" -eq 1 ]; then
@@ -259,14 +297,14 @@ if [ "${onion_client_auth_remove}" -eq 1 ]; then
   validate_onion
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} ONION_CLIENT_AUTH_REMOVE "${onion}"
-  exit "$?"
+  exit "${?}"
 fi
 
 if [ "${onion_client_auth_view}" -eq 1 ]; then
   [ -n "${onion}" ] && validate_onion
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} ONION_CLIENT_AUTH_VIEW ${onion}
-  exit "$?"
+  exit "${?}"
 fi
 
 ######
