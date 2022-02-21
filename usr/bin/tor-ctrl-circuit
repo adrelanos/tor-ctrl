@@ -66,7 +66,7 @@ list_circuits(){
       printf "\n"
     fi
   done
-  printf %s"\n${yellow}${me}: [warn] Do not share this information publicly, it could deanonymize yourself.${nocolor}\n"
+  printf %s"${yellow}${me}: [warn] Do not share this information publicly, it could deanonymize yourself.${nocolor}\n"
 }
 
 command -v tor-ctrl >/dev/null || error_msg "Install tor-ctrl"
