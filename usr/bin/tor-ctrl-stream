@@ -92,7 +92,7 @@ EOF
               printf "\nStreamId StreamPurpose StreamTarget CircuitId CircuitPurpose\n"
               printf %s"--------------------------------------------------------------------------------------------------------------${nocolor}\n"
             }
-            printf %s"${stream_id} ${stream_purpose} ${stream_target} ${circuit_id}  ${circuit_purpose}\n" | grep -v " DIR_FETCH "
+            printf %s"${stream_id} ${stream_purpose} ${stream_target} ${circuit_id}  ${circuit_purpose}\n" | grep -v " DIR_FETCH " | grep -F -v ".exit:"
           fi
           return
         ;;
