@@ -57,7 +57,7 @@ EOF
             touch stream.loop
             printf %s"${bold}"
             printf "\nStreamId StreamPurpose StreamTarget CircuitId CircuitPurpose\n"
-            printf %s"--------------------------------------------------------------------------------------------------------------${nocolor}\n"
+            printf %s"------------------------------------------------------------------------------------------------------${nocolor}\n"
           }
           ## Stream purpose is unkown for tor-ctrl if it was an end of stream that we didn't catch the creation
           ## unknown us being specified for proper field separation
