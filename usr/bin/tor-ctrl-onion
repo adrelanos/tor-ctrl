@@ -260,15 +260,22 @@ if [ "${add_onion}" -eq 1 ]; then
     mv "${permanent_onion_save%*/}"/onion.tmp "${permanent_onion_save%*/}/${onion_id_file}"
     exit "${?}"
   elif [ -n "${permanent_onion_restore}" ]; then
-    { ! test -f "${permanent_onion_restore}" && ! test -d "${permanent_onion_restore}"; } && error_msg "Permanent directory or file to restore onion does not exist: ${permanent_onion_save}"
-    for file in "${permanent_onion_restore%*/}"/*; do
-      restore_parameters="$(grep -E "Port=|Flags=|ClientAuthV3=|MaxStreams=" "${file}" | tr "\n" " ")"
-      restore_key="$(grep "250-PrivateKey=" "${file}" | sed "s/250-PrivateKey=//")"
+    if test -f "${permanent_onion_restore}"; then
+      restore_parameters="$(grep -E "Port=|Flags=|ClientAuthV3=|MaxStreams=" "${permanent_onion_restore}" | tr "\n" " ")"
+      restore_key="$(grep "250-PrivateKey=" "${permanent_onion_restore}" | sed "s/250-PrivateKey=//")"
       # shellcheck disable=SC2086
       tor-ctrl ${cli_args} ADD_ONION ${restore_key} ${restore_parameters} | grep "^250-"
-    done
-    ## yes, just the last try of exit code
-    exit "${?}"
+      exit "${?}"
+    elif test -d "${permanent_onion_restore}"; then
+      for file in "${permanent_onion_restore%*/}"/*; do
+        restore_parameters="$(grep -E "Port=|Flags=|ClientAuthV3=|MaxStreams=" "${file}" | tr "\n" " ")"
+        restore_key="$(grep "250-PrivateKey=" "${file}" | sed "s/250-PrivateKey=//")"
+        # shellcheck disable=SC2086
+        tor-ctrl ${cli_args} ADD_ONION ${restore_key} ${restore_parameters} | grep "^250-"
+      done
+      exit "${?}" ## yes, just the last try of exit code
+    else
+      error_msg "Permanent directory or file to restore onion does not exist: ${permanent_onion_save}"
   else
     # shellcheck disable=SC2086
     tor-ctrl ${cli_args} ADD_ONION ${key:="NEW:BEST"} "${port}" ${client_pub_key} ${max_streams} ${flags} | grep -v "^250 "
