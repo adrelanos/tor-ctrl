@@ -19,7 +19,7 @@
 me="${0##*/}"
 
 usage(){
-  printf '%s\n' "usage: ${me} [-mzh] [-s socket] [-p password]
+  printf '%s\n' "usage: ${me} [-mh] [-s socket] [-p password]
 
   -s [socket]    tor's control socket
                  notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
