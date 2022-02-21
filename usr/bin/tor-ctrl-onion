@@ -260,7 +260,7 @@ if [ "${add_onion}" -eq 1 ]; then
     mv "${permanent_onion_save%*/}"/onion.tmp "${permanent_onion_save%*/}/${onion_id_file}"
     exit "${?}"
   elif [ -n "${permanent_onion_restore}" ]; then
-    test -d "${permanent_onion_restore}" || error_msg "Permanent directory to restore onion does not exist: ${permanent_onion_save}"
+    { ! test -f "${permanent_onion_restore}" && ! test -d "${permanent_onion_restore}"; } && error_msg "Permanent directory or file to restore onion does not exist: ${permanent_onion_save}"
     for file in "${permanent_onion_restore%*/}"/*; do
       restore_parameters="$(grep -E "Port=|Flags=|ClientAuthV3=|MaxStreams=" "${file}" | tr "\n" " ")"
       restore_key="$(grep "250-PrivateKey=" "${file}" | sed "s/250-PrivateKey=//")"
