@@ -255,7 +255,7 @@ if [ "${add_onion}" -eq 1 ]; then
     tor-ctrl ${cli_args} ADD_ONION ${key:="NEW:BEST"} "${port}" ${client_pub_key} ${max_streams} ${flags} | grep "^250-" | tee -a "${permanent_onion_save%*/}"/onion.tmp
     exit_code="${?}"
     [ "${exit_code}" -ne 0 ] && error_msg "Failed to create onion"
-    onion_id_file="$(grep "250-ServiceID=" "${permanent_onion_save}"/onion.tmp | sed "s/250-ServiceID=//;s/\\r//")"
+    onion_id_file="$(grep "250-ServiceID=" "${permanent_onion_save}"/onion.tmp | sed "s/250-ServiceID=//" | tr -d "\\r")"
     ## save file with its Service Identification
     mv "${permanent_onion_save%*/}"/onion.tmp "${permanent_onion_save%*/}/${onion_id_file}"
     exit "${?}"
