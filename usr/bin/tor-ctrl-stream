@@ -95,7 +95,7 @@ EOF
             }
             ## Stream purpose is unkown for tor-ctrl if it was an end of stream that we didn't catch the creation
             ## unknown us being specified for proper field separation
-            printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${stream_target} ${circuit_id}  ${circuit_purpose}\n" | tr -s " " | grep -v " DIR_FETCH " | grep -F -v ".exit:"
+            printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${stream_target} ${circuit_id}  ${circuit_purpose}\n" | tr -s " "
           fi
           ## return to avoid duplicates (happens when there is CLOSED and SUCCEEDED)
           return
