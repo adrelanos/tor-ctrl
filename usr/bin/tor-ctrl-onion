@@ -152,6 +152,7 @@ get_arg(){
     ""|-*) error_msg "Option '${opt}' requires an argument.";;
   esac
   value="${arg}"
+  # shellcheck disable=SC2140
   eval "${1}"="\"${value}\""
 }
 
@@ -200,6 +201,8 @@ done
 
 ## set default values
 : "${machine_mode:=0}"
+: "${tor_control_socket:=}"
+: "${tor_password:=}"
 ## server
 : "${add_onion:=0}"
 : "${detach:=1}"
@@ -208,8 +211,11 @@ done
 : "${max_streams:=0}"
 : "${del_onion:=0}"
 : "${list_onion:=0}"
+: "${permanent_onion_save:=}"
+: "${permanent_onion_restore:=}"
 ## client
 : "${permanent_auth:=0}"
+: "${onion_client_auth_add:=}"
 : "${onion_client_auth_remove:=0}"
 : "${onion_client_auth_view:=0}"
 
@@ -237,6 +243,7 @@ if [ "${del_onion}" -eq 1 ]; then
 fi
 
 if [ "${add_onion}" -eq 1 ]; then
+  : "${key:="NEW:BEST"}"
   [ -n "${port}" ] && port="Port=${port}"
   [ "${detach}" -eq 1 ] && flags="${flags}Detach,"
   [ "${discard_pk}" -eq 1 ] && flags="${flags}DiscardPK,"
@@ -249,10 +256,10 @@ if [ "${add_onion}" -eq 1 ]; then
   fi
   if [ -n "${permanent_onion_save}" ]; then
     test -d "${permanent_onion_save}" || error_msg "Permanent directory to save onion does not exist: ${permanent_onion_save}"
-    trap "rm -f -- ${permanent_onion_save%*/}/onion.tmp" INT EXIT
+    trap 'rm -f -- ${permanent_onion_save%*/}/onion.tmp' INT EXIT
     printf '%s\n' "${port} ${client_pub_key} ${max_streams} ${flags}" | tr -s " " | tee "${permanent_onion_save%*/}"/onion.tmp
     # shellcheck disable=SC2086
-    tor-ctrl ${cli_args} ADD_ONION ${key:="NEW:BEST"} "${port}" ${client_pub_key} ${max_streams} ${flags} | grep "^250-" | tee -a "${permanent_onion_save%*/}"/onion.tmp
+    tor-ctrl ${cli_args} ADD_ONION "${key}" "${port}" ${client_pub_key} ${max_streams} ${flags} | grep "^250-" | tee -a "${permanent_onion_save%*/}"/onion.tmp
     exit_code="${?}"
     [ "${exit_code}" -ne 0 ] && error_msg "Failed to create onion"
     onion_id_file="$(grep "250-ServiceID=" "${permanent_onion_save}"/onion.tmp | sed "s/250-ServiceID=//" | tr -d "\\r")"
@@ -279,7 +286,7 @@ if [ "${add_onion}" -eq 1 ]; then
     fi
   else
     # shellcheck disable=SC2086
-    tor-ctrl ${cli_args} ADD_ONION ${key:="NEW:BEST"} "${port}" ${client_pub_key} ${max_streams} ${flags} | grep -v "^250 "
+    tor-ctrl ${cli_args} ADD_ONION "${key}" "${port}" ${client_pub_key} ${max_streams} ${flags} | grep -v "^250 "
   fi
   exit "${?}"
 fi
