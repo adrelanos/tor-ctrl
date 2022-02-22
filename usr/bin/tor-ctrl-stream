@@ -35,7 +35,8 @@ list_streams(){
   trap "exit" INT QUIT TERM
   trap "rm -f stream.hosts stream.tmp stream.loop; kill 0" EXIT
 
-  for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v "^$"); do
+  listen_stream="$(cat stream.tmp)"
+  for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v "^$" | grep -v "^250" ); do
     printf '%s\n' "${listen_stream}" | grep "^650 STREAM ${stream_ordered}" | while IFS="$(printf '\n')" read -r stream_line; do
       IFS=" " read -r _ _ stream_id stream_status circuit_id stream_target _ <<-EOF
         $(printf '%s\n' "${stream_line}")
@@ -61,12 +62,12 @@ EOF
           circuit_purpose="$(printf '%s\n' "${circuit}" | cut -d " " -f5 | sed "s/PURPOSE=//")"
           [ -z "${circuit_status}" ] && break
           if [ "${no_circuit}" -eq 0 ]; then
-            printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n"
+            printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n"
             printf %s"${bold}Stream:${nocolor} ${stream_id}, ${bold}Purpose:${nocolor} ${stream_purpose}, ${bold}Target:${nocolor} ${stream_target}${nocolor}\n"
             printf %s"${bold}Circuit:${nocolor} ${circuit_id}, ${bold}Purpose:${nocolor} ${circuit_purpose}${nocolor}\n"
             printf %s"${bold}"
             printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "n" "Fingerprint" "Address" "Nickname" "Geo" "Bandwidth"
-            printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n"
+            printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n"
             hop=0
             for relay in $(printf '%s\n' "${circuit_path}" | tr "," " "); do
               hop=$((hop+1))
@@ -84,16 +85,19 @@ EOF
               relay_locale="$(printf '%s\n' "${relay_locale}" | grep -F "250-ip-to-country/${relay_host}=" | sed "s/.*=//;s/\\r//")"
               printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "${hop}" "${relay_fingerprint}" "${relay_host}" "${relay_nickname}" "(${relay_locale})" "${relay_bandwidth}"
             done
-            printf %s"${bold}--------------------------------------------------------------------------------------------------------------${nocolor}\n\n"
+            printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n\n"
           else
             ! test -f stream.loop && {
               touch stream.loop
               printf %s"${bold}"
               printf "\nStreamId StreamPurpose StreamTarget CircuitId CircuitPurpose\n"
-              printf %s"--------------------------------------------------------------------------------------------------------------${nocolor}\n"
+              printf %s"------------------------------------------------------------------------------------------------------${nocolor}\n"
             }
-            printf %s"${stream_id} ${stream_purpose} ${stream_target} ${circuit_id}  ${circuit_purpose}\n"
+            ## Stream purpose is unkown for tor-ctrl if it was an end of stream that we didn't catch the creation
+            ## unknown us being specified for proper field separation
+            printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${stream_target} ${circuit_id}  ${circuit_purpose}\n" | tr -s " "
           fi
+          ## return to avoid duplicates (happens when there is CLOSED and SUCCEEDED)
           return
         ;;
       esac
@@ -124,7 +128,7 @@ cli_args=""
 
 if [ "${machine_mode}" -eq 0 ]; then
   printf '%s\n' "${me}: [info]: subscribed to Tor stream events, as soon as streams are created, output will be shown below."
-  printf '%s\n' "${me}: [warn]: posting these contents online can deanonymize the tor client."
+  [ "${no_circuit}" -eq 0 ] && printf '%s\n' "${me}: [warn]: posting these contents online can deanonymize the tor client."
 fi
 
 ## it will print the streams table after receiving an INT signal
@@ -135,8 +139,4 @@ trap "kill 0" EXIT
 
 ## this call will print to screen and sent to background
 # shellcheck disable=SC2086
-tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} &
-
-## this call will save the events to a variable so it can be used later
-# shellcheck disable=SC2086
-listen_stream="$(tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args})"
+tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | tee stream.tmp
