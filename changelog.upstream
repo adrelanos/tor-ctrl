@@ -1,3 +1,200 @@
+commit fc60758677673696357094d86cccf38c3b05e227
+Merge: 54ffffb bda0df7
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Tue Feb 22 05:37:17 2022 -0500
+
+    Merge remote-tracking branch 'nyxnor/master'
+
+commit bda0df76f6d93587e4897dea3387f427832e6a87
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 18:38:54 2022 +0000
+
+    do not ommit exits from normal streams
+
+commit 41604ccf7a4adc906a61217162ed77e17c7b35ce
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 18:35:25 2022 +0000
+
+    formatting
+
+commit 0792bb42d1d944c51cff2868bf111c75a51afdd3
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 18:32:21 2022 +0000
+
+    make less connections to the controller when possible
+
+commit df14202d5120a3b280dbe3db9b0691409f3ffecd
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 18:11:34 2022 +0000
+
+    fix duplicate
+    
+    https://github.com/nyxnor/tor-ctrl/issues/28
+
+commit b90f6b8c1fc975d029bdc2bf1a371808dcb06870
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 18:03:49 2022 +0000
+
+    tor-ctrl-observer
+    
+    https://github.com/nyxnor/tor-ctrl/issues/28
+
+commit bdc74d70f24d542cbde4e781a6bedab027e12ae1
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 18:03:18 2022 +0000
+
+    misc
+
+commit 9e56bf9609c16f8b8df54074ed7e07c7454d4a73
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 13:36:00 2022 +0000
+
+    the typo
+    
+    https://github.com/nyxnor/tor-ctrl/issues/30
+
+commit 40023de168f143e065a010931e7fd302b8748673
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 13:35:45 2022 +0000
+
+    the typo
+    
+    https://github.com/nyxnor/tor-ctrl/issues/30
+
+commit 944266ec6d2fd5d556c07aff323d0b34fb6f932b
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 13:33:58 2022 +0000
+
+    do no share circuits on public forums
+    
+    https://github.com/nyxnor/tor-ctrl/issues/30
+
+commit 8504280f38608b7ac0c5ba7a444be257ec4641cd
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 13:32:02 2022 +0000
+
+    shellcheck
+
+commit 6a9c2297a9ad014465a4a87c145041c9d63be268
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 12:22:03 2022 +0000
+
+    fi
+    
+    https://github.com/nyxnor/tor-ctrl/issues/26
+
+commit 46362407665741342c351656cff37f3520062293
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 12:20:35 2022 +0000
+
+    restore also from file, not just folders
+    
+    https://github.com/nyxnor/tor-ctrl/issues/26
+
+commit 3ae5b08a30174bc3ce6e7fae533f1a41d597b369
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 11:48:32 2022 +0000
+
+    restore from a singe file
+    
+    https://github.com/nyxnor/tor-ctrl/issues/26
+
+commit 6fbfc86846e95f7327faf9a0c44be3aad467e05c
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 11:44:16 2022 +0000
+
+    finish permanent mode
+    
+    https://github.com/nyxnor/tor-ctrl/issues/26
+
+commit b97f9412ceb3f327422d6cda5b5246043226eb68
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 11:35:40 2022 +0000
+
+    fix return carriage
+    
+    https://github.com/nyxnor/tor-ctrl/issues/26
+
+commit 25583a1b83ebef8ab71c0766c120d5e2e2b79184
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 11:34:04 2022 +0000
+
+    fix return carriage
+    
+    https://github.com/nyxnor/tor-ctrl/issues/26
+
+commit 0d2f9b8583efcc1b6e3c86fba75b3f4b810a1c55
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 11:21:16 2022 +0000
+
+    small fixes to permanent mode
+
+commit 8d4ca3dd3be0d7bb44db9ab582d9d4e275724b49
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 10:58:18 2022 +0000
+
+    introducing permanent onion mode
+    
+    https://github.com/nyxnor/tor-ctrl/issues/26
+
+commit 3847b1907cdf6cf8196b6bd6a8d62a0f7d698870
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Mon Feb 21 00:13:52 2022 +0000
+
+    don't print exits on stream private mode
+    
+    https://github.com/nyxnor/tor-ctrl/issues/28
+
+commit b4e996dee3f6ace12d8baddcc8895f234a136be8
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Feb 20 23:51:16 2022 +0000
+
+    fix again 250 hide
+    
+    https://github.com/nyxnor/tor-ctrl/issues/28
+
+commit 6744c0ac6f70df08f1ee9d5e8d8fbb96b9081f1d
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Feb 20 23:48:36 2022 +0000
+
+    fix ^250
+
+commit 07598d799f41500ef1009407fbe5ccdf88a4f5f9
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Feb 20 23:41:11 2022 +0000
+
+    tone down warning on private mode
+    
+    https://github.com/nyxnor/tor-ctrl/issues/28
+
+commit 28f138d46a21cdd64ef3a949e7be610d8179ac8f
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Feb 20 22:59:48 2022 +0000
+
+    remove DIR_FETCH from private tor-ctrl-stream
+    
+    https://github.com/nyxnor/tor-ctrl/issues/28
+
+commit d7f4edf62734b2480a451544bf087bb57dde132f
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Feb 20 22:55:34 2022 +0000
+
+    small changes to -onion
+
+commit e695900c4a1d0d48fef71c87bfe544666228ae60
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Feb 20 19:11:43 2022 +0000
+
+    add TBB instructions
+    
+    fix https://github.com/nyxnor/tor-ctrl/issues/27
+
+commit 54ffffbeaa91a5d792cf000c67b4950fb2fe4061
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sun Feb 20 13:56:53 2022 -0500
+
+    bumped changelog version
+
 commit 8119c6233e44ab35fea88df5861895456a74d2d5
 Merge: 827469c ece5e97
 Author: Patrick Schleizer <adrelanos@whonix.org>
