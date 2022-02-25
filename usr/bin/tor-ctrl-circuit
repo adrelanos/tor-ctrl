@@ -88,4 +88,7 @@ cli_args=""
 ## set default values
 : "${machine_mode:=0}"
 
+## only to get which socket it succesfully connects
+tor-ctrl -c "GETINFO circuit-status" ${cli_args} | grep "connecting to socket with command"
+
 list_circuits

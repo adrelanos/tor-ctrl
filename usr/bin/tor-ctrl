@@ -417,9 +417,14 @@ if [ -n "${cmd_cli}" ]; then
     if [ "${wait_confirmation}" -eq 1 ]; then
       if [ "${machine_mode}" -eq 0 ]; then
         printf '%s\n' "${me}: [info]: stop listening with Ctrl+C"
+        printf '%s\n' "${me}: [info]: connecting to socket with command: ${socket_prog_connect}"
       fi
       cmd_pipe | ${socket_prog_connect} 2>/dev/null
     else
+      if [ "${machine_mode}" -eq 0 ]; then
+        ## grep this line on the other extras scripts when it is fit
+        printf '%s\n' "${me}: [info]: connecting to socket with command: ${socket_prog_connect}"
+      fi
       cmd_pipe | ${socket_prog_connect} 2>/dev/null | finish
     fi
   fi

@@ -135,7 +135,7 @@ fi
 ## other signals such as QUIT, TERM and EXIT should kill the process tree and exit
 trap "list_streams" INT
 trap "exit" QUIT TERM
-trap "kill 0" EXIT
+trap "rm -f stream.tmp; kill 0" EXIT
 
 ## this call will print to screen and sent to background
 # shellcheck disable=SC2086
