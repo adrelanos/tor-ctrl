@@ -48,13 +48,16 @@ usage(){
                  notice: separate control commands with a shell escape to new line '\\\n'
                  notice: '-c' is optional when command is the last positional argument
 
-  -s [socket]    tor's control socket
-                 notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
-                 notice: unix: [unix:]path: /run/tor/control, unix:/run/tor/control
-                 notice: stops at first succesfull connection.
-                 default: 127.0.0.1:9051, 127.0.0.1:9151, TOR_CONTROL_HOST:TOR_CONTROL_PORT
+  --tbb          use Tor Browser Bundle socket
+                 default: environment variables TOR_CONTROL_HOST:TOR_CONTROL_PORT, if fails, try 127.0.0.1:9151
 
-  -p [pwd]       use password [var] instead of Tor's control_auth_cookie
+  -s [socket]    use specified tor's control socket
+                 notice: tcp sockets format: [addr:]port: 9051, 127.0.0.1:9051
+                 notice: unix sockets format: [unix:]path: /run/tor/control, unix:/run/tor/control
+                 notice: stops at first succesfull connection.
+                 default: first match found on file system, if fails, try 127.0.0.1:9051
+
+  -p [pwd]       use password instead of Tor's control_auth_cookie
                  default: not used
 
   -t [time]      sleep [time] seconds after each command sent
@@ -319,6 +322,7 @@ get_arg(){
 ## hacky getopts
 while :; do
   case "${1}" in
+    --*) opt="${1#*--}"; arg="${2}";;
     -*) opt="${1#*-}"; arg="${2}";;
     *) opt="${1}";;
   esac
@@ -332,6 +336,7 @@ while :; do
     d) debug_mode=1; shift 1;;
     r) dry_run=1; shift 1;;
     m) machine_mode=1; shift 1;;
+    tbb) torbrowser=1; shift 1;;
     h) usage;;
     V) printf '%s\n' "tor-ctrl ${torctrl_version}"; exit 0;;
     -) shift 1; break;;
@@ -347,6 +352,7 @@ done
 # sig_quit="$(stty -a | sed -n '/.*quit = / {s///;s/;.*$//;s/\^//p;}')"
 
 ## set default values
+: "${wait_confirmation:=0}"
 : "${machine_mode:=0}"
 : "${debug_mode:=0}"
 : "${quiet:=0}"
@@ -377,7 +383,11 @@ if [ -n "${cmd_cli}" ]; then
   ## try the socket discovered on the file system from tor configuration files
   ## if that fails, try Tor Browser default socket
   ## if that fails, try environment variables
-  check_socket "${tor_control_socket}" || check_socket "${tor_control_socket_filesystem}" || check_socket "127.0.0.1:9051" || check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" || check_socket "127.0.0.1:9151" || error_msg "Couldn't connect to any tor socket. Error logs:\n$(cat fail.log)"
+  if [ "${torbrowser}" = "1" ]; then
+    check_socket "${tor_control_socket}" || check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" || check_socket "127.0.0.1:9151" || error_msg "Couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat fail.log)"
+  else
+    check_socket "${tor_control_socket}" || check_socket "${tor_control_socket_filesystem}" || check_socket "127.0.0.1:9051" || error_msg "Couldn't connect to tor daemon socket. Error logs:\n$(cat fail.log)"
+  fi
   rm -f fail.log
   ## get string to authenticate to the controller
   login
