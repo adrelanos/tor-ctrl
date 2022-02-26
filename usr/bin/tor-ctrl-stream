@@ -61,7 +61,7 @@ EOF
           circuit_path="$(printf '%s\n' "${circuit}" | cut -d " " -f3)"
           circuit_purpose="$(printf '%s\n' "${circuit}" | cut -d " " -f5 | sed "s/PURPOSE=//")"
           [ -z "${circuit_status}" ] && break
-          if [ "${no_circuit}" -eq 0 ]; then
+          if [ -z "${no_circuit}" ]; then
             printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n"
             printf %s"${bold}Stream:${nocolor} ${stream_id}, ${bold}Purpose:${nocolor} ${stream_purpose}, ${bold}Target:${nocolor} ${stream_target}${nocolor}\n"
             printf %s"${bold}Circuit:${nocolor} ${circuit_id}, ${bold}Purpose:${nocolor} ${circuit_purpose}${nocolor}\n"
@@ -122,13 +122,9 @@ cli_args=""
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
 [ -n "${machine_mode}" ] && cli_args="${cli_args} -m"
 
-## set default values
-: "${machine_mode:=0}"
-: "${no_circuit:=0}"
-
-if [ "${machine_mode}" -eq 0 ]; then
+if [ -z "${machine_mode}" ]; then
   printf '%s\n' "${me}: [info]: subscribed to Tor stream events, as soon as streams are created, output will be shown below."
-  [ "${no_circuit}" -eq 0 ] && printf '%s\n' "${me}: [warn]: posting these contents online can deanonymize the tor client."
+  [ -z "${no_circuit}" ] && printf '%s\n' "${me}: [warn]: posting these contents online can deanonymize the tor client."
 fi
 
 ## it will print the streams table after receiving an INT signal

@@ -242,7 +242,7 @@ login(){
   fi
 
   if [ -z "${auth_string}" ]; then
-    auth_failed=0
+    auth_failed=""
     printf '%s\n' "${me}: Authentication string not detected."
     if printf '%s\n' "${auth_methods}" | grep -q "^COOKIE$" && ! test -r "${tor_cookie}"; then
       printf '%s\n' "${me}: COOKIE is enabled but not readable by user ${USER}."
@@ -253,7 +253,7 @@ login(){
       auth_failed=1
     fi
     ## this will only run if it can connect to the socket but is not receiving replies expected by a tor's controller
-    if [ "${auth_failed}" -eq 0 ]; then
+    if [ -z "${auth_failed}" ]; then
       printf '%s\n' "${me}: ${tor_control_socket} does not seems to be tor's controller socket."
     fi
     exit 1
@@ -282,7 +282,7 @@ cmd_pipe(){
   send_cmd "${auth_string}"
   send_cmd "${cmd_cli}"
   # shellcheck disable=SC2034
-  if [ "${wait_confirmation}" -eq 1 ]; then
+  if [ -n "${wait_confirmation}" ]; then
     trap "kill 0" INT
     ## infinite loop that can be terminated with interrrupt signal
     while :; do
@@ -295,7 +295,7 @@ cmd_pipe(){
 ## get result, be verbose by default and quiet if required, set exit code
 finish(){
   str="$(cat)"
-  [ "${quiet}" -eq 0 ] && printf '%s\n' "${str}"
+  [ -z "${quiet}" ] && printf '%s\n' "${str}"
   ## more than 3 '^250 ' reply status code occurs when $cmd_cli has multiple lines (\\n)
   printf '%s\n' "${str}" | if [ "$(grep -c "^250 ")" -ge 3 ]; then
     exit 0
@@ -351,16 +351,8 @@ done
 # sig_intr="$(stty -a | sed -n '/.*intr = / {s///;s/;.*$//;s/\^//p;}')"
 # sig_quit="$(stty -a | sed -n '/.*quit = / {s///;s/;.*$//;s/\^//p;}')"
 
-## set default values
-: "${wait_confirmation:=0}"
-: "${machine_mode:=0}"
-: "${debug_mode:=0}"
-: "${quiet:=0}"
-: "${dry_run:=0}"
-: "${wait_confirmation:=0}"
-
 ## check for debug mode
-[ "${debug_mode}" -eq 1 ] && set -x
+[ -n "${debug_mode}" ] && set -x
 
 ## if command was not assigned by '-c' option, get remaining arguments as command
 : "${cmd_cli:="${*}"}"
@@ -412,14 +404,14 @@ if [ -n "${cmd_cli}" ]; then
       #send_cmd "QUIT"
     } 3>&1 2>/dev/null | ${socket_prog_connect} | finish
   else
-    if [ "${wait_confirmation}" -eq 1 ]; then
-      if [ "${machine_mode}" -eq 0 ]; then
+    if [ -n "${wait_confirmation}" ]; then
+      if [ -z "${machine_mode}" ]; then
         printf '%s\n' "${me}: [info]: stop listening with Ctrl+C"
         printf '%s\n' "${me}: [info]: connecting to socket with command: ${socket_prog_connect}"
       fi
       cmd_pipe | ${socket_prog_connect} 2>/dev/null
     else
-      if [ "${machine_mode}" -eq 0 ]; then
+      if [ -z "${machine_mode}" ]; then
         ## grep this line on the other extras scripts when it is fit
         printf '%s\n' "${me}: [info]: connecting to socket with command: ${socket_prog_connect}"
       fi
