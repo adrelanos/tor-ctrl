@@ -127,13 +127,7 @@ check_progs(){
 ## if socket was not assigned on the command line, try auto-detection
 get_socket(){
   ## minimal check for tor service manager file
-  if test -f /lib/systemd/system/tor@default.service; then
-    tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed "s/ExecStart=//g")"
-    default_torrc="$(printf '%s\n' "${tor_start_command}" | grep -- " --defaults-torrc [^ ]*" | sed "s/.*--defaults-torrc //" | cut -d " " -f1)"
-    [ -n "${default_torrc}" ] && default_torrc="$(printf '%s\n' "--defaults-torrc ${default_torrc}")"
-    f_torrc="$(printf '%s\n' "${tor_start_command}" | grep -- " -f [^ ]*" | sed "s/.*-f //" | cut -d " " -f1)"
-    [ -n "${f_torrc}" ] && f_torrc="$(printf '%s\n' "-f ${f_torrc}")"
-  fi
+  test -f /lib/systemd/system/tor@default.service && tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed "s/ExecStart=//g")"
 
   ## don't evaluate the exit code of '--verify-config' as it will fail if not running as root or the tor user
   ## if 'default_torrc' is empty, tor will try: @CONFDIR@/torrc-defaults.
@@ -141,26 +135,20 @@ get_socket(){
   ## example line that has to be cleanse: print only last arg in line, remove '"', remove '.', remove '//'.
   ## Jan 1 00:00:00.000 [notice] Including configuration file "/usr/local/etc/torrc.d//50_user.conf".
   # shellcheck disable=SC2086
-  tor_config_files="$(tor --verify-config ${default_torrc} ${f_torrc} | grep -E " Read configuration file [^ ]*| Including configuration file [^ ]*" | awk '{print $NF}' | sed "s/\"//;s/\".//;s/\/\//\//")"
+  tor_config_files="$(${tor_start_command:-tor} --verify-config | grep -E " Read configuration file [^ ]*| Including configuration file [^ ]*" | awk '{print $NF}' | sed "s/\"//;s/\".//;s/\/\//\//")"
 
   ## grepping no file will be stuck forever
   if [ -n "${tor_config_files}" ]; then
     ## only one option is needed, use head
     # shellcheck disable=SC2086
-    tor_control_socket_alternative="$(grep -E "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2- | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
-  fi
-
-  ## assign detected socket to the variable or if still empty, fallback to TCP 127.0.0.1:9051
-  if [ -n "${tor_control_socket_alternative}" ]; then
-    tor_control_socket="${tor_control_socket_alternative}"
-  else
-    tor_control_socket="127.0.0.1:9051"
+    tor_control_socket_filesystem="$(grep -E "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2- | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
   fi
 }
 
 check_socket(){
   ## find if socket is a unix domain socket or a TCP socket and do sanity checks
   socket="${1}"
+  [ -z "${socket}" ] && return 1
   case "${socket}" in
     "unix:/"*|"/"*)
       socket_type="unix"
@@ -389,7 +377,7 @@ if [ -n "${cmd_cli}" ]; then
   ## try the socket discovered on the file system from tor configuration files
   ## if that fails, try Tor Browser default socket
   ## if that fails, try environment variables
-  check_socket "${tor_control_socket}" || check_socket "127.0.0.1:9151" || check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" || error_msg "Couldn't connect to any tor socket. Error logs:\n$(cat fail.log)"
+  check_socket "${tor_control_socket}" || check_socket "${tor_control_socket_filesystem}" || check_socket "127.0.0.1:9051" || check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" || check_socket "127.0.0.1:9151" || error_msg "Couldn't connect to any tor socket. Error logs:\n$(cat fail.log)"
   rm -f fail.log
   ## get string to authenticate to the controller
   login
