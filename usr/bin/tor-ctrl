@@ -49,13 +49,18 @@ usage(){
                  notice: '-c' is optional when command is the last positional argument
 
   --tbb          use Tor Browser Bundle socket
-                 default: environment variables TOR_CONTROL_HOST:TOR_CONTROL_PORT, if fails, try 127.0.0.1:9151
+                 default: socket specified by the '-s' option
+                 default:  if fails use environment variables TOR_CONTROL_HOST:TOR_CONTROL_PORT
+                 default:  if it also fails, try 127.0.0.1:9151
 
   -s [socket]    use specified tor's control socket
                  notice: tcp sockets format: [addr:]port: 9051, 127.0.0.1:9051
                  notice: unix sockets format: [unix:]path: /run/tor/control, unix:/run/tor/control
                  notice: stops at first succesfull connection.
-                 default: first match found on file system, if fails, try 127.0.0.1:9051
+                 default: socket specified by this option,
+                 default:  if fails use environment variables TOR_CONTROL_HOST:TOR_CONTROL_PORT
+                 default:  if fails search for socket on tor configuration files
+                 default:  if it also fails, try 127.0.0.1:9051
 
   -p [pwd]       use password instead of Tor's control_auth_cookie
                  default: not used
@@ -197,6 +202,8 @@ check_socket(){
         ;;
         *) printf '%s\n' "${socket_prog##*/} doesn't support Unix-domain sockets" | tee -a fail.log >/dev/null; return 1;;
       esac
+
+      tor_socket="${tor_control_unix}"
     ;;
     tcp)
       case "${socket_prog##*/}" in
@@ -213,6 +220,8 @@ check_socket(){
           printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q "Connected to ${tor_control_host}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a fail.log >/dev/null; return 1; }
         ;;
       esac
+
+      tor_socket="${tor_control_host}:${tor_control_port}"
     ;;
   esac
 }
@@ -268,7 +277,7 @@ login(){
 
 ## just get variables, don't send commands to the controller
 get_dry_run(){
-  for key in cmd_cli tor_control_socket tor_password sleep_n quiet wait_confirmation debug_mode dry_run; do
+  for key in cmd_cli tor_socket tor_password sleep_n quiet wait_confirmation debug_mode dry_run; do
     eval val='$'"${key}" && printf '%s\n' "${key}=${val:-""}"
   done
   exit 0
@@ -374,46 +383,41 @@ if [ -n "${cmd_cli}" ]; then
   if ! printf '%d' "${sleep_n}" >/dev/null 2>&1 && ! printf '%g' "${sleep_n}" >/dev/null 2>&1; then
     error_msg "Sleep time '${sleep_n}' is not an integer nor a floating point."
   fi
-  ## if socket was not assigned on the command line, try auto-detection
-  [ -z "${tor_control_socket}" ] && get_socket
-  ## just get variables, don't send commands to the controller
-  [ "${dry_run}" = "1" ] && get_dry_run
   ## set options for the socket program
   trap 'rm -f fail.log' EXIT INT TERM
-  if [ -n "${torbrowser}" ]; then
-    while :; do
-      if [ -n "${tor_control_socket}" ]; then
-        notice "attempting to connect to specified socket ${tor_control_socket}"
-        check_socket "${tor_control_socket}" && break
-      fi
-      if [ -n "${TOR_CONTROL_PORT}" ]; then
-        notice "attempting to connect to tor's environment variables socket ${TOR_CONTROL_HOST:-"127.0.0.1"} ${TOR_CONTROL_PORT} (TOR_CONTROL_HOST TOR_CONTROL_PORT)"
-        check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" && break
-      fi
-      notice "attempting to connect to fallback socket 127.0.0.1:9151"
-      check_socket "127.0.0.1:9151" && break
-      error_msg "couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat fail.log)"
-    done
-  else
-    while :; do
-      if [ -n "${tor_control_socket}" ]; then
-        notice "attempting to connect to specified socket ${tor_control_socket}"
-        check_socket "${tor_control_socket}" && break
-      fi
-      if [ -n "${TOR_CONTROL_PORT}" ]; then
-      notice "attempting to connect to tor's environment variables socket ${TOR_CONTROL_HOST:-"127.0.0.1"} ${TOR_CONTROL_PORT} (TOR_CONTROL_HOST TOR_CONTROL_PORT)"
-      check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" && break
-      fi
-      if [ -n "${tor_control_socket_filesystem}" ]; then
-        notice "attempting to connect to torrc specified socket ${tor_control_socket_filesystem}"
-        check_socket "${tor_control_socket_filesystem}" && break
-      fi
-      notice "attempting to connect to fallback socket 127.0.0.1:9051"
-      check_socket "127.0.0.1:9051" && break
-      error_msg "couldn't connect to tor daemon socket. Error logs:\n$(cat fail.log)"
-    done
+  if [ -n "${tor_control_socket}" ]; then
+    notice "attempting to connect to specified socket ${tor_control_socket}"
+    check_socket "${tor_control_socket}" && socket_found=1
+  fi
+  if [ -n "${TOR_CONTROL_PORT}" ]; then
+    notice "attempting to connect to tor's environment variables socket ${TOR_CONTROL_HOST:-"127.0.0.1"} ${TOR_CONTROL_PORT} (TOR_CONTROL_HOST TOR_CONTROL_PORT)"
+    check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" && socket_found=1
+  fi
+  if [ -z "${socket_found}" ]; then
+    if [ -n "${torbrowser}" ]; then
+      while :; do
+        notice "attempting to connect to fallback socket 127.0.0.1:9151"
+        check_socket "127.0.0.1:9151" && break
+        error_msg "couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat fail.log)"
+      done
+    else
+      while :; do
+        get_socket
+        if [ -n "${tor_control_socket_filesystem}" ]; then
+          notice "attempting to connect to tor's configuration files socket ${tor_control_socket_filesystem}"
+          check_socket "${tor_control_socket_filesystem}" && break
+        fi
+        notice "attempting to connect to fallback socket 127.0.0.1:9051"
+        check_socket "127.0.0.1:9051" && break
+        error_msg "couldn't connect to tor daemon socket. Error logs:\n$(cat fail.log)"
+      done
+    fi
   fi
   rm -f fail.log
+
+  ## just get variables, don't send commands to the controller
+  [ "${dry_run}" = "1" ] && get_dry_run
+
   ## get string to authenticate to the controller
   login
 

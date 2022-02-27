@@ -166,9 +166,14 @@ See usage:
 tor-ctrl -h
 ```
 
-Get the tor user:
+Get the tor user configured on tor configuration files:
 ```sh
 tor-ctrl GETCONF User
+```
+
+Get the username under which the tor process is running:
+```sh
+tor-ctrl GETINFO process/pid
 ```
 
 Get process id belonging to the main tor process:
