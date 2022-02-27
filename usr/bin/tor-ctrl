@@ -100,9 +100,15 @@ https://gitweb.torproject.org/torspec.git/tree/control-spec.txt"
   exit 1
 }
 
+## wrapper to printf
+notice(){
+  { [ -n "${quiet}" ] || [ -n "${machine_mode}" ] ; } && return
+  printf %s"${me}: [notice] ${1}\n"
+}
+
 ## print what failed, redirect output to stderr and exit with failed status
 error_msg(){
-  printf %s"${me}: ${1}\n" >&2
+  printf %s"${me}: [error] ${1}\n" >&2
   exit 1
 }
 
@@ -243,7 +249,7 @@ login(){
 
   if [ -z "${auth_string}" ]; then
     auth_failed=""
-    printf '%s\n' "${me}: Authentication string not detected."
+    printf '%s\n' "${me}: Authentication method not detected."
     if printf '%s\n' "${auth_methods}" | grep -q "^COOKIE$" && ! test -r "${tor_cookie}"; then
       printf '%s\n' "${me}: COOKIE is enabled but not readable by user ${USER}."
       auth_failed=1
@@ -254,7 +260,7 @@ login(){
     fi
     ## this will only run if it can connect to the socket but is not receiving replies expected by a tor's controller
     if [ -z "${auth_failed}" ]; then
-      printf '%s\n' "${me}: ${tor_control_socket} does not seems to be tor's controller socket."
+      printf '%s\n' "${me}: ${tor_control_host}:${tor_control_port} does not seems to be tor's controller socket."
     fi
     exit 1
   fi
@@ -354,6 +360,8 @@ done
 ## check for debug mode
 [ -n "${debug_mode}" ] && set -x
 
+#[ -n "${quiet}" ] && exec >/dev/null 2>&1
+
 ## if command was not assigned by '-c' option, get remaining arguments as command
 : "${cmd_cli:="${*}"}"
 
@@ -372,13 +380,38 @@ if [ -n "${cmd_cli}" ]; then
   [ "${dry_run}" = "1" ] && get_dry_run
   ## set options for the socket program
   trap 'rm -f fail.log' EXIT INT TERM
-  ## try the socket discovered on the file system from tor configuration files
-  ## if that fails, try Tor Browser default socket
-  ## if that fails, try environment variables
   if [ -n "${torbrowser}" ]; then
-    check_socket "${tor_control_socket}" || check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" || check_socket "127.0.0.1:9151" || error_msg "Couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat fail.log)"
+    while :; do
+      if [ -n "${tor_control_socket}" ]; then
+        notice "attempting to connect to specified socket ${tor_control_socket}"
+        check_socket "${tor_control_socket}" && break
+      fi
+      if [ -n "${TOR_CONTROL_PORT}" ]; then
+        notice "attempting to connect to tor's environment variables socket ${TOR_CONTROL_HOST:-"127.0.0.1"} ${TOR_CONTROL_PORT} (TOR_CONTROL_HOST TOR_CONTROL_PORT)"
+        check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" && break
+      fi
+      notice "attempting to connect to fallback socket 127.0.0.1:9151"
+      check_socket "127.0.0.1:9151" && break
+      error_msg "couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat fail.log)"
+    done
   else
-    check_socket "${tor_control_socket}" || check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" || check_socket "${tor_control_socket_filesystem}" || check_socket "127.0.0.1:9051" || error_msg "Couldn't connect to tor daemon socket. Error logs:\n$(cat fail.log)"
+    while :; do
+      if [ -n "${tor_control_socket}" ]; then
+        notice "attempting to connect to specified socket ${tor_control_socket}"
+        check_socket "${tor_control_socket}" && break
+      fi
+      if [ -n "${TOR_CONTROL_PORT}" ]; then
+      notice "attempting to connect to tor's environment variables socket ${TOR_CONTROL_HOST:-"127.0.0.1"} ${TOR_CONTROL_PORT} (TOR_CONTROL_HOST TOR_CONTROL_PORT)"
+      check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" && break
+      fi
+      if [ -n "${tor_control_socket_filesystem}" ]; then
+        notice "attempting to connect to torrc specified socket ${tor_control_socket_filesystem}"
+        check_socket "${tor_control_socket_filesystem}" && break
+      fi
+      notice "attempting to connect to fallback socket 127.0.0.1:9051"
+      check_socket "127.0.0.1:9051" && break
+      error_msg "couldn't connect to tor daemon socket. Error logs:\n$(cat fail.log)"
+    done
   fi
   rm -f fail.log
   ## get string to authenticate to the controller
@@ -405,16 +438,12 @@ if [ -n "${cmd_cli}" ]; then
     } 3>&1 2>/dev/null | ${socket_prog_connect} | finish
   else
     if [ -n "${wait_confirmation}" ]; then
-      if [ -z "${machine_mode}" ]; then
-        printf '%s\n' "${me}: [info]: stop listening with Ctrl+C"
-        printf '%s\n' "${me}: [info]: connecting to socket with command: ${socket_prog_connect}"
-      fi
+      notice "stop listening with Ctrl+C"
+      notice "connecting to socket with command: ${socket_prog_connect}"
       cmd_pipe | ${socket_prog_connect} 2>/dev/null
     else
-      if [ -z "${machine_mode}" ]; then
-        ## grep this line on the other extras scripts when it is fit
-        printf '%s\n' "${me}: [info]: connecting to socket with command: ${socket_prog_connect}"
-      fi
+      ## grep this line on the other extras scripts when it is fit
+      notice "connecting to socket with command: ${socket_prog_connect}"
       cmd_pipe | ${socket_prog_connect} 2>/dev/null | finish
     fi
   fi
