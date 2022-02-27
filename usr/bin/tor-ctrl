@@ -375,10 +375,10 @@ if [ -n "${cmd_cli}" ]; then
   ## try the socket discovered on the file system from tor configuration files
   ## if that fails, try Tor Browser default socket
   ## if that fails, try environment variables
-  if [ "${torbrowser}" = "1" ]; then
+  if [ -n "${torbrowser}" ]; then
     check_socket "${tor_control_socket}" || check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" || check_socket "127.0.0.1:9151" || error_msg "Couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat fail.log)"
   else
-    check_socket "${tor_control_socket}" || check_socket "${tor_control_socket_filesystem}" || check_socket "127.0.0.1:9051" || error_msg "Couldn't connect to tor daemon socket. Error logs:\n$(cat fail.log)"
+    check_socket "${tor_control_socket}" || check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" || check_socket "${tor_control_socket_filesystem}" || check_socket "127.0.0.1:9051" || error_msg "Couldn't connect to tor daemon socket. Error logs:\n$(cat fail.log)"
   fi
   rm -f fail.log
   ## get string to authenticate to the controller
