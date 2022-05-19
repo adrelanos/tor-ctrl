@@ -95,9 +95,8 @@ trap "list_streams" INT
 trap "exit" QUIT TERM
 trap "kill 0" EXIT
 
-## this call will print to screen and sent to background
-# shellcheck disable=SC2086
-#tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} &
+## only to get which socket it succesfully connects
+tor-ctrl -c "GETINFO circuit-status" ${cli_args} | grep "connecting to socket with command"
 
 tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | sed "/DIR_FETCH/d;/DIR_UPLOAD/d;/DIRPORT_TEST/d;/\.exit\:/d;/^$/d" | \
 tee stream.tmp | cut -d " " -f3-6

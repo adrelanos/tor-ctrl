@@ -111,6 +111,7 @@ Examples:
   Server
                  ${me} -A -l 80
                  ${me} -A -l 80,127.0.0.1:8080 -w -i
+                 ${me} -A -l 80 -w -i -u client_pub_key
                  ${me} -A -P ~/.${me} -l 80
                  ${me} -A -E ~/.${me}
                  ${me} -D -o website.onion
@@ -169,7 +170,7 @@ while :; do
     A) add_onion=1; shift 1;;
     k) get_arg client_pub_key; shift 2;;
     l) get_arg port; shift 2;;
-    w) detach=0; shift 1;;
+    w) wait_confirmation=1; shift 1;;
     u) getarg client_pub_key; shift 2;;
     i) discard_pk=1; shift 1;;
     y) non_anonymous=1; shift 1;;
@@ -198,60 +199,38 @@ while :; do
   esac
 done
 
-
-## set default values
-: "${machine_mode:=0}"
-: "${tor_control_socket:=}"
-: "${tor_password:=}"
-## server
-: "${add_onion:=0}"
-: "${detach:=1}"
-: "${discard_pk:=0}"
-: "${non_anonymous:=0}"
-: "${max_streams:=0}"
-: "${del_onion:=0}"
-: "${list_onion:=0}"
-: "${permanent_onion_save:=}"
-: "${permanent_onion_restore:=}"
-## client
-: "${permanent_auth:=0}"
-: "${onion_client_auth_add:=}"
-: "${onion_client_auth_remove:=0}"
-: "${onion_client_auth_view:=0}"
-
-
 cli_args=""
 [ -n "${tor_control_socket}" ] && cli_args="${cli_args} -s ${tor_control_socket}"
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
-[ "${machine_mode}" -eq 1 ] && cli_args="${cli_args} -m"
-[ "${detach}" -eq 0 ] && cli_args="${cli_args} -w"
+[ -n "${machine_mode}" ] && cli_args="${cli_args} -m"
+[ -n "${wait_confirmation}" ] && cli_args="${cli_args} -w"
 
 #########
 ## Server
 
-if [ "${list_onion}" -eq 1 ]; then
+if [ -n "${list_onion}" ]; then
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} GETINFO onions/detached
   exit "${?}"
 fi
 
-if [ "${del_onion}" -eq 1 ]; then
+if [ -n "${del_onion}" ]; then
   validate_onion
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} DEL_ONION "${onion}"
   exit "${?}"
 fi
 
-if [ "${add_onion}" -eq 1 ]; then
+if [ -n "${add_onion}" ]; then
   : "${key:="NEW:BEST"}"
   [ -n "${port}" ] && port="Port=${port}"
-  [ "${detach}" -eq 1 ] && flags="${flags}Detach,"
-  [ "${discard_pk}" -eq 1 ] && flags="${flags}DiscardPK,"
+  [ -z "${wait_confirmation}" ] && flags="${flags}Detach,"
+  [ -n "${discard_pk}" ] && flags="${flags}DiscardPK,"
   [ -n "${client_pub_key}" ] && flags="${flags}V3Auth," client_pub_key="ClientAuthV3=${client_pub_key}"
-  [ "${non_anonymous}" -eq 1 ] && flags="${flags}NonAnonymous,"
+  [ -n "${non_anonymous}" ] && flags="${flags}NonAnonymous,"
   [ -n "${max_streams}" ] && flags="${flags}MaxStreamsCloseCircuit," max_streams="MaxStreams=${max_streams}"
   [ -n "${flags}" ] && flags="Flags=${flags}"
-  if [ -n "${permanent_onion_save}" ] && [ "${discard_pk}" -eq 1 ]; then
+  if [ -n "${permanent_onion_save}" ] && [ -n "${discard_pk}" ]; then
     error_msg "Permanent onion mode is not compatible with the flag that discards the private key."
   fi
   if [ -n "${permanent_onion_save}" ]; then
@@ -303,7 +282,7 @@ if [ -n "${onion_client_auth_add}" ]; then
   exit "${?}"
 fi
 
-if [ "${onion_client_auth_remove}" -eq 1 ]; then
+if [ -n "${onion_client_auth_remove}" ]; then
   [ -z "${onion}" ] && error_msg "This option requires an onion service to be specified, use with '-o address.onion'"
   validate_onion
   # shellcheck disable=SC2086
@@ -311,7 +290,7 @@ if [ "${onion_client_auth_remove}" -eq 1 ]; then
   exit "${?}"
 fi
 
-if [ "${onion_client_auth_view}" -eq 1 ]; then
+if [ -n "${onion_client_auth_view}" ]; then
   [ -n "${onion}" ] && validate_onion
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} ONION_CLIENT_AUTH_VIEW ${onion}

@@ -48,12 +48,21 @@ usage(){
                  notice: separate control commands with a shell escape to new line '\\\n'
                  notice: '-c' is optional when command is the last positional argument
 
-  -s [socket]    tor's control socket
-                 notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
-                 notice: unix: [unix:]path: /run/tor/control, unix:/run/tor/control
-                 default: 9051
+  --tbb          use Tor Browser Bundle socket
+                 default: socket specified by the '-s' option
+                 default:  if fails use environment variables TOR_CONTROL_HOST:TOR_CONTROL_PORT
+                 default:  if it also fails, try 127.0.0.1:9151
 
-  -p [pwd]       use password [var] instead of Tor's control_auth_cookie
+  -s [socket]    use specified tor's control socket
+                 notice: tcp sockets format: [addr:]port: 9051, 127.0.0.1:9051
+                 notice: unix sockets format: [unix:]path: /run/tor/control, unix:/run/tor/control
+                 notice: stops at first succesfull connection.
+                 default: socket specified by this option,
+                 default:  if fails use environment variables TOR_CONTROL_HOST:TOR_CONTROL_PORT
+                 default:  if fails search for socket on tor configuration files
+                 default:  if it also fails, try 127.0.0.1:9051
+
+  -p [pwd]       use password instead of Tor's control_auth_cookie
                  default: not used
 
   -t [time]      sleep [time] seconds after each command sent
@@ -96,9 +105,15 @@ https://gitweb.torproject.org/torspec.git/tree/control-spec.txt"
   exit 1
 }
 
+## wrapper to printf
+notice(){
+  { [ -n "${quiet}" ] || [ -n "${machine_mode}" ] ; } && return
+  printf %s"${me}: [notice] ${1}\n"
+}
+
 ## print what failed, redirect output to stderr and exit with failed status
 error_msg(){
-  printf %s"${me}: ${1}\n" >&2
+  printf %s"${me}: [error] ${1}\n" >&2
   exit 1
 }
 
@@ -126,13 +141,7 @@ check_progs(){
 ## if socket was not assigned on the command line, try auto-detection
 get_socket(){
   ## minimal check for tor service manager file
-  if test -f /lib/systemd/system/tor@default.service; then
-    tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed "s/ExecStart=//g")"
-    default_torrc="$(printf '%s\n' "${tor_start_command}" | grep -- " --defaults-torrc [^ ]*" | sed "s/.*--defaults-torrc //" | cut -d " " -f1)"
-    [ -n "${default_torrc}" ] && default_torrc="$(printf '%s\n' "--defaults-torrc ${default_torrc}")"
-    f_torrc="$(printf '%s\n' "${tor_start_command}" | grep -- " -f [^ ]*" | sed "s/.*-f //" | cut -d " " -f1)"
-    [ -n "${f_torrc}" ] && f_torrc="$(printf '%s\n' "-f ${f_torrc}")"
-  fi
+  test -f /lib/systemd/system/tor@default.service && tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed "s/ExecStart=//g")"
 
   ## don't evaluate the exit code of '--verify-config' as it will fail if not running as root or the tor user
   ## if 'default_torrc' is empty, tor will try: @CONFDIR@/torrc-defaults.
@@ -140,45 +149,43 @@ get_socket(){
   ## example line that has to be cleanse: print only last arg in line, remove '"', remove '.', remove '//'.
   ## Jan 1 00:00:00.000 [notice] Including configuration file "/usr/local/etc/torrc.d//50_user.conf".
   # shellcheck disable=SC2086
-  tor_config_files="$(tor --verify-config ${default_torrc} ${f_torrc} | grep -E " Read configuration file [^ ]*| Including configuration file [^ ]*" | awk '{print $NF}' | sed "s/\"//;s/\".//;s/\/\//\//")"
+  tor_config_files="$(${tor_start_command:-tor} --verify-config | grep -E " Read configuration file [^ ]*| Including configuration file [^ ]*" | awk '{print $NF}' | sed "s/\"//;s/\".//;s/\/\//\//")"
 
   ## grepping no file will be stuck forever
   if [ -n "${tor_config_files}" ]; then
     ## only one option is needed, use head
     # shellcheck disable=SC2086
-    tor_control_socket_alternative="$(grep -E "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2- | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
-  fi
-
-  ## assign detected socket to the variable or if still empty, fallback to TCP 127.0.0.1:9051
-  if [ -n "${tor_control_socket_alternative}" ]; then
-    tor_control_socket="${tor_control_socket_alternative}"
-  else
-    tor_control_socket="127.0.0.1:9051"
+    tor_control_socket_filesystem="$(grep -E "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2- | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
   fi
 }
 
 check_socket(){
-  ## find if tor_control_socket is a unix domain socket or a TCP socket and do sanity checks
-  case "${tor_control_socket}" in
+  ## find if socket is a unix domain socket or a TCP socket and do sanity checks
+  socket="${1}"
+  [ -z "${socket}" ] && return 1
+  case "${socket}" in
     "unix:/"*|"/"*)
       socket_type="unix"
-      tor_control_unix="${tor_control_socket##*unix:}"
-      test -e "${tor_control_unix}" || error_msg "${tor_control_unix} does not exist"
-      test -S "${tor_control_unix}" || error_msg "${tor_control_unix} is not a socket"
+      tor_control_unix="${socket##*unix:}"
+      test -e "${tor_control_unix}" || { printf '%s\n' "${tor_control_unix} does not exist" | tee -a fail.log >/dev/null; return 1; }
+      test -S "${tor_control_unix}" || { printf '%s\n' "${tor_control_unix} is not a socket" | tee -a fail.log >/dev/null; return 1; }
     ;;
-    [0-9]*)
+    [0-9]*|":"[0-9]*)
+      ## latter option occurs when TOR_CONTROL_HOST is empty but TOR_CONTROL_PORT is not
       socket_type="tcp"
-      tor_control_port="${tor_control_socket##*:}"
+      tor_control_port="${socket##*:}"
       tor_control_port="${tor_control_port:-9051}"
-      printf %d "${tor_control_port}" >/dev/null 2>&1 || error_msg "${tor_control_port} is not a valid port, not an integer"
-      { [ "${tor_control_port}" -gt 0 ] && [ "${tor_control_port}" -le 65535 ]; } || error_msg "${tor_control_port} is not a valid port, not within range: 0-65535"
-      tor_control_host="${tor_control_socket%%:*}"
-      [ "${tor_control_host}" = "${tor_control_port}" ] && tor_control_host="127.0.0.1"
+      printf %d "${tor_control_port}" >/dev/null 2>&1 || { printf '%s\n' "${tor_control_port} is not a valid port, not an integer" | tee -a fail.log >/dev/null; return 1; }
+      { [ "${tor_control_port}" -gt 0 ] && [ "${tor_control_port}" -le 65535 ]; } || { printf '%s\n' "${tor_control_port} is not a valid port, not within range: 0-65535" | tee -a fail.log >/dev/null; return 1; }
+      tor_control_host="${socket%%:*}"
+      { [ "${tor_control_host}" = "${tor_control_port}" ] || [ -z "${tor_control_host}" ]; } && tor_control_host="127.0.0.1"
       for quad in $(printf '%s\n' "${tor_control_host}" | tr "." " "); do
-        printf %d "${quad}" >/dev/null 2>&1 || error_msg "${tor_control_host} is not a valid address, ${quad} is not and integer"
-        { [ "${quad}" -ge 0 ] && [ "${quad}" -le 255 ]; } || error_msg "${tor_control_host} is not a valid address, ${quad} is not within range: 0-255"
+        printf %d "${quad}" >/dev/null 2>&1 || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not and integer" | tee -a fail.log >/dev/null; return 1; }
+        { [ "${quad}" -ge 0 ] && [ "${quad}" -le 255 ]; } || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not within range: 0-255" | tee -a fail.log >/dev/null; return 1; }
       done
     ;;
+    ":") return 1;; ## this happens when variables are empty
+    *) printf '%s\n' "socket '${socket}' is invalid" | tee -a fail.log >/dev/null; return 1;;
   esac
 
   ## assign the program options for socket and test if conneciton is refused
@@ -187,30 +194,34 @@ check_socket(){
       case "${socket_prog##*/}" in
         nc|netcat)
           socket_prog_connect="${socket_prog} -U ${tor_control_unix}"
-          ${socket_prog_connect} -zv || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
+          ${socket_prog_connect} -zv || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_unix}" | tee -a fail.log >/dev/null; return 1; }
         ;;
         socat)
           socket_prog_connect="${socket_prog} - UNIX-CONNECT:${tor_control_unix}"
-          ${socket_prog} /dev/null "UNIX-CONNECT:${tor_control_unix}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_unix}"
+          ${socket_prog} /dev/null "UNIX-CONNECT:${tor_control_unix}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_unix}" | tee -a fail.log >/dev/null; return 1; }
         ;;
-        *) error_msg "${socket_prog##*/} doesn't support Unix-domain sockets";;
+        *) printf '%s\n' "${socket_prog##*/} doesn't support Unix-domain sockets" | tee -a fail.log >/dev/null; return 1;;
       esac
+
+      tor_socket="${tor_control_unix}"
     ;;
     tcp)
       case "${socket_prog##*/}" in
         nc|netcat)
           socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
-          ${socket_prog_connect} -z || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
+          ${socket_prog_connect} -z || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a fail.log >/dev/null; return 1; }
         ;;
         socat)
           socket_prog_connect="${socket_prog} TCP:${tor_control_host}:${tor_control_port} -"
-          "${socket_prog}" "TCP:${tor_control_host}:${tor_control_port}" /dev/null || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
+          "${socket_prog}" "TCP:${tor_control_host}:${tor_control_port}" /dev/null || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a fail.log >/dev/null; return 1; }
         ;;
         telnet)
           socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
-          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q "Connected to ${tor_control_host}" || error_msg "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}"
+          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q "Connected to ${tor_control_host}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a fail.log >/dev/null; return 1; }
         ;;
       esac
+
+      tor_socket="${tor_control_host}:${tor_control_port}"
     ;;
   esac
 }
@@ -246,8 +257,8 @@ login(){
   fi
 
   if [ -z "${auth_string}" ]; then
-    auth_failed=0
-    printf '%s\n' "${me}: Authentication string not detected."
+    auth_failed=""
+    printf '%s\n' "${me}: Authentication method not detected."
     if printf '%s\n' "${auth_methods}" | grep -q "^COOKIE$" && ! test -r "${tor_cookie}"; then
       printf '%s\n' "${me}: COOKIE is enabled but not readable by user ${USER}."
       auth_failed=1
@@ -257,8 +268,8 @@ login(){
       auth_failed=1
     fi
     ## this will only run if it can connect to the socket but is not receiving replies expected by a tor's controller
-    if [ "${auth_failed}" -eq 0 ]; then
-      printf '%s\n' "${me}: ${tor_control_socket} does not seems to be tor's controller socket."
+    if [ -z "${auth_failed}" ]; then
+      printf '%s\n' "${me}: ${tor_control_host}:${tor_control_port} does not seems to be tor's controller socket."
     fi
     exit 1
   fi
@@ -266,7 +277,7 @@ login(){
 
 ## just get variables, don't send commands to the controller
 get_dry_run(){
-  for key in cmd_cli tor_control_socket tor_password sleep_n quiet wait_confirmation debug_mode dry_run; do
+  for key in cmd_cli tor_socket tor_password sleep_n quiet wait_confirmation debug_mode dry_run; do
     eval val='$'"${key}" && printf '%s\n' "${key}=${val:-""}"
   done
   exit 0
@@ -286,7 +297,7 @@ cmd_pipe(){
   send_cmd "${auth_string}"
   send_cmd "${cmd_cli}"
   # shellcheck disable=SC2034
-  if [ "${wait_confirmation}" -eq 1 ]; then
+  if [ -n "${wait_confirmation}" ]; then
     trap "kill 0" INT
     ## infinite loop that can be terminated with interrrupt signal
     while :; do
@@ -299,7 +310,7 @@ cmd_pipe(){
 ## get result, be verbose by default and quiet if required, set exit code
 finish(){
   str="$(cat)"
-  [ "${quiet}" -eq 0 ] && printf '%s\n' "${str}"
+  [ -z "${quiet}" ] && printf '%s\n' "${str}"
   ## more than 3 '^250 ' reply status code occurs when $cmd_cli has multiple lines (\\n)
   printf '%s\n' "${str}" | if [ "$(grep -c "^250 ")" -ge 3 ]; then
     exit 0
@@ -326,6 +337,7 @@ get_arg(){
 ## hacky getopts
 while :; do
   case "${1}" in
+    --*) opt="${1#*--}"; arg="${2}";;
     -*) opt="${1#*-}"; arg="${2}";;
     *) opt="${1}";;
   esac
@@ -339,6 +351,7 @@ while :; do
     d) debug_mode=1; shift 1;;
     r) dry_run=1; shift 1;;
     m) machine_mode=1; shift 1;;
+    tbb) torbrowser=1; shift 1;;
     h) usage;;
     V) printf '%s\n' "tor-ctrl ${torctrl_version}"; exit 0;;
     -) shift 1; break;;
@@ -353,15 +366,10 @@ done
 # sig_intr="$(stty -a | sed -n '/.*intr = / {s///;s/;.*$//;s/\^//p;}')"
 # sig_quit="$(stty -a | sed -n '/.*quit = / {s///;s/;.*$//;s/\^//p;}')"
 
-## set default values
-: "${machine_mode:=0}"
-: "${debug_mode:=0}"
-: "${quiet:=0}"
-: "${dry_run:=0}"
-: "${wait_confirmation:=0}"
-
 ## check for debug mode
-[ "${debug_mode}" -eq 1 ] && set -x
+[ -n "${debug_mode}" ] && set -x
+
+#[ -n "${quiet}" ] && exec >/dev/null 2>&1
 
 ## if command was not assigned by '-c' option, get remaining arguments as command
 : "${cmd_cli:="${*}"}"
@@ -375,12 +383,41 @@ if [ -n "${cmd_cli}" ]; then
   if ! printf '%d' "${sleep_n}" >/dev/null 2>&1 && ! printf '%g' "${sleep_n}" >/dev/null 2>&1; then
     error_msg "Sleep time '${sleep_n}' is not an integer nor a floating point."
   fi
-  ## if socket was not assigned on the command line, try auto-detection
-  [ -z "${tor_control_socket}" ] && get_socket
+  ## set options for the socket program
+  trap 'rm -f fail.log' EXIT INT TERM
+  if [ -n "${tor_control_socket}" ]; then
+    notice "attempting to connect to specified socket ${tor_control_socket}"
+    check_socket "${tor_control_socket}" && socket_found=1
+  fi
+  if [ -n "${TOR_CONTROL_PORT}" ]; then
+    notice "attempting to connect to tor's environment variables socket ${TOR_CONTROL_HOST:-"127.0.0.1"} ${TOR_CONTROL_PORT} (TOR_CONTROL_HOST TOR_CONTROL_PORT)"
+    check_socket "${TOR_CONTROL_HOST}:${TOR_CONTROL_PORT}" && socket_found=1
+  fi
+  if [ -z "${socket_found}" ]; then
+    if [ -n "${torbrowser}" ]; then
+      while :; do
+        notice "attempting to connect to fallback socket 127.0.0.1:9151"
+        check_socket "127.0.0.1:9151" && break
+        error_msg "couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat fail.log)"
+      done
+    else
+      while :; do
+        get_socket
+        if [ -n "${tor_control_socket_filesystem}" ]; then
+          notice "attempting to connect to tor's configuration files socket ${tor_control_socket_filesystem}"
+          check_socket "${tor_control_socket_filesystem}" && break
+        fi
+        notice "attempting to connect to fallback socket 127.0.0.1:9051"
+        check_socket "127.0.0.1:9051" && break
+        error_msg "couldn't connect to tor daemon socket. Error logs:\n$(cat fail.log)"
+      done
+    fi
+  fi
+  rm -f fail.log
+
   ## just get variables, don't send commands to the controller
   [ "${dry_run}" = "1" ] && get_dry_run
-  ## set options for the socket program
-  check_socket
+
   ## get string to authenticate to the controller
   login
 
@@ -404,12 +441,13 @@ if [ -n "${cmd_cli}" ]; then
       #send_cmd "QUIT"
     } 3>&1 2>/dev/null | ${socket_prog_connect} | finish
   else
-    if [ "${wait_confirmation}" -eq 1 ]; then
-      if [ "${machine_mode}" -eq 0 ]; then
-        printf '%s\n' "${me}: [info]: stop listening with Ctrl+C"
-      fi
+    if [ -n "${wait_confirmation}" ]; then
+      notice "stop listening with Ctrl+C"
+      notice "connecting to socket with command: ${socket_prog_connect}"
       cmd_pipe | ${socket_prog_connect} 2>/dev/null
     else
+      ## grep this line on the other extras scripts when it is fit
+      notice "connecting to socket with command: ${socket_prog_connect}"
       cmd_pipe | ${socket_prog_connect} 2>/dev/null | finish
     fi
   fi
