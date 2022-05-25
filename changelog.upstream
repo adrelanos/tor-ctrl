@@ -1,3 +1,84 @@
+commit 53645387c902ad0b0f8dd821ba6afd4b36ddc75d
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri May 20 15:26:00 2022 -0400
+
+    readme
+
+commit c2c43049b60556eab6e00121458040c932257d13
+Merge: 8df77ad 520324b
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Thu May 19 18:13:07 2022 -0400
+
+    Merge remote-tracking branch 'nyxnor/master'
+
+commit 520324b35e6ae8941d5d7b2d3fa6004702c58f85
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Feb 27 22:22:37 2022 +0100
+
+    improve usage and less repeated code
+    
+    https://github.com/nyxnor/tor-ctrl/issues/27
+
+commit 0d55024e1e9fb5cece3f10678767dc6a2db39559
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Feb 27 15:05:19 2022 +0100
+
+    explain which socket failed and which worked
+    
+    https://github.com/nyxnor/tor-ctrl/issues/27
+
+commit b9ebebd9fd2de637b0e00fa97ca7418fb9a35214
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Feb 27 11:17:46 2022 +0100
+
+    sort socket per tor system
+    
+    https://github.com/nyxnor/tor-ctrl/issues/27
+
+commit a8d9bf3c244832e71b1a5f5c9c6ef698fd73ac68
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sat Feb 26 14:24:07 2022 +0100
+
+    var: don't compare integers, compare if empty or not
+
+commit 11a2d33b9b1ca39040dc207e8ae3425af3f54284
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sat Feb 26 14:06:10 2022 +0100
+
+    enhance socket selection
+    
+    https://github.com/nyxnor/tor-ctrl/issues/27
+
+commit a1246bc518b73366bdfe57a016ed704bc93d29a3
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sat Feb 26 02:08:15 2022 +0100
+
+    sort socket per tor system
+    
+    https://github.com/nyxnor/tor-ctrl/issues/27
+
+commit 21aa3b189f2cfa8fbf36a1740e05ca0f2da2f6bc
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Feb 25 10:01:24 2022 +0100
+
+    info about which socket it connected
+    
+    https://github.com/nyxnor/tor-ctrl/issues/27
+
+commit c69df4c1d8149e71813334b343fc0e8ce2e7e71e
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Fri Feb 25 02:38:17 2022 +0100
+
+    try TBB socket and env var till finding something
+    
+    https://github.com/nyxnor/tor-ctrl/issues/27
+
+commit 8df77adb6ea0f65e52bdac2136686e0b5a001c2a
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Tue Feb 22 07:47:31 2022 -0500
+
+    bumped changelog version
+
 commit fc60758677673696357094d86cccf38c3b05e227
 Merge: 54ffffb bda0df7
 Author: Patrick Schleizer <adrelanos@whonix.org>
