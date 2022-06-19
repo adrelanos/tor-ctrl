@@ -442,8 +442,8 @@ if [ -n "${cmd_cli}" ]; then
     } 3>&1 2>/dev/null | ${socket_prog_connect} | finish
   else
     if [ -n "${wait_confirmation}" ]; then
-      notice "stop listening with Ctrl+C"
       notice "connecting to socket with command: ${socket_prog_connect}"
+      notice "to stop listening and show a summary, please Ctrl+C"
       cmd_pipe | ${socket_prog_connect} 2>/dev/null
     else
       ## grep this line on the other extras scripts when it is fit
