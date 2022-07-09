@@ -43,7 +43,7 @@ EOF
           stream_target_cache="$(printf '%s\n' "$(cat stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
           printf '%s\n' "${stream_target_cache}" | tee stream.hosts >/dev/null
           stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep -F "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
-          stream_target_clean="$(printf '%s\n' "${stream_target_hostname}-(${stream_target})")"
+          stream_target_clean="$(printf '%s\n' "${stream_target_hostname}~(${stream_target})")"
         ;;
         CLOSED|SUCCEEDED)
           [ -n "${stream_target_clean}" ] && stream_target="${stream_target_clean}"
@@ -56,12 +56,12 @@ EOF
           ! test -f stream.loop && {
             touch stream.loop
             printf %s"${bold}"
-            printf "\nStreamId StreamPurpose StreamTarget CircuitId CircuitPurpose\n"
+            printf "\nID Purpose CircID Purpose Target\n"
             printf %s"------------------------------------------------------------------------------------------------------${nocolor}\n"
           }
           ## Stream purpose is unkown for tor-ctrl if it was an end of stream that we didn't catch the creation
           ## unknown us being specified for proper field separation
-          printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${stream_target} ${circuit_id}  ${circuit_purpose}\n" | tr -s " " | grep -v " DIR_FETCH " | grep -F -v ".exit:"
+          printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${circuit_id}  ${circuit_purpose} ${stream_target}\n" | tr -s " " | grep -v " DIR_FETCH " | grep -F -v ".exit:"
           ## return to avoid duplicates (happens when there is CLOSED and SUCCEEDED)
           return
         ;;

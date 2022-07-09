@@ -23,6 +23,10 @@ usage(){
                  notice: script informational and warning messages won't be printed to stdout
                  default: not set
 
+  -a [addr]      filter to only print streams from client addresses matching specified address
+                 notice: tcp: addr: 127.0.0.1, 10.137.0.10, 192.168.0.10
+                 default: all addresses
+
   -h             print this help message
 "
   exit 1
@@ -33,24 +37,26 @@ list_streams(){
   ##https://stackoverflow.com/a/22644006 and https://stackoverflow.com/a/53714583
   # shellcheck disable=SC2154
   trap "exit" INT QUIT TERM
-  trap "rm -f stream.hosts stream.tmp stream.loop; kill 0" EXIT
+  trap "rm -f .stream.hosts .stream.tmp .stream.loop; kill 0" EXIT
 
-  listen_stream="$(cat stream.tmp)"
-  for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v "^$" | grep -v "^250" ); do
+  listen_stream="$(cat .stream.tmp)"
+  for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v "^[[:space:]]*$" | grep -v "^250" ); do
     printf '%s\n' "${listen_stream}" | grep "^650 STREAM ${stream_ordered}" | while IFS="$(printf '\n')" read -r stream_line; do
       IFS=" " read -r _ _ stream_id stream_status circuit_id stream_target _ <<-EOF
-        $(printf '%s\n' "${stream_line}")
+        $(printf '%s' "${stream_line}")
 EOF
       case "${stream_status}" in
         NEW|NEWRESOLVE)
           stream_target_orig="${stream_target}"
           stream_purpose="$(printf '%s\n' "${stream_line}" | tr " " "\n" | grep "PURPOSE=" | sed "s/PURPOSE=//")"
+          stream_client="$(printf '%s\n' "${stream_line}" | tr " " "\n" | grep "SOURCE_ADDR=" | sed "s/SOURCE_ADDR=//")"
+	  test -n "${client_filter}" && [ "${client_filter%:*}" != "${stream_client%:*}" ] && break
         ;;
         REMAP)
-          stream_target_cache="$(printf '%s\n' "$(cat stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
-          printf '%s\n' "${stream_target_cache}" | tee stream.hosts >/dev/null
+          stream_target_cache="$(printf '%s\n' "$(cat .stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
+          printf '%s\n' "${stream_target_cache}" | tee .stream.hosts >/dev/null
           stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep -F "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
-          stream_target_clean="$(printf '%s\n' "${stream_target_hostname}-(${stream_target})")"
+          stream_target_clean="$(printf '%s\n' "${stream_target_hostname}~(${stream_target})")"
         ;;
         CLOSED|SUCCEEDED)
           [ -n "${stream_target_clean}" ] && stream_target="${stream_target_clean}"
@@ -63,7 +69,8 @@ EOF
           [ -z "${circuit_status}" ] && break
           if [ -z "${no_circuit}" ]; then
             printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n"
-            printf %s"${bold}Stream:${nocolor} ${stream_id}, ${bold}Purpose:${nocolor} ${stream_purpose}, ${bold}Target:${nocolor} ${stream_target}${nocolor}\n"
+            printf %s"${bold}Target:${nocolor} ${stream_target}${nocolor}\n"
+            printf %s"${bold}Stream:${nocolor} ${stream_id}, ${bold}Purpose:${nocolor} ${stream_purpose}, ${bold}Client:${nocolor} ${stream_client}${nocolor}\n"
             printf %s"${bold}Circuit:${nocolor} ${circuit_id}, ${bold}Purpose:${nocolor} ${circuit_purpose}${nocolor}\n"
             printf %s"${bold}"
             printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "n" "Fingerprint" "Address" "Nickname" "Geo" "Bandwidth"
@@ -87,32 +94,37 @@ EOF
             done
             printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n\n"
           else
-            ! test -f stream.loop && {
-              touch stream.loop
+            ! test -f .stream.loop && {
+              touch .stream.loop
               printf %s"${bold}"
-              printf "\nStreamId StreamPurpose StreamTarget CircuitId CircuitPurpose\n"
+              printf "\nID Purpose Client CircID CircPurpose Target\n"
+              #printf '\n%6s %-20s %-21s %6s %-20s %-62s\n' "ID" "Purpose" "Client" "CircID" "CircPurpose" "Target"
               printf %s"------------------------------------------------------------------------------------------------------${nocolor}\n"
             }
             ## Stream purpose is unkown for tor-ctrl if it was an end of stream that we didn't catch the creation
             ## unknown us being specified for proper field separation
-            printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${stream_target} ${circuit_id}  ${circuit_purpose}\n" | tr -s " "
+            printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${stream_client:="UNKNOWN"} ${circuit_id}  ${circuit_purpose} ${stream_target}\n" | tr -s " "
+            #printf '%6s %-20s %-21s %6s %-20s %-62s\n' "${stream_id}" "${stream_purpose}" "${stream_client}" "${circuit_id}" "${circuit_purpose}" "${stream_target}" | tr -s " "
           fi
           ## return to avoid duplicates (happens when there is CLOSED and SUCCEEDED)
           return
-        ;;
+         ;;
       esac
     done
   done
 }
 
+#set -x
+
 command -v tor-ctrl >/dev/null || error_msg "Install tor-ctrl"
 
-while getopts ":s:p:mzh" Option; do
+while getopts ":s:p:a:mzh" Option; do
   case ${Option} in
     s) tor_control_socket="${OPTARG}";;
     p) tor_password="${OPTARG}";;
     m) machine_mode=1;;
     z) no_circuit=1;;
+    a) client_filter="${OPTARG}";;
     h|*) usage;;
   esac
 done
@@ -124,6 +136,7 @@ cli_args=""
 
 if [ -z "${machine_mode}" ]; then
   printf '%s\n' "${me}: [info]: subscribed to Tor stream events, as soon as streams are created, output will be shown below."
+  [ -n "${client_filter}" ] && printf '%s\n' "${me}: [info]: only streams created by the client address ${client_filter} will be shown"
   [ -z "${no_circuit}" ] && printf '%s\n' "${me}: [warn]: posting these contents online can deanonymize the tor client."
 fi
 
@@ -131,8 +144,8 @@ fi
 ## other signals such as QUIT, TERM and EXIT should kill the process tree and exit
 trap "list_streams" INT
 trap "exit" QUIT TERM
-trap "rm -f stream.tmp; kill 0" EXIT
+trap "rm -f .stream.tmp; kill 0" EXIT
 
 ## this call will print to screen and sent to background
 # shellcheck disable=SC2086
-tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | tee stream.tmp
+tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | tee .stream.tmp
