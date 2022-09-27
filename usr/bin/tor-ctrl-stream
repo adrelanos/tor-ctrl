@@ -40,9 +40,9 @@ list_streams(){
   ##https://stackoverflow.com/a/22644006 and https://stackoverflow.com/a/53714583
   # shellcheck disable=SC2154
   trap "exit" INT QUIT TERM
-  trap "rm -f .stream.hosts .stream.tmp .stream.loop; kill 0" EXIT
+  trap "rm -f "${tmpdir}"/.stream.hosts "${tmpdir}"/.stream.tmp "${tmpdir}"/.stream.loop; kill 0" EXIT
 
-  listen_stream="$(cat .stream.tmp)"
+  listen_stream="$(cat "${tmpdir}"/.stream.tmp)"
   for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v "^[[:space:]]*$" | grep -v "^250" ); do
     printf '%s\n' "${listen_stream}" | grep "^650 STREAM ${stream_ordered}" | while IFS="$(printf '\n')" read -r stream_line; do
       IFS=" " read -r _ _ stream_id stream_status circuit_id stream_target _ <<-EOF
@@ -56,8 +56,8 @@ EOF
 	  test -n "${client_filter}" && [ "${client_filter%:*}" != "${stream_client%:*}" ] && break
         ;;
         REMAP)
-          stream_target_cache="$(printf '%s\n' "$(cat .stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
-          printf '%s\n' "${stream_target_cache}" | tee .stream.hosts >/dev/null
+          stream_target_cache="$(printf '%s\n' "$(cat "${tmpdir}"/.stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
+          printf '%s\n' "${stream_target_cache}" | tee "${tmpdir}"/.stream.hosts >/dev/null
           stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep -F "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
           stream_target_clean="$(printf '%s\n' "${stream_target_hostname}~(${stream_target})")"
         ;;
@@ -97,8 +97,8 @@ EOF
             done
             printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n\n"
           else
-            ! test -f .stream.loop && {
-              touch .stream.loop
+            ! test -f "${tmpdir}"/.stream.loop && {
+              touch "${tmpdir}"/.stream.loop
               printf %s"${bold}"
               printf "\nID Purpose Client CircID CircPurpose Target\n"
               #printf '\n%6s %-20s %-21s %6s %-20s %-62s\n' "ID" "Purpose" "Client" "CircID" "CircPurpose" "Target"
@@ -137,6 +137,10 @@ cli_args=""
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
 [ -n "${machine_mode}" ] && cli_args="${cli_args} -m"
 
+: "${TMPDIR:="/tmp"}"
+mkdir -p "${TMPDIR}/tor-ctrl-stream" || error_msg "Failed to create '${TMPDIR}/tor-ctrl-observer'"
+tmpdir="$(mktemp -d ${TMPDIR}/tor-ctrl-stream/XXXXXX)"
+
 if [ -z "${machine_mode}" ]; then
   printf '%s\n' "${me}: [info]: subscribed to Tor stream events, as soon as streams are created, output will be shown below."
   [ -n "${client_filter}" ] && printf '%s\n' "${me}: [info]: only streams created by the client address ${client_filter} will be shown"
@@ -147,8 +151,8 @@ fi
 ## other signals such as QUIT, TERM and EXIT should kill the process tree and exit
 trap "list_streams" INT
 trap "exit" QUIT TERM
-trap "rm -f .stream.tmp; kill 0" EXIT
+trap "rm -f "${tmpdir}"/.stream.tmp; kill 0" EXIT
 
 ## this call will print to screen and sent to background
 # shellcheck disable=SC2086
-tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | tee .stream.tmp
+tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | tee "${tmpdir}"/.stream.tmp
