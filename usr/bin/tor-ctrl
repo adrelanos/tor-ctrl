@@ -45,22 +45,27 @@ usage(){
 
   -c [command]   command to execute
                  notice: recommended to \"double quote\" your command
-                 notice: separate control commands with a shell escape to new line '\\\n'
-                 notice: '-c' is optional when command is the last positional argument
+                 notice: separate control commands with a shell escape to new
+                         line '\\\n'
+                 notice: '-c' is optional when command is the last positional
+                         argument
 
   --tbb          use Tor Browser Bundle socket
                  default: socket specified by the '-s' option
-                 default:  if fails use environment variables TOR_CONTROL_HOST:TOR_CONTROL_PORT
+                 default: if fails use environment variables
+                          TOR_CONTROL_HOST:TOR_CONTROL_PORT
                  default:  if it also fails, try 127.0.0.1:9151
 
   -s [socket]    use specified tor's control socket
                  notice: tcp sockets format: [addr:]port: 9051, 127.0.0.1:9051
-                 notice: unix sockets format: [unix:]path: /run/tor/control, unix:/run/tor/control
+                 notice: unix sockets format: [unix:]path: /run/tor/control,
+                         unix:/run/tor/control
                  notice: stops at first succesfull connection.
                  default: socket specified by this option,
-                 default:  if fails use environment variables TOR_CONTROL_HOST:TOR_CONTROL_PORT
-                 default:  if fails search for socket on tor configuration files
-                 default:  if it also fails, try 127.0.0.1:9051
+                 default: if fails use environment variables
+                          TOR_CONTROL_HOST:TOR_CONTROL_PORT
+                 default: if fails search for socket on tor configuration files
+                 default: if it also fails, try 127.0.0.1:9051
 
   -p [pwd]       use password instead of Tor's control_auth_cookie
                  default: not used
@@ -69,14 +74,17 @@ usage(){
                  notice: if the socket program is telnet, fallback to 1 second
                  default: 0 second
 
-  -w             after sending the command, wait for interrupt signal (Ctrl+C), before closing the connection.
-                 notice: useful to be informed about events (asynchronous replies), command SETEVENTS
+  -w             after sending the command, wait for interrupt signal (Ctrl+C)
+                 before closing the connection.
+                 notice: useful to be informed about events (asynchronous
+                         replies), command SETEVENTS
                  notice: incompatible with '-q' quiet mode.
                  notice: exit code shall not be evaluated.
                  default: not set
 
   -m             machine mode
-                 notice: script informational and warning messages won't be printed to stdout
+                 notice: script informational and warning messages won't be
+                         printed to stdout
                  default: not set
 
   -q             quiet mode.
@@ -90,7 +98,8 @@ Debugging options:
                  default: not set
 
   -r             dry-run mode
-                 notice: Show what would be done, without sending commands to the controller
+                 notice: Show what would be done, without sending commands to
+                         the controller
                  default: not set
 
   Examples:      ${me} GETCONF User

@@ -12,7 +12,8 @@ usage(){
 
   -s [socket]    tor's control socket
                  notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
-                 notice: unix: [unix:]path: /run/tor/control, unix:/run/tor/control
+                 notice: unix: [unix:]path: /run/tor/control,
+                         unix:/run/tor/control
                  default: 9051
 
   -p [pwd]       use password [pwd] instead of Tor's control_auth_cookie
