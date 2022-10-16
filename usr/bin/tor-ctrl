@@ -149,14 +149,21 @@ check_progs(){
 
 ## if socket was not assigned on the command line, try auto-detection
 get_socket(){
+  ## workstation can't run tor, it will hang
+  test -f /usr/share/anon-ws-base-files/workstation && return 0
+
   ## minimal check for tor service manager file
   test -f /lib/systemd/system/tor@default.service && tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed "s/ExecStart=//g")"
 
-  ## don't evaluate the exit code of '--verify-config' as it will fail if not running as root or the tor user
+  ## don't evaluate the exit code of '--verify-config' as it will fail if
+  ## not running as root or the tor user
   ## if 'default_torrc' is empty, tor will try: @CONFDIR@/torrc-defaults.
-  ## if 'f_torrc' is empty, tor will try: @CONFDIR@/torrc, or $HOME/.torrc if that file is not found
-  ## example line that has to be cleanse: print only last arg in line, remove '"', remove '.', remove '//'.
-  ## Jan 1 00:00:00.000 [notice] Including configuration file "/usr/local/etc/torrc.d//50_user.conf".
+  ## if 'f_torrc' is empty, tor will try: @CONFDIR@/torrc, or $HOME/.torrc
+  ## if that file is not found
+  ## example line that has to be cleanse: print only last arg in line,
+  ## remove '"', remove '.', remove '//'.
+  ## Jan 1 00:00:00.000 [notice] Including configuration file
+  ## "/usr/local/etc/torrc.d//50_user.conf".
   # shellcheck disable=SC2086
   tor_config_files="$(${tor_start_command:-tor} --verify-config | grep -E " Read configuration file [^ ]*| Including configuration file [^ ]*" | awk '{print $NF}' | sed "s/\"//;s/\".//;s/\/\//\//")"
 
