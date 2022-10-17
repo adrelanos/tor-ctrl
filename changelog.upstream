@@ -1,3 +1,50 @@
+commit 51dbca8d319c79ad7e09186fcc7176718e779247
+Merge: 43f99f9 1e53eb6
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Mon Oct 17 06:39:16 2022 -0400
+
+    Merge remote-tracking branch 'nyxnor/master'
+
+commit 1e53eb6719dd0bb9788e32f2f3a3a96a958ee952
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Oct 16 21:31:49 2022 +0000
+
+    fix hanging of tor on WS
+
+commit 81b35145139630b9b686684fc51381c13ceab0d3
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Tue Sep 27 20:39:01 2022 +0000
+
+    make temporary file be created on tmpdir
+    
+    avoid putitng files on current directory
+
+commit 23433ede20a3a93041834a42f557c88bd088bac5
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Tue Sep 27 20:13:39 2022 +0000
+
+    make help message column less then 80 chars
+
+commit 3c8291a6c0198956a04439d6a329e132ffb37127
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sat Jul 9 00:09:59 2022 +0000
+
+    source_addr
+    
+    https://github.com/nyxnor/tor-ctrl/issues/32
+
+commit 230499fbc8d29fe463a95c0e0cb97ef33f314b89
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sun Jun 19 17:14:29 2022 +0000
+
+    fix https://github.com/nyxnor/tor-ctrl/issues/31
+
+commit 43f99f91002085a50f2def4ebf420a3f66d5984f
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Wed May 25 06:07:33 2022 -0400
+
+    bumped changelog version
+
 commit 53645387c902ad0b0f8dd821ba6afd4b36ddc75d
 Author: Patrick Schleizer <adrelanos@whonix.org>
 Date:   Fri May 20 15:26:00 2022 -0400
