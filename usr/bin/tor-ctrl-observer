@@ -12,7 +12,8 @@ usage(){
 
   -s [socket]    tor's control socket
                  notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
-                 notice: unix: [unix:]path: /run/tor/control, unix:/run/tor/control
+                 notice: unix: [unix:]path: /run/tor/control,
+                         unix:/run/tor/control
                  default: 9051
 
   -p [pwd]       use password [pwd] instead of Tor's control_auth_cookie
@@ -25,7 +26,7 @@ usage(){
 list_streams(){
   ##https://stackoverflow.com/a/22644006 and https://stackoverflow.com/a/53714583
   # shellcheck disable=SC2154
-  trap "exit" INT QUIT TERM
+  trap "rm -f stream.tmp; exit" INT QUIT TERM
   trap "rm -f stream.hosts stream.tmp stream.loop; kill 0" EXIT
 
   listen_stream="$(cat stream.tmp)"
@@ -40,10 +41,10 @@ EOF
           stream_purpose="$(printf '%s\n' "${stream_line}" | tr " " "\n" | grep "PURPOSE=" | sed "s/PURPOSE=//")"
         ;;
         REMAP)
-          stream_target_cache="$(printf '%s\n' "$(cat stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
-          printf '%s\n' "${stream_target_cache}" | tee stream.hosts >/dev/null
+          stream_target_cache="$(printf '%s\n' "$(cat "${tmpdir}"/stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
+          printf '%s\n' "${stream_target_cache}" | tee "${tmpdir}"/stream.hosts >/dev/null
           stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep -F "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
-          stream_target_clean="$(printf '%s\n' "${stream_target_hostname}-(${stream_target})")"
+          stream_target_clean="$(printf '%s\n' "${stream_target_hostname}~(${stream_target})")"
         ;;
         CLOSED|SUCCEEDED)
           [ -n "${stream_target_clean}" ] && stream_target="${stream_target_clean}"
@@ -56,18 +57,19 @@ EOF
           ! test -f stream.loop && {
             touch stream.loop
             printf %s"${bold}"
-            printf "\nStreamId StreamPurpose StreamTarget CircuitId CircuitPurpose\n"
+            printf "\nID Purpose CircID Purpose Target\n"
             printf %s"------------------------------------------------------------------------------------------------------${nocolor}\n"
           }
           ## Stream purpose is unkown for tor-ctrl if it was an end of stream that we didn't catch the creation
           ## unknown us being specified for proper field separation
-          printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${stream_target} ${circuit_id}  ${circuit_purpose}\n" | tr -s " " | grep -v " DIR_FETCH " | grep -F -v ".exit:"
+          printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${circuit_id}  ${circuit_purpose} ${stream_target}\n" | tr -s " " | grep -v " DIR_FETCH " | grep -F -v ".exit:"
           ## return to avoid duplicates (happens when there is CLOSED and SUCCEEDED)
           return
         ;;
       esac
     done
   done
+  printf %s"------------------------------------------------------------------------------------------------------${nocolor}\n"
 }
 
 
@@ -86,6 +88,9 @@ cli_args=""
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
 [ -n "${machine_mode}" ] && cli_args="${cli_args} -m"
 
+: "${TMPDIR:="/tmp"}"
+mkdir -p "${TMPDIR}/tor-ctrl-observer" || error_msg "Failed to create '${TMPDIR}/tor-ctrl-observer'"
+tmpdir="$(mktemp -d ${TMPDIR}/tor-ctrl-observer/XXXXXX)"
 
 printf '%s\n' "${me}: [info]: subscribed to Tor stream events, as soon as streams are created, output will be shown below."
 
@@ -97,6 +102,9 @@ trap "kill 0" EXIT
 
 ## only to get which socket it succesfully connects
 tor-ctrl -c "GETINFO circuit-status" ${cli_args} | grep "connecting to socket with command"
+printf '%s\n' "${me}: [info]: to stop listening and show a summary, please Ctrl+C"
 
-tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | sed "/DIR_FETCH/d;/DIR_UPLOAD/d;/DIRPORT_TEST/d;/\.exit\:/d;/^$/d" | \
-tee stream.tmp | cut -d " " -f3-6
+tor-ctrl -w -m -c "SETEVENTS STREAM" ${cli_args} | sed "/DIR_FETCH/d;/DIR_UPLOAD/d;/DIRPORT_TEST/d;/\.exit\:/d;/^$/d" | \
+tee "${tmpdir}"/stream.tmp | cut -d " " -f3-6
+
+

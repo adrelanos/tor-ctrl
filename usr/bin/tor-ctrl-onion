@@ -23,14 +23,16 @@ usage(){
 
   -s [socket]    tor's control socket
                  notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
-                 notice: unix: [unix:]path: /run/tor/control, unix:/run/tor/control
+                 notice: unix: [unix:]path: /run/tor/control,
+                         unix:/run/tor/control
                  default: 9051
 
   -p [pwd]       use password [pwd] instead of Tor's control_auth_cookie
                  default: not used
 
   -m             machine mode
-                 notice: script informational and warning messages won't be printed to stdout
+                 notice: script informational and warning messages won't be
+                         printed to stdout
                  default: not set
 
   -h             print this help message
@@ -47,8 +49,10 @@ SERVER
 
   -k [key_type:key_blob]
                  use key specified by the argument
-                 if 'key_type' is NEW, will create a new key using the 'key_blob' BEST algorithm, which currently is ED25519-V3
-                 if 'key_type' is an algorithm, e.g. ED25519-V3, 'key_blob' is the private key in base64
+                 if 'key_type' is NEW, will create a new key using the
+                   'key_blob' BEST algorithm, which currently is ED25519-V3
+                 if 'key_type' is an algorithm, e.g. ED25519-V3, 'key_blob' is
+                   the private key in base64
                  notice: useful to restore keys: 'ED25519-V3:onion_private_key
                  default: NEW:BEST
 
@@ -66,7 +70,8 @@ SERVER
                  default: not set
 
   -i             discard service private key
-                 notice: this is irreversible, it will not be possible to recreate the same hostname
+                 notice: this is irreversible, it will not be possible to
+                         recreate the same hostname
 
   -y             add a non-anonymous Single Onion Service.
 
@@ -92,20 +97,25 @@ CLIENT
  Add onion client authorization:
 
   -U [key_type:client_priv_key]
-                 add client-side v3 client auth credentials for the onion service
+                 add client-side v3 client auth credentials for the onion
+                 service
                  key_type: 'x2551' is the only one supported right now
                  client_priv_key: base64 encoding of x25519 key
 
-  -n             permanent flag: this client's credentials should be stored in the filesystem.
-                 notice: If this is not set, the client's credentials are ephemeral and stored in memory.
+  -n             permanent flag: this client's credentials should be stored in
+                 the filesystem.
+                 notice: If this is not set, the client's credentials are
+                         ephemeral and stored in memory.
 
  Remove onion client authorization:
 
-  -R             remove the client-side v3 client auth credentials for the onion service
+  -R             remove the client-side v3 client auth credentials for the
+                 onion service
 
  View onion client authorizations:
 
-  -W             view client-side credentials for specified onion service or all credentials if none service was provided
+  -W             view client-side credentials for specified onion service or
+                 all credentials if none service was provided
 
 Examples:
   Server

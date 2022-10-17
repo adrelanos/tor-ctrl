@@ -45,22 +45,27 @@ usage(){
 
   -c [command]   command to execute
                  notice: recommended to \"double quote\" your command
-                 notice: separate control commands with a shell escape to new line '\\\n'
-                 notice: '-c' is optional when command is the last positional argument
+                 notice: separate control commands with a shell escape to new
+                         line '\\\n'
+                 notice: '-c' is optional when command is the last positional
+                         argument
 
   --tbb          use Tor Browser Bundle socket
                  default: socket specified by the '-s' option
-                 default:  if fails use environment variables TOR_CONTROL_HOST:TOR_CONTROL_PORT
+                 default: if fails use environment variables
+                          TOR_CONTROL_HOST:TOR_CONTROL_PORT
                  default:  if it also fails, try 127.0.0.1:9151
 
   -s [socket]    use specified tor's control socket
                  notice: tcp sockets format: [addr:]port: 9051, 127.0.0.1:9051
-                 notice: unix sockets format: [unix:]path: /run/tor/control, unix:/run/tor/control
+                 notice: unix sockets format: [unix:]path: /run/tor/control,
+                         unix:/run/tor/control
                  notice: stops at first succesfull connection.
                  default: socket specified by this option,
-                 default:  if fails use environment variables TOR_CONTROL_HOST:TOR_CONTROL_PORT
-                 default:  if fails search for socket on tor configuration files
-                 default:  if it also fails, try 127.0.0.1:9051
+                 default: if fails use environment variables
+                          TOR_CONTROL_HOST:TOR_CONTROL_PORT
+                 default: if fails search for socket on tor configuration files
+                 default: if it also fails, try 127.0.0.1:9051
 
   -p [pwd]       use password instead of Tor's control_auth_cookie
                  default: not used
@@ -69,14 +74,17 @@ usage(){
                  notice: if the socket program is telnet, fallback to 1 second
                  default: 0 second
 
-  -w             after sending the command, wait for interrupt signal (Ctrl+C), before closing the connection.
-                 notice: useful to be informed about events (asynchronous replies), command SETEVENTS
+  -w             after sending the command, wait for interrupt signal (Ctrl+C)
+                 before closing the connection.
+                 notice: useful to be informed about events (asynchronous
+                         replies), command SETEVENTS
                  notice: incompatible with '-q' quiet mode.
                  notice: exit code shall not be evaluated.
                  default: not set
 
   -m             machine mode
-                 notice: script informational and warning messages won't be printed to stdout
+                 notice: script informational and warning messages won't be
+                         printed to stdout
                  default: not set
 
   -q             quiet mode.
@@ -90,7 +98,8 @@ Debugging options:
                  default: not set
 
   -r             dry-run mode
-                 notice: Show what would be done, without sending commands to the controller
+                 notice: Show what would be done, without sending commands to
+                         the controller
                  default: not set
 
   Examples:      ${me} GETCONF User
@@ -140,14 +149,21 @@ check_progs(){
 
 ## if socket was not assigned on the command line, try auto-detection
 get_socket(){
+  ## workstation can't run tor, it will hang
+  test -f /usr/share/anon-ws-base-files/workstation && return 0
+
   ## minimal check for tor service manager file
   test -f /lib/systemd/system/tor@default.service && tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed "s/ExecStart=//g")"
 
-  ## don't evaluate the exit code of '--verify-config' as it will fail if not running as root or the tor user
+  ## don't evaluate the exit code of '--verify-config' as it will fail if
+  ## not running as root or the tor user
   ## if 'default_torrc' is empty, tor will try: @CONFDIR@/torrc-defaults.
-  ## if 'f_torrc' is empty, tor will try: @CONFDIR@/torrc, or $HOME/.torrc if that file is not found
-  ## example line that has to be cleanse: print only last arg in line, remove '"', remove '.', remove '//'.
-  ## Jan 1 00:00:00.000 [notice] Including configuration file "/usr/local/etc/torrc.d//50_user.conf".
+  ## if 'f_torrc' is empty, tor will try: @CONFDIR@/torrc, or $HOME/.torrc
+  ## if that file is not found
+  ## example line that has to be cleanse: print only last arg in line,
+  ## remove '"', remove '.', remove '//'.
+  ## Jan 1 00:00:00.000 [notice] Including configuration file
+  ## "/usr/local/etc/torrc.d//50_user.conf".
   # shellcheck disable=SC2086
   tor_config_files="$(${tor_start_command:-tor} --verify-config | grep -E " Read configuration file [^ ]*| Including configuration file [^ ]*" | awk '{print $NF}' | sed "s/\"//;s/\".//;s/\/\//\//")"
 
@@ -167,25 +183,34 @@ check_socket(){
     "unix:/"*|"/"*)
       socket_type="unix"
       tor_control_unix="${socket##*unix:}"
-      test -e "${tor_control_unix}" || { printf '%s\n' "${tor_control_unix} does not exist" | tee -a fail.log >/dev/null; return 1; }
-      test -S "${tor_control_unix}" || { printf '%s\n' "${tor_control_unix} is not a socket" | tee -a fail.log >/dev/null; return 1; }
+      test -e "${tor_control_unix}" || {
+        printf '%s\n' "${tor_control_unix} does not exist" | tee -a "${tmpdir}"/fail.log >/dev/null
+        return 1
+      }
+      test -S "${tor_control_unix}" || {
+        printf '%s\n' "${tor_control_unix} is not a socket" | tee -a "${tmpdir}"/fail.log >/dev/null
+        return 1
+      }
     ;;
     [0-9]*|":"[0-9]*)
       ## latter option occurs when TOR_CONTROL_HOST is empty but TOR_CONTROL_PORT is not
       socket_type="tcp"
       tor_control_port="${socket##*:}"
       tor_control_port="${tor_control_port:-9051}"
-      printf %d "${tor_control_port}" >/dev/null 2>&1 || { printf '%s\n' "${tor_control_port} is not a valid port, not an integer" | tee -a fail.log >/dev/null; return 1; }
-      { [ "${tor_control_port}" -gt 0 ] && [ "${tor_control_port}" -le 65535 ]; } || { printf '%s\n' "${tor_control_port} is not a valid port, not within range: 0-65535" | tee -a fail.log >/dev/null; return 1; }
+      printf %d "${tor_control_port}" >/dev/null 2>&1 || {
+        printf '%s\n' "${tor_control_port} is not a valid port, not an integer" | tee -a "${tmpdir}"/fail.log >/dev/null
+        return 1
+      }
+      { [ "${tor_control_port}" -gt 0 ] && [ "${tor_control_port}" -le 65535 ]; } || { printf '%s\n' "${tor_control_port} is not a valid port, not within range: 0-65535" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
       tor_control_host="${socket%%:*}"
       { [ "${tor_control_host}" = "${tor_control_port}" ] || [ -z "${tor_control_host}" ]; } && tor_control_host="127.0.0.1"
       for quad in $(printf '%s\n' "${tor_control_host}" | tr "." " "); do
-        printf %d "${quad}" >/dev/null 2>&1 || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not and integer" | tee -a fail.log >/dev/null; return 1; }
-        { [ "${quad}" -ge 0 ] && [ "${quad}" -le 255 ]; } || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not within range: 0-255" | tee -a fail.log >/dev/null; return 1; }
+        printf %d "${quad}" >/dev/null 2>&1 || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not and integer" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
+        { [ "${quad}" -ge 0 ] && [ "${quad}" -le 255 ]; } || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not within range: 0-255" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
       done
     ;;
     ":") return 1;; ## this happens when variables are empty
-    *) printf '%s\n' "socket '${socket}' is invalid" | tee -a fail.log >/dev/null; return 1;;
+    *) printf '%s\n' "socket '${socket}' is invalid" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1;;
   esac
 
   ## assign the program options for socket and test if conneciton is refused
@@ -194,13 +219,13 @@ check_socket(){
       case "${socket_prog##*/}" in
         nc|netcat)
           socket_prog_connect="${socket_prog} -U ${tor_control_unix}"
-          ${socket_prog_connect} -zv || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_unix}" | tee -a fail.log >/dev/null; return 1; }
+          ${socket_prog_connect} -zv || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_unix}" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
         ;;
         socat)
           socket_prog_connect="${socket_prog} - UNIX-CONNECT:${tor_control_unix}"
-          ${socket_prog} /dev/null "UNIX-CONNECT:${tor_control_unix}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_unix}" | tee -a fail.log >/dev/null; return 1; }
+          ${socket_prog} /dev/null "UNIX-CONNECT:${tor_control_unix}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_unix}" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
         ;;
-        *) printf '%s\n' "${socket_prog##*/} doesn't support Unix-domain sockets" | tee -a fail.log >/dev/null; return 1;;
+        *) printf '%s\n' "${socket_prog##*/} doesn't support Unix-domain sockets" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1;;
       esac
 
       tor_socket="${tor_control_unix}"
@@ -209,15 +234,15 @@ check_socket(){
       case "${socket_prog##*/}" in
         nc|netcat)
           socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
-          ${socket_prog_connect} -z || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a fail.log >/dev/null; return 1; }
+          ${socket_prog_connect} -z || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
         ;;
         socat)
           socket_prog_connect="${socket_prog} TCP:${tor_control_host}:${tor_control_port} -"
-          "${socket_prog}" "TCP:${tor_control_host}:${tor_control_port}" /dev/null || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a fail.log >/dev/null; return 1; }
+          "${socket_prog}" "TCP:${tor_control_host}:${tor_control_port}" /dev/null || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
         ;;
         telnet)
           socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
-          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q "Connected to ${tor_control_host}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a fail.log >/dev/null; return 1; }
+          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q "Connected to ${tor_control_host}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
         ;;
       esac
 
@@ -362,6 +387,9 @@ done
 
 ############
 ### main ###
+: "${TMPDIR:="/tmp"}"
+mkdir -p "${TMPDIR}/tor-ctrl" || error_msg "Failed to create '${TMPDIR}/tor-ctrl'"
+tmpdir="$(mktemp -d ${TMPDIR}/tor-ctrl/XXXXXX)"
 
 # sig_intr="$(stty -a | sed -n '/.*intr = / {s///;s/;.*$//;s/\^//p;}')"
 # sig_quit="$(stty -a | sed -n '/.*quit = / {s///;s/;.*$//;s/\^//p;}')"
@@ -384,7 +412,7 @@ if [ -n "${cmd_cli}" ]; then
     error_msg "Sleep time '${sleep_n}' is not an integer nor a floating point."
   fi
   ## set options for the socket program
-  trap 'rm -f fail.log' EXIT INT TERM
+  trap 'rm -f "${tmpdir}"/fail.log' EXIT INT TERM
   if [ -n "${tor_control_socket}" ]; then
     notice "attempting to connect to specified socket ${tor_control_socket}"
     check_socket "${tor_control_socket}" && socket_found=1
@@ -398,7 +426,7 @@ if [ -n "${cmd_cli}" ]; then
       while :; do
         notice "attempting to connect to fallback socket 127.0.0.1:9151"
         check_socket "127.0.0.1:9151" && break
-        error_msg "couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat fail.log)"
+        error_msg "couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat "${tmpdir}"/fail.log)"
       done
     else
       while :; do
@@ -409,11 +437,11 @@ if [ -n "${cmd_cli}" ]; then
         fi
         notice "attempting to connect to fallback socket 127.0.0.1:9051"
         check_socket "127.0.0.1:9051" && break
-        error_msg "couldn't connect to tor daemon socket. Error logs:\n$(cat fail.log)"
+        error_msg "couldn't connect to tor daemon socket. Error logs:\n$(cat "${tmpdir}"/fail.log)"
       done
     fi
   fi
-  rm -f fail.log
+  rm -f "${tmpdir}"/fail.log
 
   ## just get variables, don't send commands to the controller
   [ "${dry_run}" = "1" ] && get_dry_run
@@ -442,8 +470,8 @@ if [ -n "${cmd_cli}" ]; then
     } 3>&1 2>/dev/null | ${socket_prog_connect} | finish
   else
     if [ -n "${wait_confirmation}" ]; then
-      notice "stop listening with Ctrl+C"
       notice "connecting to socket with command: ${socket_prog_connect}"
+      notice "to stop listening and show a summary, please Ctrl+C"
       cmd_pipe | ${socket_prog_connect} 2>/dev/null
     else
       ## grep this line on the other extras scripts when it is fit
