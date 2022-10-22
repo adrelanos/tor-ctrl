@@ -50,7 +50,6 @@ list_circuits(){
       hop=0
       for relay in $(printf '%s\n' "${circuit_path}" | tr "," " "); do
         hop=$((hop+1))
-        [ ${hop} -gt 3 ] && break
         relay="$(printf '%s\n' "${relay}" | tr -d "$" | tr "~" " ")"
         relay_fingerprint="$(printf '%s\n' "${relay}" | cut -d " " -f1)"
         relay_nickname="$(printf '%s\n' "${relay}" | cut -d " " -f2)"
