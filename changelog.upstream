@@ -1,3 +1,24 @@
+commit 26baa3c09bbd46e33dcd76426770a3856b4fe7fc
+Merge: 8e51c0c 88552d2
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Mon Oct 24 12:02:30 2022 -0400
+
+    Merge remote-tracking branch 'nyxnor/master'
+
+commit 88552d2afdaa35b05371a4d13fd5580fc0f0890d
+Author: nyxnor <nyxnor@protonmail.com>
+Date:   Sat Oct 22 17:37:17 2022 +0000
+
+    unlimit circuit hops
+    
+    vanguards compatibility
+
+commit 8e51c0cf5a7f88174ae90b202f96594ef7812576
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Mon Oct 17 06:40:29 2022 -0400
+
+    bumped changelog version
+
 commit 51dbca8d319c79ad7e09186fcc7176718e779247
 Merge: 43f99f9 1e53eb6
 Author: Patrick Schleizer <adrelanos@whonix.org>
