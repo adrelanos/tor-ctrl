@@ -1,3 +1,17 @@
+commit ad8964c620f8de2544922eb697ae715a65dfa166
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Tue Jun 13 08:47:12 2023 +0000
+
+    fix lintian warning
+    
+    P: tor-ctrl source: very-long-line-length-in-source-file 554 > 512 [README.md:256]
+
+commit 2836173372e877e86d944ddf5f07b57b643ebcf4
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Mon Jun 12 18:09:55 2023 +0000
+
+    bumped changelog version
+
 commit d71448e451cace1dc80f8b7ac1034a5ed770896f
 Author: Patrick Schleizer <adrelanos@whonix.org>
 Date:   Mon Jun 12 16:22:34 2023 +0000
