@@ -9,7 +9,7 @@ Build-Depends: debhelper (>= 13), debhelper-compat (= 13),
 Homepage: https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 Vcs-Browser: https://github.com/nyxnor/tor-ctrl
 Vcs-Git: https://github.com/nyxnor/tor-ctrl.git
-Standards-Version: 4.6.1.0
+Standards-Version: 4.6.2
 Rules-Requires-Root: no
 
 Package: tor-ctrl
