@@ -1,5 +1,10 @@
 #!/usr/bin/env sh
 
+## Copyright (c) 2007 Stefan Behte <stefan.behte@gmx.net> <http://ge.mine.nu/>
+## Copyright (C) 2013 - 2020 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
+## Copyright (C) 2021 - 2022 nyxnor <nyxnor@protonmail.com>
+## See the file COPYING for copying conditions.
+
 ## Command line tool for setting up stream for communication from the
 ## Tor Controller's (client) to a Tor process (server). The client send
 ## commands using TCP sockets or Unix-domain sockets and receive replies
@@ -8,31 +13,6 @@
 ## In order to get this to work, read tor-ctrl's and tor's man page
 ## to configure the conrol method (ControlPort/ControlSocket) and the
 ## authentication method (CookieAuthentication/HashedControlPassword).
-##
-## Copyright (c) 2007 Stefan Behte <stefan.behte@gmx.net> <http://ge.mine.nu/>
-## Copyright (C) 2013 - 2020 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
-## Copyright (C) 2021 - 2022 nyxnor <nyxnor@protonmail.com>
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <https://www.gnu.org/licenses/>.
-##
-## On Debian systems, the full text of the GNU General Public
-## License version 3 can be found in the file
-## `/usr/share/common-licenses/GPL-3'.
-##
-## tor-ctrl was originally written by Stefan Behte
-## further developed by Patrick Schleizer
-## and later enhanced by Nyxnor
 
 ## script version
 torctrl_version="5.0.0"
