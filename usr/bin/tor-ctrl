@@ -9,7 +9,7 @@
 ## to configure the conrol method (ControlPort/ControlSocket) and the
 ## authentication method (CookieAuthentication/HashedControlPassword).
 ##
-## Copyright (c) 2007 by Stefan Behte <stefan.behte@gmx.net> <http://ge.mine.nu/>
+## Copyright (c) 2007 Stefan Behte <stefan.behte@gmx.net> <http://ge.mine.nu/>
 ## Copyright (C) 2013 - 2020 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
 ## Copyright (C) 2021 - 2022 nyxnor <nyxnor@protonmail.com>
 ##
