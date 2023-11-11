@@ -1,3 +1,51 @@
+commit 970be895529300479f8f21c382b282dfa69bde28
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Nov 11 14:28:43 2023 -0500
+
+    shorten header comments
+
+commit fb0e3bea2924e747760b6c6b53e2208d1ccdf920
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Nov 11 14:26:10 2023 -0500
+
+    change license to GPL-3+
+
+commit ced64a3a78a592e68bb5c308184cf25feb6250dd
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Nov 11 14:23:19 2023 -0500
+
+    copyright
+
+commit 3c38f636f85fd8000265eca43d73974b7d203363
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Nov 11 14:20:18 2023 -0500
+
+    copyright
+
+commit 27b85909f84fc72c1db39450eee7b407e3f011a5
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Nov 11 14:19:53 2023 -0500
+
+    copyright
+
+commit 2fcc6fa5257a6ccb7494f5b2239e6394ed59af8b
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Nov 11 14:18:55 2023 -0500
+
+    syntax fix
+
+commit f5a759a18f6a62adb1029acf0ce3f517d0a384f2
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Nov 11 14:17:57 2023 -0500
+
+    debian/copyright must match COPYING
+
+commit 1856358b6b5cf28d466cbbd3789004ea78b12371
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Mon Jul 17 11:51:27 2023 -0400
+
+    bumped changelog version
+
 commit 0d1306e4aa32effebc15334cfc3b7dde4b8b8abc
 Author: Patrick Schleizer <adrelanos@whonix.org>
 Date:   Mon Jul 17 11:20:13 2023 -0400
