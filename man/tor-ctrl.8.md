@@ -110,7 +110,7 @@ Not expected, please report them at https://github.com/nyxnor/tor-ctrl/issues
 
 Copyright (C) 2007 by Stefan Behte
 
-Portion Copyright (C) 2013 - 2020 ENCRYPTED SUPPORT LP <adrelanos@riseup.net>
+Portion Copyright (C) 2013 - 2025 ENCRYPTED SUPPORT LLC <adrelanos@riseup.net>
 
 Portion Copyright (C) 2021 - 2022 nyxnor <nyxnor@protonmail.com>
 
