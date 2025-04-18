@@ -152,6 +152,9 @@ validate_onion(){
 }
 
 exit_handler() {
+  if ! test -d "${permanent_onion_save%*/}" ; then
+    return 0
+  fi
   safe-rm -f -- "${permanent_onion_save%*/}/onion.tmp"
   return 0
 }

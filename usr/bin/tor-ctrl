@@ -325,6 +325,9 @@ finish(){
 }
 
 exit_handler() {
+  if ! test -d "${tmpdir}" ; then
+    return 0
+  fi
   safe-rm -f -- "${tmpdir}/fail.log"
   return 0
 }
