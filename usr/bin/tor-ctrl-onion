@@ -246,9 +246,9 @@ if [ -n "${add_onion}" ]; then
   if [ -n "${permanent_onion_save}" ]; then
     test -d "${permanent_onion_save}" || error_msg "Permanent directory to save onion does not exist: ${permanent_onion_save}"
     trap 'rm -f -- ${permanent_onion_save%*/}/onion.tmp' INT EXIT
-    printf '%s\n' "${port} ${client_pub_key} ${max_streams} ${flags}" | tr -s " " | tee "${permanent_onion_save%*/}"/onion.tmp
+    printf '%s\n' "${port} ${client_pub_key} ${max_streams} ${flags}" | tr -s " " | tee -- "${permanent_onion_save%*/}"/onion.tmp
     # shellcheck disable=SC2086
-    tor-ctrl ${cli_args} ADD_ONION "${key}" "${port}" ${client_pub_key} ${max_streams} ${flags} | grep -- "^250-" | tee -a "${permanent_onion_save%*/}"/onion.tmp
+    tor-ctrl ${cli_args} ADD_ONION "${key}" "${port}" ${client_pub_key} ${max_streams} ${flags} | grep -- "^250-" | tee -a -- "${permanent_onion_save%*/}"/onion.tmp
     exit_code="${?}"
     [ "${exit_code}" -ne 0 ] && error_msg "Failed to create onion"
     onion_id_file="$(grep -- "250-ServiceID=" "${permanent_onion_save}"/onion.tmp | sed "s/250-ServiceID=//" | tr -d "\\r")"

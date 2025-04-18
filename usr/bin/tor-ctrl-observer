@@ -42,7 +42,7 @@ EOF
         ;;
         REMAP)
           stream_target_cache="$(printf '%s\n' "$(cat -- "${tmpdir}"/stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
-          printf '%s\n' "${stream_target_cache}" | tee "${tmpdir}"/stream.hosts >/dev/null
+          printf '%s\n' "${stream_target_cache}" | tee -- "${tmpdir}"/stream.hosts >/dev/null
           stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep -F -- "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
           stream_target_clean="$(printf '%s\n' "${stream_target_hostname}~(${stream_target})")"
         ;;
@@ -105,4 +105,4 @@ tor-ctrl -c "GETINFO circuit-status" ${cli_args} | grep -- "connecting to socket
 printf '%s\n' "${me}: [info]: to stop listening and show a summary, please Ctrl+C"
 
 tor-ctrl -w -m -c "SETEVENTS STREAM" ${cli_args} | sed "/DIR_FETCH/d;/DIR_UPLOAD/d;/DIRPORT_TEST/d;/\.exit\:/d;/^$/d" | \
-tee "${tmpdir}"/stream.tmp | cut -d " " -f3-6
+tee -- "${tmpdir}"/stream.tmp | cut -d " " -f3-6

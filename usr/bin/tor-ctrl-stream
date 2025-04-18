@@ -58,7 +58,7 @@ EOF
         ;;
         REMAP)
           stream_target_cache="$(printf '%s\n' "$(cat -- "${tmpdir}"/.stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
-          printf '%s\n' "${stream_target_cache}" | tee "${tmpdir}"/.stream.hosts >/dev/null
+          printf '%s\n' "${stream_target_cache}" | tee -- "${tmpdir}"/.stream.hosts >/dev/null
           stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep -F -- "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
           stream_target_clean="$(printf '%s\n' "${stream_target_hostname}~(${stream_target})")"
         ;;
@@ -156,4 +156,4 @@ trap "rm -f "${tmpdir}"/.stream.tmp; kill 0" EXIT
 
 ## this call will print to screen and sent to background
 # shellcheck disable=SC2086
-tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | tee "${tmpdir}"/.stream.tmp
+tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | tee -- "${tmpdir}"/.stream.tmp
