@@ -24,7 +24,7 @@ usage(){
 
 
 list_streams(){
-  ##https://stackoverflow.com/a/22644006 and https://stackoverflow.com/a/53714583
+  ## https://stackoverflow.com/a/22644006 and https://stackoverflow.com/a/53714583
   # shellcheck disable=SC2154
   trap "rm -f stream.tmp; exit" INT QUIT TERM
   trap "rm -f stream.hosts stream.tmp stream.loop; kill 0" EXIT
@@ -56,20 +56,20 @@ EOF
           [ -z "${circuit_status}" ] && break
           ! test -f stream.loop && {
             touch stream.loop
-            printf %s"${bold}"
+            printf '%s' "${bold}"
             printf "\nID Purpose CircID Purpose Target\n"
-            printf %s"------------------------------------------------------------------------------------------------------${nocolor}\n"
+            printf '%s' "------------------------------------------------------------------------------------------------------${nocolor}\n"
           }
           ## Stream purpose is unkown for tor-ctrl if it was an end of stream that we didn't catch the creation
           ## unknown us being specified for proper field separation
-          printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${circuit_id}  ${circuit_purpose} ${stream_target}\n" | tr -s " " | grep -v " DIR_FETCH " | grep -F -v ".exit:"
+          printf '%s' "${stream_id} ${stream_purpose:="UNKNOWN"} ${circuit_id}  ${circuit_purpose} ${stream_target}\n" | tr -s " " | grep -v " DIR_FETCH " | grep -F -v ".exit:"
           ## return to avoid duplicates (happens when there is CLOSED and SUCCEEDED)
           return
         ;;
       esac
     done
   done
-  printf %s"------------------------------------------------------------------------------------------------------${nocolor}\n"
+  printf "%s" "------------------------------------------------------------------------------------------------------${nocolor}\n"
 }
 
 
@@ -106,5 +106,3 @@ printf '%s\n' "${me}: [info]: to stop listening and show a summary, please Ctrl+
 
 tor-ctrl -w -m -c "SETEVENTS STREAM" ${cli_args} | sed "/DIR_FETCH/d;/DIR_UPLOAD/d;/DIRPORT_TEST/d;/\.exit\:/d;/^$/d" | \
 tee "${tmpdir}"/stream.tmp | cut -d " " -f3-6
-
-

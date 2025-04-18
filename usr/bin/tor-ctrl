@@ -97,12 +97,12 @@ https://gitweb.torproject.org/torspec.git/tree/control-spec.txt"
 ## wrapper to printf
 notice(){
   { [ -n "${quiet}" ] || [ -n "${machine_mode}" ] ; } && return
-  printf %s"${me}: [notice] ${1}\n"
+  printf '%s' "${me}: [notice] ${1}\n"
 }
 
 ## print what failed, redirect output to stderr and exit with failed status
 error_msg(){
-  printf %s"${me}: [error] ${1}\n" >&2
+  printf '%s' "${me}: [error] ${1}\n" >&2
   exit 1
 }
 
@@ -177,7 +177,7 @@ check_socket(){
       socket_type="tcp"
       tor_control_port="${socket##*:}"
       tor_control_port="${tor_control_port:-9051}"
-      printf %d "${tor_control_port}" >/dev/null 2>&1 || {
+      printf '%d' "${tor_control_port}" >/dev/null 2>&1 || {
         printf '%s\n' "${tor_control_port} is not a valid port, not an integer" | tee -a "${tmpdir}"/fail.log >/dev/null
         return 1
       }
@@ -185,7 +185,7 @@ check_socket(){
       tor_control_host="${socket%%:*}"
       { [ "${tor_control_host}" = "${tor_control_port}" ] || [ -z "${tor_control_host}" ]; } && tor_control_host="127.0.0.1"
       for quad in $(printf '%s\n' "${tor_control_host}" | tr "." " "); do
-        printf %d "${quad}" >/dev/null 2>&1 || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not and integer" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
+        printf '%d' "${quad}" >/dev/null 2>&1 || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not and integer" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
         { [ "${quad}" -ge 0 ] && [ "${quad}" -le 255 ]; } || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not within range: 0-255" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
       done
     ;;
