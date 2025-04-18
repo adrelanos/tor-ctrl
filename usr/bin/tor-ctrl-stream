@@ -40,7 +40,7 @@ list_streams(){
   ##https://stackoverflow.com/a/22644006 and https://stackoverflow.com/a/53714583
   # shellcheck disable=SC2154
   trap "exit" INT QUIT TERM
-  trap "rm -f "${tmpdir}"/.stream.hosts "${tmpdir}"/.stream.tmp "${tmpdir}"/.stream.loop; kill 0" EXIT
+  trap "rm -f -- "${tmpdir}"/.stream.hosts "${tmpdir}"/.stream.tmp "${tmpdir}"/.stream.loop; kill 0" EXIT
 
   listen_stream="$(cat -- "${tmpdir}"/.stream.tmp)"
   for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep -- "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v -- "^[[:space:]]*$" | grep -v -- "^250" ); do
@@ -152,7 +152,7 @@ fi
 ## other signals such as QUIT, TERM and EXIT should kill the process tree and exit
 trap "list_streams" INT
 trap "exit" QUIT TERM
-trap "rm -f "${tmpdir}"/.stream.tmp; kill 0" EXIT
+trap "rm -f -- "${tmpdir}"/.stream.tmp; kill 0" EXIT
 
 ## this call will print to screen and sent to background
 # shellcheck disable=SC2086
