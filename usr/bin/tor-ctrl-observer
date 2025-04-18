@@ -29,7 +29,7 @@ list_streams(){
   trap "rm -f stream.tmp; exit" INT QUIT TERM
   trap "rm -f stream.hosts stream.tmp stream.loop; kill 0" EXIT
 
-  listen_stream="$(cat stream.tmp)"
+  listen_stream="$(cat -- stream.tmp)"
   for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v "^$" | grep -v "^250" ); do
     printf '%s\n' "${listen_stream}" | grep "^650 STREAM ${stream_ordered}" | while IFS="$(printf '\n')" read -r stream_line; do
       IFS=" " read -r _ _ stream_id stream_status circuit_id stream_target _ <<-EOF
@@ -41,7 +41,7 @@ EOF
           stream_purpose="$(printf '%s\n' "${stream_line}" | tr " " "\n" | grep "PURPOSE=" | sed "s/PURPOSE=//")"
         ;;
         REMAP)
-          stream_target_cache="$(printf '%s\n' "$(cat "${tmpdir}"/stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
+          stream_target_cache="$(printf '%s\n' "$(cat -- "${tmpdir}"/stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
           printf '%s\n' "${stream_target_cache}" | tee "${tmpdir}"/stream.hosts >/dev/null
           stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep -F "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
           stream_target_clean="$(printf '%s\n' "${stream_target_hostname}~(${stream_target})")"
