@@ -34,7 +34,7 @@ case "${1}" in
 
   install)
     [ "$(id -u)" -ne 0 ] && error_msg "${1} as root"
-    for file in "${toplevel}"/usr/bin/*; do
+    for file in "${toplevel}/usr/bin/"*; do
       [ -f "${file}" ] && cp "${file}" /usr/bin/
     done
     for mandir in "/usr/local/man/man8" "/usr/local/share/man/man8" "/usr/share/man/man8"; do
@@ -81,7 +81,7 @@ case "${1}" in
 
   check)
     command -v shellcheck >/dev/null || error_msg "Install 'shellcheck' to linter scripts"
-    shellcheck "${toplevel}"/usr/bin/*
+    shellcheck "${toplevel}/usr/bin/"*
   ;;
 
   *) usage;;

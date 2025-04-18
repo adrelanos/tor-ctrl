@@ -164,11 +164,11 @@ check_socket(){
       socket_type="unix"
       tor_control_unix="${socket##*unix:}"
       test -e "${tor_control_unix}" || {
-        printf '%s\n' "${tor_control_unix} does not exist" | tee -a -- "${tmpdir}"/fail.log >/dev/null
+        printf '%s\n' "${tor_control_unix} does not exist" | tee -a -- "${tmpdir}/fail.log" >/dev/null
         return 1
       }
       test -S "${tor_control_unix}" || {
-        printf '%s\n' "${tor_control_unix} is not a socket" | tee -a -- "${tmpdir}"/fail.log >/dev/null
+        printf '%s\n' "${tor_control_unix} is not a socket" | tee -a -- "${tmpdir}/fail.log" >/dev/null
         return 1
       }
     ;;
@@ -178,19 +178,19 @@ check_socket(){
       tor_control_port="${socket##*:}"
       tor_control_port="${tor_control_port:-9051}"
       printf '%d' "${tor_control_port}" >/dev/null 2>&1 || {
-        printf '%s\n' "${tor_control_port} is not a valid port, not an integer" | tee -a -- "${tmpdir}"/fail.log >/dev/null
+        printf '%s\n' "${tor_control_port} is not a valid port, not an integer" | tee -a -- "${tmpdir}/fail.log" >/dev/null
         return 1
       }
-      { [ "${tor_control_port}" -gt 0 ] && [ "${tor_control_port}" -le 65535 ]; } || { printf '%s\n' "${tor_control_port} is not a valid port, not within range: 0-65535" | tee -a -- "${tmpdir}"/fail.log >/dev/null; return 1; }
+      { [ "${tor_control_port}" -gt 0 ] && [ "${tor_control_port}" -le 65535 ]; } || { printf '%s\n' "${tor_control_port} is not a valid port, not within range: 0-65535" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
       tor_control_host="${socket%%:*}"
       { [ "${tor_control_host}" = "${tor_control_port}" ] || [ -z "${tor_control_host}" ]; } && tor_control_host="127.0.0.1"
       for quad in $(printf '%s\n' "${tor_control_host}" | tr "." " "); do
-        printf '%d' "${quad}" >/dev/null 2>&1 || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not and integer" | tee -a -- "${tmpdir}"/fail.log >/dev/null; return 1; }
-        { [ "${quad}" -ge 0 ] && [ "${quad}" -le 255 ]; } || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not within range: 0-255" | tee -a -- "${tmpdir}"/fail.log >/dev/null; return 1; }
+        printf '%d' "${quad}" >/dev/null 2>&1 || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not and integer" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
+        { [ "${quad}" -ge 0 ] && [ "${quad}" -le 255 ]; } || { printf '%s\n' "${tor_control_host} is not a valid address, ${quad} is not within range: 0-255" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
       done
     ;;
     ":") return 1;; ## this happens when variables are empty
-    *) printf '%s\n' "socket '${socket}' is invalid" | tee -a -- "${tmpdir}"/fail.log >/dev/null; return 1;;
+    *) printf '%s\n' "socket '${socket}' is invalid" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1;;
   esac
 
   ## assign the program options for socket and test if conneciton is refused
@@ -199,13 +199,13 @@ check_socket(){
       case "${socket_prog##*/}" in
         nc|netcat)
           socket_prog_connect="${socket_prog} -U ${tor_control_unix}"
-          ${socket_prog_connect} -zv || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_unix}" | tee -a -- "${tmpdir}"/fail.log >/dev/null; return 1; }
+          ${socket_prog_connect} -zv || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_unix}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
         ;;
         socat)
           socket_prog_connect="${socket_prog} - UNIX-CONNECT:${tor_control_unix}"
-          ${socket_prog} /dev/null "UNIX-CONNECT:${tor_control_unix}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_unix}" | tee -a -- "${tmpdir}"/fail.log >/dev/null; return 1; }
+          ${socket_prog} /dev/null "UNIX-CONNECT:${tor_control_unix}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_unix}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
         ;;
-        *) printf '%s\n' "${socket_prog##*/} doesn't support Unix-domain sockets" | tee -a -- "${tmpdir}"/fail.log >/dev/null; return 1;;
+        *) printf '%s\n' "${socket_prog##*/} doesn't support Unix-domain sockets" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1;;
       esac
 
       tor_socket="${tor_control_unix}"
@@ -214,15 +214,15 @@ check_socket(){
       case "${socket_prog##*/}" in
         nc|netcat)
           socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
-          ${socket_prog_connect} -z || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a -- "${tmpdir}"/fail.log >/dev/null; return 1; }
+          ${socket_prog_connect} -z || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
         ;;
         socat)
           socket_prog_connect="${socket_prog} TCP:${tor_control_host}:${tor_control_port} -"
-          "${socket_prog}" "TCP:${tor_control_host}:${tor_control_port}" /dev/null || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a -- "${tmpdir}"/fail.log >/dev/null; return 1; }
+          "${socket_prog}" "TCP:${tor_control_host}:${tor_control_port}" /dev/null || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
         ;;
         telnet)
           socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
-          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q -- "Connected to ${tor_control_host}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a -- "${tmpdir}"/fail.log >/dev/null; return 1; }
+          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q -- "Connected to ${tor_control_host}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
         ;;
       esac
 
@@ -411,7 +411,7 @@ if [ -n "${cmd_cli}" ]; then
       while :; do
         notice "attempting to connect to fallback socket 127.0.0.1:9151"
         check_socket "127.0.0.1:9151" && break
-        error_msg "couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat -- "${tmpdir}"/fail.log)"
+        error_msg "couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat -- "${tmpdir}/fail.log")"
       done
     else
       while :; do
@@ -422,11 +422,11 @@ if [ -n "${cmd_cli}" ]; then
         fi
         notice "attempting to connect to fallback socket 127.0.0.1:9051"
         check_socket "127.0.0.1:9051" && break
-        error_msg "couldn't connect to tor daemon socket. Error logs:\n$(cat -- "${tmpdir}"/fail.log)"
+        error_msg "couldn't connect to tor daemon socket. Error logs:\n$(cat -- "${tmpdir}/fail.log")"
       done
     fi
   fi
-  safe-rm -f -- "${tmpdir}"/fail.log
+  safe-rm -f -- "${tmpdir}/fail.log"
 
   ## just get variables, don't send commands to the controller
   [ "${dry_run}" = "1" ] && get_dry_run

@@ -62,8 +62,8 @@ EOF
 	  test -n "${client_filter}" && [ "${client_filter%:*}" != "${stream_client%:*}" ] && break
         ;;
         REMAP)
-          stream_target_cache="$(printf '%s\n' "$(cat -- "${tmpdir}"/.stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
-          printf '%s\n' "${stream_target_cache}" | tee -- "${tmpdir}"/.stream.hosts >/dev/null
+          stream_target_cache="$(printf '%s\n' "$(cat -- "${tmpdir}/.stream.hosts" 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
+          printf '%s\n' "${stream_target_cache}" | tee -- "${tmpdir}/.stream.hosts" >/dev/null
           stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep -F -- "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
           stream_target_clean="$(printf '%s\n' "${stream_target_hostname}~(${stream_target})")"
         ;;
@@ -103,8 +103,8 @@ EOF
             done
             printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n\n"
           else
-            ! test -f "${tmpdir}"/.stream.loop && {
-              touch "${tmpdir}"/.stream.loop
+            ! test -f "${tmpdir}/.stream.loop" && {
+              touch "${tmpdir}/.stream.loop"
               printf %s"${bold}"
               printf "\nID Purpose Client CircID CircPurpose Target\n"
               #printf '\n%6s %-20s %-21s %6s %-20s %-62s\n' "ID" "Purpose" "Client" "CircID" "CircPurpose" "Target"
