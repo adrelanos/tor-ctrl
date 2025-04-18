@@ -100,7 +100,7 @@ trap "list_streams" INT
 trap "exit" QUIT TERM
 trap "kill 0" EXIT
 
-## only to get which socket it succesfully connects
+## only to get which socket it successfully connects
 tor-ctrl -c "GETINFO circuit-status" ${cli_args} | grep -- "connecting to socket with command"
 printf '%s\n' "${me}: [info]: to stop listening and show a summary, please Ctrl+C"
 
