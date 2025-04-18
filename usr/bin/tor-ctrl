@@ -406,7 +406,7 @@ if [ -n "${cmd_cli}" ]; then
       while :; do
         notice "attempting to connect to fallback socket 127.0.0.1:9151"
         check_socket "127.0.0.1:9151" && break
-        error_msg "couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat "${tmpdir}"/fail.log)"
+        error_msg "couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat -- "${tmpdir}"/fail.log)"
       done
     else
       while :; do
@@ -417,7 +417,7 @@ if [ -n "${cmd_cli}" ]; then
         fi
         notice "attempting to connect to fallback socket 127.0.0.1:9051"
         check_socket "127.0.0.1:9051" && break
-        error_msg "couldn't connect to tor daemon socket. Error logs:\n$(cat "${tmpdir}"/fail.log)"
+        error_msg "couldn't connect to tor daemon socket. Error logs:\n$(cat -- "${tmpdir}"/fail.log)"
       done
     fi
   fi
