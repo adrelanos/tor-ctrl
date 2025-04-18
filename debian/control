@@ -14,7 +14,7 @@ Rules-Requires-Root: no
 
 Package: tor-ctrl
 Architecture: all
-Depends: tor, netcat-openbsd, xxd, ${misc:Depends}
+Depends: tor, netcat-openbsd, xxd, safe-rm, ${misc:Depends}
 Description: Tor controller command line tool
  Command line tool for setting up stream for communication from the
  Tor Controller's (client) to a Tor process (server). The client send

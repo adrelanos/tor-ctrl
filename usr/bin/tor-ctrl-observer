@@ -26,8 +26,8 @@ usage(){
 list_streams(){
   ## https://stackoverflow.com/a/22644006 and https://stackoverflow.com/a/53714583
   # shellcheck disable=SC2154
-  trap "rm -f -- stream.tmp; exit" INT QUIT TERM
-  trap "rm -f -- stream.hosts stream.tmp stream.loop; kill 0" EXIT
+  trap "safe-rm -f -- stream.tmp; exit" INT QUIT TERM
+  trap "safe-rm -f -- stream.hosts stream.tmp stream.loop; kill 0" EXIT
 
   listen_stream="$(cat -- stream.tmp)"
   for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep -- "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v -- "^$" | grep -v -- "^250" ); do

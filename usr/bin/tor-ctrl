@@ -392,7 +392,7 @@ if [ -n "${cmd_cli}" ]; then
     error_msg "Sleep time '${sleep_n}' is not an integer nor a floating point."
   fi
   ## set options for the socket program
-  trap 'rm -f -- "${tmpdir}"/fail.log' EXIT INT TERM
+  trap 'safe-rm -f -- "${tmpdir}"/fail.log' EXIT INT TERM
   if [ -n "${tor_control_socket}" ]; then
     notice "attempting to connect to specified socket ${tor_control_socket}"
     check_socket "${tor_control_socket}" && socket_found=1
@@ -421,7 +421,7 @@ if [ -n "${cmd_cli}" ]; then
       done
     fi
   fi
-  rm -f -- "${tmpdir}"/fail.log
+  safe-rm -f -- "${tmpdir}"/fail.log
 
   ## just get variables, don't send commands to the controller
   [ "${dry_run}" = "1" ] && get_dry_run
