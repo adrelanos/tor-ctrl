@@ -45,9 +45,9 @@ case "${1}" in
 
   remove)
     [ "$(id -u)" -ne 0 ] && error_msg "${1} as root"
-    rm -f "/usr/local/man/man8/${script_name}.8" "/usr/local/share/man/man8/${script_name}.8" "/usr/share/man/man8/${script_name}.8"
+    safe-rm -f -- "/usr/local/man/man8/${script_name}.8" "/usr/local/share/man/man8/${script_name}.8" "/usr/share/man/man8/${script_name}.8"
     for file in "${toplevel}"/usr/bin/*; do
-      [ -f "${file}" ] && rm -f "/usr/bin/${file##*/}" "/usr/local/bin/${file##*/}"
+      [ -f "${file}" ] && safe-rm -- -f "/usr/bin/${file##*/}" "/usr/local/bin/${file##*/}"
     done
   ;;
 
@@ -65,7 +65,7 @@ case "${1}" in
   ;;
 
   clean-deb)
-    rm -rf -- *-build-deps_*.buildinfo *-build-deps_*.changes \
+    safe-rm -rf -- *-build-deps_*.buildinfo *-build-deps_*.changes \
     debian/*.debhelper.log debian/*.substvars \
     debian/.debhelper debian/files \
     debian/debhelper-build-stamp "debian/${script_name}" \
