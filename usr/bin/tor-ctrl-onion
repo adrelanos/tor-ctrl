@@ -257,7 +257,7 @@ if [ -n "${add_onion}" ]; then
     [ "${exit_code}" -ne 0 ] && error_msg "Failed to create onion"
     onion_id_file="$(grep -- "250-ServiceID=" "${permanent_onion_save}/onion.tmp"" | sed "s/250-ServiceID=//" | tr -d "\\r")"
     ## save file with its Service Identification, good practive to identify the service
-    mv "${permanent_onion_save%*/}/onion.tmp" "${permanent_onion_save%*/}/${onion_id_file}"
+    mv -- "${permanent_onion_save%*/}/onion.tmp" "${permanent_onion_save%*/}/${onion_id_file}"
     exit "${?}"
   elif [ -n "${permanent_onion_restore}" ]; then
     if test -f "${permanent_onion_restore}"; then

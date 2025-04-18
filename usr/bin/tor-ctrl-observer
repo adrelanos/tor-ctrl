@@ -55,7 +55,7 @@ EOF
           circuit_purpose="$(printf '%s\n' "${circuit}" | cut -d " " -f5 | sed "s/PURPOSE=//")"
           [ -z "${circuit_status}" ] && break
           ! test -f stream.loop && {
-            touch stream.loop
+            touch -- stream.loop
             printf '%s' "${bold}"
             printf "\nID Purpose CircID Purpose Target\n"
             printf '%s' "------------------------------------------------------------------------------------------------------${nocolor}\n"

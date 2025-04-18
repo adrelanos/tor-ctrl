@@ -104,7 +104,7 @@ EOF
             printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n\n"
           else
             ! test -f "${tmpdir}/.stream.loop" && {
-              touch "${tmpdir}/.stream.loop"
+              touch -- "${tmpdir}/.stream.loop"
               printf %s"${bold}"
               printf "\nID Purpose Client CircID CircPurpose Target\n"
               #printf '\n%6s %-20s %-21s %6s %-20s %-62s\n' "ID" "Purpose" "Client" "CircID" "CircPurpose" "Target"
