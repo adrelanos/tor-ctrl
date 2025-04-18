@@ -140,7 +140,7 @@ cli_args=""
 
 : "${TMPDIR:="/tmp"}"
 mkdir -p "${TMPDIR}/tor-ctrl-stream" || error_msg "Failed to create '${TMPDIR}/tor-ctrl-observer'"
-tmpdir="$(mktemp -d ${TMPDIR}/tor-ctrl-stream/XXXXXX)"
+tmpdir="$(mktemp -d "${TMPDIR}/tor-ctrl-stream/XXXXXX")"
 
 if [ -z "${machine_mode}" ]; then
   printf '%s\n' "${me}: [info]: subscribed to Tor stream events, as soon as streams are created, output will be shown below."

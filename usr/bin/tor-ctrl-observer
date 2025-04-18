@@ -90,7 +90,7 @@ cli_args=""
 
 : "${TMPDIR:="/tmp"}"
 mkdir -p "${TMPDIR}/tor-ctrl-observer" || error_msg "Failed to create '${TMPDIR}/tor-ctrl-observer'"
-tmpdir="$(mktemp -d ${TMPDIR}/tor-ctrl-observer/XXXXXX)"
+tmpdir="$(mktemp -d "${TMPDIR}/tor-ctrl-observer/XXXXXX")"
 
 printf '%s\n' "${me}: [info]: subscribed to Tor stream events, as soon as streams are created, output will be shown below."
 
