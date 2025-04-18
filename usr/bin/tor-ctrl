@@ -133,7 +133,7 @@ get_socket(){
   test -f /usr/share/anon-ws-base-files/workstation && return 0
 
   ## minimal check for tor service manager file
-  test -f /lib/systemd/system/tor@default.service && tor_start_command="$(grep "ExecStart=" /lib/systemd/system/tor@default.service | sed "s/ExecStart=//g")"
+  test -f /lib/systemd/system/tor@default.service && tor_start_command="$(grep -- "ExecStart=" /lib/systemd/system/tor@default.service | sed "s/ExecStart=//g")"
 
   ## don't evaluate the exit code of '--verify-config' as it will fail if
   ## not running as root or the tor user
@@ -145,13 +145,13 @@ get_socket(){
   ## Jan 1 00:00:00.000 [notice] Including configuration file
   ## "/usr/local/etc/torrc.d//50_user.conf".
   # shellcheck disable=SC2086
-  tor_config_files="$(${tor_start_command:-tor} --verify-config | grep -E " Read configuration file [^ ]*| Including configuration file [^ ]*" | awk '{print $NF}' | sed "s/\"//;s/\".//;s/\/\//\//")"
+  tor_config_files="$(${tor_start_command:-tor} --verify-config | grep -E -- " Read configuration file [^ ]*| Including configuration file [^ ]*" | awk '{print $NF}' | sed "s/\"//;s/\".//;s/\/\//\//")"
 
   ## grepping no file will be stuck forever
   if [ -n "${tor_config_files}" ]; then
     ## only one option is needed, use head
     # shellcheck disable=SC2086
-    tor_control_socket_filesystem="$(grep -E "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2- | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
+    tor_control_socket_filesystem="$(grep -E -- "^ControlPort [^ ]*|^ControlSocket [^ ]*" ${tor_config_files} | cut -d ":" -f2- | cut -d " " -f2 | sed "s/\"//g;s/unix\://" | head -n 1)"
   fi
 }
 
@@ -222,7 +222,7 @@ check_socket(){
         ;;
         telnet)
           socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
-          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q "Connected to ${tor_control_host}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
+          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q -- "Connected to ${tor_control_host}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a "${tmpdir}"/fail.log >/dev/null; return 1; }
         ;;
       esac
 
@@ -233,15 +233,15 @@ check_socket(){
 
 ## get string to authenticate to the controller
 login(){
-  auth="$({ send_cmd "PROTOCOLINFO"; send_cmd "QUIT"; } | ${socket_prog_connect} 2>/dev/null | grep "AUTH")"
+  auth="$({ send_cmd "PROTOCOLINFO"; send_cmd "QUIT"; } | ${socket_prog_connect} 2>/dev/null | grep -- "AUTH")"
   auth_methods="$(printf '%s\n' "${auth}" | sed "s/250-AUTH METHODS=//" | cut -d " " -f1 | tr "," "\n")"
   tor_cookie="$(printf '%s\n' "${auth}" | sed "s/.*COOKIEFILE=//" | tr -d "\"" | tr -d "\\r")"
 
-  if printf '%s\n' "${auth_methods}" | grep -q "NULL"; then
+  if printf '%s\n' "${auth_methods}" | grep -q -- "NULL"; then
     auth_string="AUTHENTICATE"
   elif test -r "${tor_cookie}"; then
-    safecookie_enabled="$(printf '%s\n' "${auth_methods}" | grep "^SAFECOOKIE$")"
-    cookie_enabled="$(printf '%s\n' "${auth_methods}" | grep "^COOKIE$")"
+    safecookie_enabled="$(printf '%s\n' "${auth_methods}" | grep -- "^SAFECOOKIE$")"
+    cookie_enabled="$(printf '%s\n' "${auth_methods}" | grep -- "^COOKIE$")"
     if [ -n "${cookie_enabled}" ]; then
       ## xxd is only needed when authenticating with SAFECOOKIE
       prog_converter_hex="xxd hexdump od"
@@ -257,18 +257,18 @@ login(){
     fi
   elif
     # shellcheck disable=SC2154
-    [ -n "${tor_password}" ] && printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" ; then
+    [ -n "${tor_password}" ] && printf '%s\n' "${auth_methods}" | grep -q -- "^HASHEDPASSWORD$" ; then
     auth_string="AUTHENTICATE \"${tor_password}\""
   fi
 
   if [ -z "${auth_string}" ]; then
     auth_failed=""
     printf '%s\n' "${me}: Authentication method not detected."
-    if printf '%s\n' "${auth_methods}" | grep -q "^COOKIE$" && ! test -r "${tor_cookie}"; then
+    if printf '%s\n' "${auth_methods}" | grep -q -- "^COOKIE$" && ! test -r "${tor_cookie}"; then
       printf '%s\n' "${me}: COOKIE is enabled but not readable by user ${USER}."
       auth_failed=1
     fi
-    if printf '%s\n' "${auth_methods}" | grep -q "^HASHEDPASSWORD$" && [ -z "${tor_password}" ]; then
+    if printf '%s\n' "${auth_methods}" | grep -q -- "^HASHEDPASSWORD$" && [ -z "${tor_password}" ]; then
       printf '%s\n' "${me}: HASHEDPASSWORD is enabled but no password provided on the command line."
       auth_failed=1
     fi
@@ -317,7 +317,7 @@ finish(){
   str="$(cat)"
   [ -z "${quiet}" ] && printf '%s\n' "${str}"
   ## more than 3 '^250 ' reply status code occurs when $cmd_cli has multiple lines (\\n)
-  printf '%s\n' "${str}" | if [ "$(grep -c "^250 ")" -ge 3 ]; then
+  printf '%s\n' "${str}" | if [ "$(grep -c -- "^250 ")" -ge 3 ]; then
     exit 0
   else
     exit 1

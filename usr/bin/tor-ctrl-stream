@@ -43,30 +43,30 @@ list_streams(){
   trap "rm -f "${tmpdir}"/.stream.hosts "${tmpdir}"/.stream.tmp "${tmpdir}"/.stream.loop; kill 0" EXIT
 
   listen_stream="$(cat -- "${tmpdir}"/.stream.tmp)"
-  for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v "^[[:space:]]*$" | grep -v "^250" ); do
+  for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep -- "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v -- "^[[:space:]]*$" | grep -v -- "^250" ); do
     ## TODO: Should the second printf be '%s\n' instead of only '\n'?
-    printf '%s\n' "${listen_stream}" | grep "^650 STREAM ${stream_ordered}" | while IFS="$(printf '\n')" read -r stream_line; do
+    printf '%s\n' "${listen_stream}" | grep -- "^650 STREAM ${stream_ordered}" | while IFS="$(printf '\n')" read -r stream_line; do
       IFS=" " read -r _ _ stream_id stream_status circuit_id stream_target _ <<-EOF
         $(printf '%s' "${stream_line}")
 EOF
       case "${stream_status}" in
         NEW|NEWRESOLVE)
           stream_target_orig="${stream_target}"
-          stream_purpose="$(printf '%s\n' "${stream_line}" | tr " " "\n" | grep "PURPOSE=" | sed "s/PURPOSE=//")"
-          stream_client="$(printf '%s\n' "${stream_line}" | tr " " "\n" | grep "SOURCE_ADDR=" | sed "s/SOURCE_ADDR=//")"
+          stream_purpose="$(printf '%s\n' "${stream_line}" | tr " " "\n" | grep -- "PURPOSE=" | sed "s/PURPOSE=//")"
+          stream_client="$(printf '%s\n' "${stream_line}" | tr " " "\n" | grep -- "SOURCE_ADDR=" | sed "s/SOURCE_ADDR=//")"
 	  test -n "${client_filter}" && [ "${client_filter%:*}" != "${stream_client%:*}" ] && break
         ;;
         REMAP)
           stream_target_cache="$(printf '%s\n' "$(cat -- "${tmpdir}"/.stream.hosts 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
           printf '%s\n' "${stream_target_cache}" | tee "${tmpdir}"/.stream.hosts >/dev/null
-          stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep -F "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
+          stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep -F -- "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
           stream_target_clean="$(printf '%s\n' "${stream_target_hostname}~(${stream_target})")"
         ;;
         CLOSED|SUCCEEDED)
           [ -n "${stream_target_clean}" ] && stream_target="${stream_target_clean}"
           # shellcheck disable=SC2086
           circuit_all="$(tor-ctrl -c "GETINFO circuit-status" ${cli_args})"
-          circuit="$(printf '%s\n' "${circuit_all}" | grep "^${circuit_id} " | sed "/250 OK/d;/250+circuit-status=/d;/250 closing connection/d")"
+          circuit="$(printf '%s\n' "${circuit_all}" | grep -- "^${circuit_id} " | sed "/250 OK/d;/250+circuit-status=/d;/250 closing connection/d")"
           circuit_status="$(printf '%s\n' "${circuit}" | cut -d " " -f2)"
           circuit_path="$(printf '%s\n' "${circuit}" | cut -d " " -f3)"
           circuit_purpose="$(printf '%s\n' "${circuit}" | cut -d " " -f5 | sed "s/PURPOSE=//")"
@@ -88,12 +88,12 @@ EOF
               relay_nickname="$(printf '%s\n' "${relay}" | cut -d " " -f2)"
               # shellcheck disable=SC2086
               relay_status="$(tor-ctrl -c "GETINFO ns/id/${relay_fingerprint}" ${cli_args})"
-              relay_host="$(printf '%s\n' "${relay_status}" | grep "^r " | cut -d " " -f7)"
-              relay_bandwidth="$(printf '%s\n' "${relay_status}" | grep "^w " | sed "s/w Bandwidth=//;s/\\r//")"
+              relay_host="$(printf '%s\n' "${relay_status}" | grep -- "^r " | cut -d " " -f7)"
+              relay_bandwidth="$(printf '%s\n' "${relay_status}" | grep -- "^w " | sed "s/w Bandwidth=//;s/\\r//")"
               relay_bandwidth="$((relay_bandwidth*512/1024/1024)) MiB/s"
               # shellcheck disable=SC2086
               relay_locale="$(tor-ctrl -c "GETINFO ip-to-country/${relay_host}" ${cli_args})"
-              relay_locale="$(printf '%s\n' "${relay_locale}" | grep -F "250-ip-to-country/${relay_host}=" | sed "s/.*=//;s/\\r//")"
+              relay_locale="$(printf '%s\n' "${relay_locale}" | grep -F -- "250-ip-to-country/${relay_host}=" | sed "s/.*=//;s/\\r//")"
               printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "${hop}" "${relay_fingerprint}" "${relay_host}" "${relay_nickname}" "(${relay_locale})" "${relay_bandwidth}"
             done
             printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n\n"
