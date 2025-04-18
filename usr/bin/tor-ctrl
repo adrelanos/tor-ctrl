@@ -324,6 +324,11 @@ finish(){
   fi
 }
 
+exit_handler() {
+  safe-rm -f -- "${tmpdir}/fail.log"
+  return 0
+}
+
 ############
 ### opts ###
 
@@ -392,7 +397,7 @@ if [ -n "${cmd_cli}" ]; then
     error_msg "Sleep time '${sleep_n}' is not an integer nor a floating point."
   fi
   ## set options for the socket program
-  trap 'safe-rm -f -- "${tmpdir}"/fail.log' EXIT INT TERM
+  trap "exit_handler" EXIT INT TERM
   if [ -n "${tor_control_socket}" ]; then
     notice "attempting to connect to specified socket ${tor_control_socket}"
     check_socket "${tor_control_socket}" && socket_found=1
