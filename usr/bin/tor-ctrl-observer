@@ -2,9 +2,6 @@
 
 ## This is the script you tell people to run and avoid leaking private information
 
-nocolor="\033[0m"
-bold="\033[1m"
-
 me="${0##*/}"
 
 usage(){
