@@ -36,8 +36,8 @@ usage(){
 }
 
 exit_handler() {
-  if test -d "${tmpdir}" ; then
-    safe-rm -f -- "${tmpdir}/.stream.hosts" "${tmpdir}/.stream.tmp" "${tmpdir}/.stream.loop"
+  if test -d "${temp_dir}" ; then
+    safe-rm -f -- "${temp_dir}/.stream.hosts" "${temp_dir}/.stream.tmp" "${temp_dir}/.stream.loop"
   fi
   kill 0
   return 0
@@ -49,7 +49,7 @@ list_streams(){
   trap "exit" INT QUIT TERM
   trap "exit_handler" EXIT
 
-  listen_stream="$(cat -- "${tmpdir}/.stream.tmp")"
+  listen_stream="$(cat -- "${temp_dir}/.stream.tmp")"
   for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep -- "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v -- "^[[:space:]]*$" | grep -v -- "^250" ); do
     ## TODO: Should the second printf be '%s\n' instead of only '\n'?
     printf '%s\n' "${listen_stream}" | grep -- "^650 STREAM ${stream_ordered}" | while IFS="$(printf '\n')" read -r stream_line; do
@@ -64,8 +64,8 @@ EOF
 	  test -n "${client_filter}" && [ "${client_filter%:*}" != "${stream_client%:*}" ] && break
         ;;
         REMAP)
-          stream_target_cache="$(printf '%s\n' "$(cat -- "${tmpdir}/.stream.hosts" 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
-          printf '%s\n' "${stream_target_cache}" | tee -- "${tmpdir}/.stream.hosts" >/dev/null
+          stream_target_cache="$(printf '%s\n' "$(cat -- "${temp_dir}/.stream.hosts" 2>/dev/null) ${stream_target_orig%:*}=${stream_target%:*}")"
+          printf '%s\n' "${stream_target_cache}" | tee -- "${temp_dir}/.stream.hosts" >/dev/null
           stream_target_hostname="$(printf '%s\n' "${stream_target_cache}" | tr " " "\n" | grep -F -- "=${stream_target%:*}" | head -n 1 | sed "s|=.*||")"
           stream_target_clean="$(printf '%s\n' "${stream_target_hostname}~(${stream_target})")"
         ;;
@@ -105,8 +105,8 @@ EOF
             done
             printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n\n"
           else
-            ! test -f "${tmpdir}/.stream.loop" && {
-              touch -- "${tmpdir}/.stream.loop"
+            ! test -f "${temp_dir}/.stream.loop" && {
+              touch -- "${temp_dir}/.stream.loop"
               printf %s"${bold}"
               printf "\nID Purpose Client CircID CircPurpose Target\n"
               #printf '\n%6s %-20s %-21s %6s %-20s %-62s\n' "ID" "Purpose" "Client" "CircID" "CircPurpose" "Target"
@@ -145,7 +145,7 @@ cli_args=""
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
 [ -n "${machine_mode}" ] && cli_args="${cli_args} -m"
 
-tmpdir="$(mktemp --directory)"
+temp_dir="$(mktemp --directory)"
 
 if [ -z "${machine_mode}" ]; then
   printf '%s\n' "${me}: [info]: subscribed to Tor stream events, as soon as streams are created, output will be shown below."
@@ -161,4 +161,4 @@ trap "exit_handler" EXIT
 
 ## this call will print to screen and sent to background
 # shellcheck disable=SC2086
-tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | tee -- "${tmpdir}/.stream.tmp"
+tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | tee -- "${temp_dir}/.stream.tmp"
