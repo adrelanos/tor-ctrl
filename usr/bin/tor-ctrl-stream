@@ -37,7 +37,7 @@ usage(){
 
 exit_handler() {
   if test -d "${temp_dir}" ; then
-    safe-rm -f -- "${temp_dir}/.stream.hosts" "${temp_dir}/.stream.tmp" "${temp_dir}/.stream.loop"
+    safe-rm -r -f -- "${temp_dir}"
   fi
   kill 0
   return 0

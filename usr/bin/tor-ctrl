@@ -329,7 +329,7 @@ exit_handler() {
   if ! test -d "${temp_dir}" ; then
     return 0
   fi
-  safe-rm -f -- "${temp_dir}/fail.log"
+  safe-rm -r -f -- "${temp_dir}"
   return 0
 }
 
