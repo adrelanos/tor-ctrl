@@ -76,7 +76,7 @@ SERVER
 
   -P [dir]       directory where to save permanent onions
 
-  -E [dir|file]  directory or difle search for onion(s) to restore
+  -E [dir|file]  directory or file search for onion(s) to restore
 
  Delete onion:
 
@@ -142,9 +142,11 @@ validate_onion(){
   ## remove protocol (http://, git:// etc)
   onion=${onion##*://}
   ## count characters
-  [ "${#onion}" = "56" ] || error_msg "Onion '${onion}' is invalid\n\t length '${#onion}' should be exactly 56 characters long (not counting .onion)"
+  [ "${#onion}" = "56" ] || error_msg "Onion '${onion}' is invalid
+  length '${#onion}' should be exactly 56 characters long (not counting .onion)"
   ## check for base32 and lower case letters
-  [ "${onion%%*[^a-z2-7]*}" ] || error_msg "Onion '${onion}' is invalid\n\t it is not within base32 alphabet lower-case encoding [a-z2-7]"
+  [ "${onion%%*[^a-z2-7]*}" ] || error_msg "Onion '${onion}' is invalid
+  it is not within base32 alphabet lower-case encoding [a-z2-7]"
 }
 
 exit_handler() {
@@ -256,7 +258,7 @@ if [ -n "${add_onion}" ]; then
     exit_code="${?}"
     [ "${exit_code}" -ne 0 ] && error_msg "Failed to create onion"
     onion_id_file="$(grep -- "250-ServiceID=" "${permanent_onion_save}/onion.tmp" | sed "s/250-ServiceID=//" | tr -d "\\r")"
-    ## save file with its Service Identification, good practive to identify the service
+    ## save file with its Service Identification, good practice to identify the service
     mv -- "${permanent_onion_save%*/}/onion.tmp" "${permanent_onion_save%*/}/${onion_id_file}"
     exit "${?}"
   elif [ -n "${permanent_onion_restore}" ]; then
