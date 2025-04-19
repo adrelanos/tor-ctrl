@@ -161,4 +161,4 @@ trap "exit_handler" EXIT
 
 ## this call will print to screen and sent to background
 # shellcheck disable=SC2086
-tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | tee -- "${tmpdir}"/.stream.tmp
+tor-ctrl -w -c "SETEVENTS STREAM" ${cli_args} | tee -- "${tmpdir}/.stream.tmp"
