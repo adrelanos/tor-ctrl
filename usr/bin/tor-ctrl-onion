@@ -12,10 +12,6 @@
 ##  - the control connection that originated the "ADD_ONION" command is closed.
 ## It is possible to override disabling the Onion Service on control connection close by specifying the "Detach" flag.
 
-
-#nocolor="\033[0m"
-#bold="\033[1m"
-
 me="${0##*/}"
 
 usage(){

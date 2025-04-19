@@ -2,17 +2,8 @@
 
 me="${0##*/}"
 
-## colors
 nocolor="\033[0m"
-#bold="\033[1m"
-#nobold="\033[22m"
-#underline="\033[4m"
-#nounderline="\033[24m"
-#red="\033[31m"
-#green="\033[32m"
 yellow="\033[33m"
-## signals
-
 
 usage(){
   printf '%s\n' "usage: ${me} [-s socket] [-p password]
