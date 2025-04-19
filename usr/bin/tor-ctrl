@@ -316,8 +316,9 @@ cmd_pipe(){
 finish(){
   str="$(cat)"
   [ -z "${quiet}" ] && printf '%s\n' "${str}"
+  counter="$(printf '%s\n' "${str}" | grep -c -- "^250 ")"
   ## more than 3 '^250 ' reply status code occurs when $cmd_cli has multiple lines (\\n)
-  printf '%s\n' "${str}" | if [ "$(grep -c -- "^250 ")" -ge 3 ]; then
+  if [ "$counter" -ge "3" ]; then
     exit 0
   else
     exit 1
