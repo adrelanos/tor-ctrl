@@ -36,6 +36,7 @@ usage(){
 }
 
 exit_handler() {
+  trap "" EXIT
   if test -d "${temp_dir}" ; then
     safe-rm -r -f -- "${temp_dir}"
   fi

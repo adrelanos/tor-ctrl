@@ -152,6 +152,7 @@ validate_onion(){
 }
 
 exit_handler() {
+  trap "" EXIT
   if ! test -d "${permanent_onion_save%*/}" ; then
     return 0
   fi

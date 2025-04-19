@@ -325,6 +325,7 @@ finish(){
 }
 
 exit_handler() {
+  trap "" EXIT
   if ! test -d "${temp_dir}" ; then
     return 0
   fi
