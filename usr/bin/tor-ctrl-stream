@@ -49,7 +49,7 @@ list_streams(){
   trap "exit" INT QUIT TERM
   trap "exit_handler" EXIT
 
-  listen_stream="$(cat -- "${tmpdir}"/.stream.tmp)"
+  listen_stream="$(cat -- "${tmpdir}/.stream.tmp")"
   for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep -- "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v -- "^[[:space:]]*$" | grep -v -- "^250" ); do
     ## TODO: Should the second printf be '%s\n' instead of only '\n'?
     printf '%s\n' "${listen_stream}" | grep -- "^650 STREAM ${stream_ordered}" | while IFS="$(printf '\n')" read -r stream_line; do
@@ -145,9 +145,7 @@ cli_args=""
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
 [ -n "${machine_mode}" ] && cli_args="${cli_args} -m"
 
-: "${TMPDIR:="/tmp"}"
-mkdir -p "${TMPDIR}/tor-ctrl-stream" || error_msg "Failed to create '${TMPDIR}/tor-ctrl-observer'"
-tmpdir="$(mktemp -d "${TMPDIR}/tor-ctrl-stream/XXXXXX")"
+tmpdir="$(mktemp --directory)"
 
 if [ -z "${machine_mode}" ]; then
   printf '%s\n' "${me}: [info]: subscribed to Tor stream events, as soon as streams are created, output will be shown below."

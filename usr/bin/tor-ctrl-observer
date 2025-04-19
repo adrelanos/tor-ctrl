@@ -88,9 +88,7 @@ cli_args=""
 [ -n "${tor_password}" ] && cli_args="${cli_args} -p ${tor_password}"
 [ -n "${machine_mode}" ] && cli_args="${cli_args} -m"
 
-: "${TMPDIR:="/tmp"}"
-mkdir -p "${TMPDIR}/tor-ctrl-observer" || error_msg "Failed to create '${TMPDIR}/tor-ctrl-observer'"
-tmpdir="$(mktemp -d "${TMPDIR}/tor-ctrl-observer/XXXXXX")"
+tmpdir="$(mktemp --directory)"
 
 printf '%s\n' "${me}: [info]: subscribed to Tor stream events, as soon as streams are created, output will be shown below."
 
