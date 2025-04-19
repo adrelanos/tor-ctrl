@@ -11,7 +11,7 @@
 ## from the server.
 ##
 ## In order to get this to work, read tor-ctrl's and tor's man page
-## to configure the conrol method (ControlPort/ControlSocket) and the
+## to configure the control method (ControlPort/ControlSocket) and the
 ## authentication method (CookieAuthentication/HashedControlPassword).
 
 ## script version
@@ -40,7 +40,7 @@ usage(){
                  notice: tcp sockets format: [addr:]port: 9051, 127.0.0.1:9051
                  notice: unix sockets format: [unix:]path: /run/tor/control,
                          unix:/run/tor/control
-                 notice: stops at first succesfull connection.
+                 notice: stops at first successful connection.
                  default: socket specified by this option,
                  default: if fails use environment variables
                           TOR_CONTROL_HOST:TOR_CONTROL_PORT
@@ -199,7 +199,7 @@ check_socket(){
       case "${socket_prog##*/}" in
         nc|netcat)
           socket_prog_connect="${socket_prog} -U ${tor_control_unix}"
-          ${socket_prog_connect} -zv || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_unix}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
+          ${socket_prog_connect} -zv || { printf '%s\n' "${socket_prog}: Connection refused to ${tor_control_unix}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
         ;;
         socat)
           socket_prog_connect="${socket_prog} - UNIX-CONNECT:${tor_control_unix}"
@@ -218,11 +218,11 @@ check_socket(){
         ;;
         socat)
           socket_prog_connect="${socket_prog} TCP:${tor_control_host}:${tor_control_port} -"
-          "${socket_prog}" "TCP:${tor_control_host}:${tor_control_port}" /dev/null || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
+          "${socket_prog}" "TCP:${tor_control_host}:${tor_control_port}" /dev/null || { printf '%s\n' "${socket_prog}: Connection refused to ${tor_control_host}:${tor_control_port}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
         ;;
         telnet)
           socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
-          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q -- "Connected to ${tor_control_host}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
+          printf "\x1dclose\x0d" | ${socket_prog_connect} 2>/dev/null | grep -q -- "Connected to ${tor_control_host}" || { printf '%s\n' "${socket_prog}: Connection refused to ${tor_control_host}:${tor_control_port}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
         ;;
       esac
 
@@ -304,7 +304,7 @@ cmd_pipe(){
   # shellcheck disable=SC2034
   if [ -n "${wait_confirmation}" ]; then
     trap "kill 0" INT
-    ## infinite loop that can be terminated with interrrupt signal
+    ## infinite loop that can be terminated with interrupt signal
     while :; do
       sleep 24h
     done
