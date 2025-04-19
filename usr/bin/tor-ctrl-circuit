@@ -26,14 +26,14 @@ usage(){
 }
 
 error_msg(){
-  printf '%s' "${me}: [error] ${1}\n" >&2
+  printf '%s\n' "${me}: [error] ${1}" >&2
   exit 1
 }
 
 list_circuits(){
   # shellcheck disable=SC2086
   circuit_all="$(tor-ctrl -c "GETINFO circuit-status" ${cli_args})"
-  printf '%s' "${yellow}${me}: [warn] Do not share this information publicly, it could deanonymize yourself.${nocolor}\n\n"
+  printf '%b\n' "${yellow}${me}: [warn] Do not share this information publicly, it could deanonymize yourself.${nocolor}"
   circuit_all="$(printf '%s\n' "${circuit_all}" | sed "/250 OK/d;/250+circuit-status=/d;/250 closing connection/d")"
   printf '%s\n' "${circuit_all}" | while IFS="$(printf '\n')" read -r circuit || [ -n "${circuit}" ]; do
     circuit_id="$(printf '%s\n' "${circuit}" | cut -d " " -f1)"
@@ -63,7 +63,7 @@ list_circuits(){
       printf "\n"
     fi
   done
-  printf '%s' "${yellow}${me}: [warn] Do not share this information publicly, it could deanonymize yourself.${nocolor}\n"
+  printf '%b\n' "${yellow}${me}: [warn] Do not share this information publicly, it could deanonymize yourself.${nocolor}"
 }
 
 command -v tor-ctrl >/dev/null || error_msg "Install tor-ctrl"
