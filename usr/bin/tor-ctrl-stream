@@ -79,13 +79,13 @@ EOF
           circuit_purpose="$(printf '%s\n' "${circuit}" | cut -d " " -f5 | sed "s/PURPOSE=//")"
           [ -z "${circuit_status}" ] && break
           if [ -z "${no_circuit}" ]; then
-            printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n"
-            printf %s"${bold}Target:${nocolor} ${stream_target}${nocolor}\n"
-            printf %s"${bold}Stream:${nocolor} ${stream_id}, ${bold}Purpose:${nocolor} ${stream_purpose}, ${bold}Client:${nocolor} ${stream_client}${nocolor}\n"
-            printf %s"${bold}Circuit:${nocolor} ${circuit_id}, ${bold}Purpose:${nocolor} ${circuit_purpose}${nocolor}\n"
-            printf %s"${bold}"
+            printf "%s\n" "${bold}------------------------------------------------------------------------------------------------------${nocolor}\n"
+            printf "%s\n" "${bold}Target:${nocolor} ${stream_target}${nocolor}\n"
+            printf "%s\n" "${bold}Stream:${nocolor} ${stream_id}, ${bold}Purpose:${nocolor} ${stream_purpose}, ${bold}Client:${nocolor} ${stream_client}${nocolor}\n"
+            printf "%s\n" "${bold}Circuit:${nocolor} ${circuit_id}, ${bold}Purpose:${nocolor} ${circuit_purpose}${nocolor}\n"
+            printf "%s\n" "${bold}"
             printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "n" "Fingerprint" "Address" "Nickname" "Geo" "Bandwidth"
-            printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n"
+            printf "%s\n" "${bold}------------------------------------------------------------------------------------------------------${nocolor}\n"
             hop=0
             for relay in $(printf '%s\n' "${circuit_path}" | tr "," " "); do
               hop=$((hop+1))
@@ -103,18 +103,18 @@ EOF
               relay_locale="$(printf '%s\n' "${relay_locale}" | grep -F -- "250-ip-to-country/${relay_host}=" | sed "s/.*=//;s/\\r//")"
               printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "${hop}" "${relay_fingerprint}" "${relay_host}" "${relay_nickname}" "(${relay_locale})" "${relay_bandwidth}"
             done
-            printf %s"${bold}------------------------------------------------------------------------------------------------------${nocolor}\n\n"
+            printf "%s\n" "${bold}------------------------------------------------------------------------------------------------------${nocolor}"
           else
             ! test -f "${temp_dir}/.stream.loop" && {
               touch -- "${temp_dir}/.stream.loop"
-              printf %s"${bold}"
-              printf "\nID Purpose Client CircID CircPurpose Target\n"
+              printf "%s\n" ""
+              printf "ID Purpose Client CircID CircPurpose Target"
               #printf '\n%6s %-20s %-21s %6s %-20s %-62s\n' "ID" "Purpose" "Client" "CircID" "CircPurpose" "Target"
-              printf %s"------------------------------------------------------------------------------------------------------${nocolor}\n"
+              printf "%s" "------------------------------------------------------------------------------------------------------"
             }
             ## Stream purpose is unkown for tor-ctrl if it was an end of stream that we didn't catch the creation
             ## unknown us being specified for proper field separation
-            printf %s"${stream_id} ${stream_purpose:="UNKNOWN"} ${stream_client:="UNKNOWN"} ${circuit_id}  ${circuit_purpose} ${stream_target}\n" | tr -s " "
+            printf "%s\n" "${stream_id} ${stream_purpose:="UNKNOWN"} ${stream_client:="UNKNOWN"} ${circuit_id}  ${circuit_purpose} ${stream_target}" | tr -s " "
             #printf '%6s %-20s %-21s %6s %-20s %-62s\n' "${stream_id}" "${stream_purpose}" "${stream_client}" "${circuit_id}" "${circuit_purpose}" "${stream_target}" | tr -s " "
           fi
           ## return to avoid duplicates (happens when there is CLOSED and SUCCEEDED)
