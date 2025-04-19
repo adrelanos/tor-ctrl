@@ -97,12 +97,12 @@ https://gitweb.torproject.org/torspec.git/tree/control-spec.txt"
 ## wrapper to printf
 notice(){
   { [ -n "${quiet}" ] || [ -n "${machine_mode}" ] ; } && return
-  printf '%s' "${me}: [notice] ${1}\n"
+  printf '%s\n' "${me}: [notice] ${1}"
 }
 
 ## print what failed, redirect output to stderr and exit with failed status
 error_msg(){
-  printf '%s' "${me}: [error] ${1}\n" >&2
+  printf '%s\n' "${me}: [error] ${1}" >&2
   exit 1
 }
 
@@ -391,7 +391,7 @@ temp_dir="$(mktemp --directory)"
 
 if [ -n "${cmd_cli}" ]; then
   ## accept commands separated by new lines
-  cmd_cli="$(printf %s"${cmd_cli}\n" | sed "s|^ ||")"
+  cmd_cli="$(printf "%s\n" "${cmd_cli}" | sed "s|^ ||")"
   ## check if requirements are fulfilled
   check_progs
   ## sleep was assigned on check_progs if empty because of telnet, see if it is valid.
@@ -413,7 +413,8 @@ if [ -n "${cmd_cli}" ]; then
       while :; do
         notice "attempting to connect to fallback socket 127.0.0.1:9151"
         check_socket "127.0.0.1:9151" && break
-        error_msg "couldn't connect to Tor Browser Bundle socket. Error logs:\n$(cat -- "${temp_dir}/fail.log")"
+        error_msg "couldn't connect to Tor Browser Bundle socket. Error logs:
+        $(cat -- "${temp_dir}/fail.log")"
       done
     else
       while :; do
@@ -424,7 +425,8 @@ if [ -n "${cmd_cli}" ]; then
         fi
         notice "attempting to connect to fallback socket 127.0.0.1:9051"
         check_socket "127.0.0.1:9051" && break
-        error_msg "couldn't connect to tor daemon socket. Error logs:\n$(cat -- "${temp_dir}/fail.log")"
+        error_msg "couldn't connect to tor daemon socket. Error logs:
+        $(cat -- "${temp_dir}/fail.log")"
       done
     fi
   fi
