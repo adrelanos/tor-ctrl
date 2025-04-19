@@ -15,7 +15,7 @@ yellow="\033[33m"
 
 
 usage(){
-  printf '%s\n' "usage: ${me} [-s socket] [-p password
+  printf '%s\n' "usage: ${me} [-s socket] [-p password]
 
   -s [socket]    tor's control socket
                  notice: tcp: [addr:]port: 9051, 127.0.0.1:9051
