@@ -1,7 +1,10 @@
 #!/usr/bin/env sh
 
-nocolor="\033[0m"
-bold="\033[1m"
+#nocolor="\033[0m"
+#bold="\033[1m"
+## TODO: colors versus stecho
+nocolor=""
+bold=""
 
 me="${0##*/}"
 
