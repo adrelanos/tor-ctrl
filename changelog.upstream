@@ -1,3 +1,256 @@
+commit 96e34c6d6de7f6d2031534b2b493434ca42b9438
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 12:24:07 2025 -0400
+
+    fix
+
+commit 46d8285387e8debe174876a4d85a18573a6e5dcf
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 11:32:30 2025 -0400
+
+    tor-ctrl-onion: fix `-k`, `-u`, `-x`
+
+commit 17cffa4dd44a4ed8726f54a4d1123941351dfdd2
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 11:24:54 2025 -0400
+
+    fix
+
+commit 50e3079d933a249bab21a53e094df28be8ca311a
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 11:17:17 2025 -0400
+
+    fix
+
+commit 9c4bbdbc5f566d4d26baed7c5b81faedf8a7c6ae
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 11:13:55 2025 -0400
+
+    fix
+
+commit aacd023532193463e2ac495f5815723c9f9f0d72
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 11:09:25 2025 -0400
+
+    disable colors in tor-ctrl-stream
+
+commit b742eee844d2f3d59650ad362212e914ef106009
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 11:07:21 2025 -0400
+
+    cleanup
+
+commit baf864236a0cc6547c11254f8ec5b092ea14c663
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 11:05:32 2025 -0400
+
+    cleanup
+
+commit d50afd2cbaf67f0896939401963ed0408c86407e
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 11:04:56 2025 -0400
+
+    refactoring
+
+commit f1c9f33948428f4d700b5747f55ae40e06ab52b4
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 11:00:35 2025 -0400
+
+    refactoring
+
+commit 443eaa8b0eecf5460cf78ae2d0e04f6ff7682c67
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 10:58:19 2025 -0400
+
+    disable trap inside handler
+
+commit 6ad0dcb93120e4d6ea1f2e4e2a63eb29e97c65d3
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 10:55:46 2025 -0400
+
+    remove `kill 0` because not actually launching programs into the background
+    and because this can cause infinite loops
+
+commit f9ddd06813363f87baf7a3cb3c9dc53297d61905
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 10:52:33 2025 -0400
+
+    fix
+
+commit 825d1b50d81532a0ca1019e2cc1e35514171801d
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 10:24:26 2025 -0400
+
+    fix
+
+commit b4e2693e2d69ff4a468cc2bbe76dd1623e1f6eb7
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 10:19:20 2025 -0400
+
+    improve temporary folder cleanup
+
+commit 76a54d8f19160f5a64c801e98e42e4dfea77fc5c
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 10:10:33 2025 -0400
+
+    simplify temporary folder deletion
+
+commit 604f64296652022b6d7f4b2734f3510f5b4edde9
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 10:07:58 2025 -0400
+
+    refactoring
+
+commit 39780c49fcab8373de8fca5ebe9db3625e4897ac
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 10:04:52 2025 -0400
+
+    typo
+
+commit 975be32fb9565ad587c87bad3cd24fc1ae41bf13
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 09:58:25 2025 -0400
+
+    typo
+
+commit 446d66785528d5048ebbeb6233aa2f7fa23853f8
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 09:57:37 2025 -0400
+
+    refactoring
+
+commit 71ec95afb44542d444fbb6c05dd683050c0d58d6
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 09:56:07 2025 -0400
+
+    avoid potential permission issues by "`mkdir /tmp`"
+
+commit ae3201e602c10a9e627614178485d27aa4970d16
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 09:50:48 2025 -0400
+
+    refactoring
+
+commit 6e8ea0036f4ebabdd22bdad0599d9cade63bada7
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 09:40:01 2025 -0400
+
+    typo
+
+commit bb2ba0b22eacc88d05b97ba65212ab8642a03c55
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 09:33:16 2025 -0400
+
+    fix
+
+commit 4e5efef0ead69dc4cc06788cd36ce07a43af5560
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sat Apr 19 09:21:04 2025 -0400
+
+    output
+
+commit 230e08f6df99a21fe17f31861c3824fb95946833
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 19:45:25 2025 -0400
+
+    improve tmpdir safety
+
+commit 4ccea826a4a4004035d2a97c03aec373471f9218
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 19:41:36 2025 -0400
+
+    end-of-options
+
+commit c2f78d412b915397ec9bcf5316e9ce9dbc3eff56
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 19:40:24 2025 -0400
+
+    refactoring
+
+commit 0515e59954489ef6db8a0c3fe004ad0d228853a2
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 19:35:13 2025 -0400
+
+    typo
+
+commit ce3ae039cfeba029c0547b165a438014cc555f01
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 19:32:01 2025 -0400
+
+    refactoring
+
+commit dd217fa33f4d3ed29009575d6dcfc5a535b04525
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 19:29:06 2025 -0400
+
+    refactoring
+
+commit 7d3f505f0e36d1878374096490683a909c28719f
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 19:25:38 2025 -0400
+
+    refactoring
+
+commit ba15367770430dc0e7ed6646936fbffa77f95d6b
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 19:05:33 2025 -0400
+
+    safe-rm
+
+commit 11bc94f7373c6c07b9b41314ddef544d2d295ea0
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 19:04:06 2025 -0400
+
+    safe-rm
+
+commit d94efaca65b0685472a5a20912d796ce6d9d0183
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 19:02:34 2025 -0400
+
+    end-of-options
+
+commit 23eeaa9adbc6e832f3ec966d182002a290b6c8ae
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 18:58:08 2025 -0400
+
+    end-of-options
+
+commit 75cd01301485533181ebe851ca3af81c8e4c6ba6
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 18:56:18 2025 -0400
+
+    quotes
+
+commit 4e0dfec5f76524a30bc14c74b340dd2958aacb47
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 18:54:11 2025 -0400
+
+    end-of-options
+
+commit 5027b74d971be25ef874f0c987a31cd3a4f65239
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 18:51:32 2025 -0400
+
+    end-of-options
+
+commit 2e68345b1081c7ece4db336cba9ed528e0333696
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 18:44:44 2025 -0400
+
+    end-of-options
+
+commit 2be3ebfbf12736dff027d60fef3c2f7a3143195c
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Apr 18 18:42:32 2025 -0400
+
+    printf
+
+commit 04666eecac6b4999a4a3eb4120b16790f763f0d6
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Jan 24 11:11:46 2025 +0000
+
+    bumped changelog version
+
 commit 560bd27b6b17cf132cd46b09a0cf2e6070729984
 Author: Patrick Schleizer <adrelanos@whonix.org>
 Date:   Thu Jan 23 11:13:40 2025 -0500
