@@ -29,20 +29,13 @@ exit_handler() {
   kill 0
 }
 
-term_handler(){
-  if test -d "${temp_dir}" ; then
-    safe-rm -r -f -- "${temp_dir}"
-  fi
-  exit
-}
-
 list_streams(){
   ## https://stackoverflow.com/a/22644006 and https://stackoverflow.com/a/53714583
   # shellcheck disable=SC2154
-  trap "term_handler" INT QUIT TERM
+  trap "exit" INT QUIT TERM
   trap "exit_handler" EXIT
 
-  listen_stream="$(cat -- stream.tmp)"
+  listen_stream="$(cat -- "${temp_dir}/stream.tmp")"
   for stream_ordered in $(printf '%s\n' "${listen_stream}" | grep -- "^650 STREAM" | cut -d " " -f3 | sort -u | grep -v -- "^$" | grep -v -- "^250" ); do
     printf '%s\n' "${listen_stream}" | grep -- "^650 STREAM ${stream_ordered}" | while IFS="$(printf '\n')" read -r stream_line; do
       IFS=" " read -r _ _ stream_id stream_status circuit_id stream_target _ <<-EOF
