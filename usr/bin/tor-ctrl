@@ -203,7 +203,7 @@ check_socket(){
         ;;
         socat)
           socket_prog_connect="${socket_prog} - UNIX-CONNECT:${tor_control_unix}"
-          ${socket_prog} /dev/null "UNIX-CONNECT:${tor_control_unix}" || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_unix}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
+          ${socket_prog} /dev/null "UNIX-CONNECT:${tor_control_unix}" || { printf '%s\n' "${socket_prog}: Connection refused to ${tor_control_unix}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
         ;;
         *) printf '%s\n' "${socket_prog##*/} doesn't support Unix-domain sockets" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1;;
       esac
@@ -214,7 +214,7 @@ check_socket(){
       case "${socket_prog##*/}" in
         nc|netcat)
           socket_prog_connect="${socket_prog} ${tor_control_host} ${tor_control_port}"
-          ${socket_prog_connect} -z || { printf '%s\n' "${socket_prog}: Connetion refused to ${tor_control_host}:${tor_control_port}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
+          ${socket_prog_connect} -z || { printf '%s\n' "${socket_prog}: Connection refused to ${tor_control_host}:${tor_control_port}" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1; }
         ;;
         socat)
           socket_prog_connect="${socket_prog} TCP:${tor_control_host}:${tor_control_port} -"
