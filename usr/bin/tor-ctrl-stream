@@ -82,13 +82,13 @@ EOF
           circuit_purpose="$(printf '%s\n' "${circuit}" | cut -d " " -f5 | sed "s/PURPOSE=//")"
           [ -z "${circuit_status}" ] && break
           if [ -z "${no_circuit}" ]; then
-            printf "%s\n" "${bold}------------------------------------------------------------------------------------------------------${nocolor}\n"
-            printf "%s\n" "${bold}Target:${nocolor} ${stream_target}${nocolor}\n"
-            printf "%s\n" "${bold}Stream:${nocolor} ${stream_id}, ${bold}Purpose:${nocolor} ${stream_purpose}, ${bold}Client:${nocolor} ${stream_client}${nocolor}\n"
-            printf "%s\n" "${bold}Circuit:${nocolor} ${circuit_id}, ${bold}Purpose:${nocolor} ${circuit_purpose}${nocolor}\n"
+            printf "%s\n" "${bold}------------------------------------------------------------------------------------------------------${nocolor}"
+            printf "%s\n" "${bold}Target:${nocolor} ${stream_target}${nocolor}"
+            printf "%s\n" "${bold}Stream:${nocolor} ${stream_id}, ${bold}Purpose:${nocolor} ${stream_purpose}, ${bold}Client:${nocolor} ${stream_client}${nocolor}"
+            printf "%s\n" "${bold}Circuit:${nocolor} ${circuit_id}, ${bold}Purpose:${nocolor} ${circuit_purpose}${nocolor}"
             printf "%s\n" "${bold}"
             printf '%1s. %-40s %-15s %-19s %-4s %9s\n' "n" "Fingerprint" "Address" "Nickname" "Geo" "Bandwidth"
-            printf "%s\n" "${bold}------------------------------------------------------------------------------------------------------${nocolor}\n"
+            printf "%s\n" "${bold}------------------------------------------------------------------------------------------------------${nocolor}"
             hop=0
             for relay in $(printf '%s\n' "${circuit_path}" | tr "," " "); do
               hop=$((hop+1))
