@@ -193,7 +193,7 @@ check_socket(){
     *) printf '%s\n' "socket '${socket}' is invalid" | tee -a -- "${tmpdir}/fail.log" >/dev/null; return 1;;
   esac
 
-  ## assign the program options for socket and test if conneciton is refused
+  ## assign the program options for socket and test if connection is refused
   case "${socket_type}" in
     unix)
       case "${socket_prog##*/}" in
