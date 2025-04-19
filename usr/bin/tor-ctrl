@@ -303,7 +303,6 @@ cmd_pipe(){
   send_cmd "${cmd_cli}"
   # shellcheck disable=SC2034
   if [ -n "${wait_confirmation}" ]; then
-    trap "kill 0" INT
     ## infinite loop that can be terminated with interrupt signal
     while :; do
       sleep 24h
