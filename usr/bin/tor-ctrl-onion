@@ -137,6 +137,7 @@ error_msg(){
 }
 
 validate_onion(){
+  onion="$1"
   ## remove .onion suffix and everything after it
   onion=${onion%.onion*}
   ## remove protocol (http://, git:// etc)
@@ -231,7 +232,7 @@ if [ -n "${list_onion}" ]; then
 fi
 
 if [ -n "${del_onion}" ]; then
-  validate_onion
+  validate_onion "${onion}"
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} DEL_ONION "${onion}"
   exit "${?}"
@@ -258,15 +259,7 @@ if [ -n "${add_onion}" ]; then
     exit_code="${?}"
     [ "${exit_code}" -ne 0 ] && error_msg "Failed to create onion"
     onion_id_file="$(grep -- "250-ServiceID=" "${permanent_onion_save}/onion.tmp" | sed "s/250-ServiceID=//" | tr -d "\\r")"
-
-    if ! printf "%s\n" "$onion_id_file" | grep --quiet -E '^[a-zA-Z0-9]+$'; then
-      error_msg "Variable onion_id_file is not alphanumeric."
-    fi
-    onion_id_file_string_length="${#onion_id_file}"
-    if ! [ "${onion_id_file_string_length}" = "56" ]; then
-      error_msg "Variable onion_id_file_string_length is is not 56. It is: $onion_id_file_string_length"
-    fi
-
+    validate_onion "${onion_id_file}"
     ## save file with its Service Identification, good practice to identify the service
     mv -- "${permanent_onion_save%*/}/onion.tmp" "${permanent_onion_save%*/}/${onion_id_file}"
     exit "${?}"
@@ -301,7 +294,7 @@ fi
 
 if [ -n "${onion_client_auth_add}" ]; then
   [ -z "${onion}" ] && error_msg "This option requires an onion service to be specified, use with '-o address.onion'"
-  validate_onion
+  validate_onion "${onion}"
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} ONION_CLIENT_AUTH_ADD "${onion}" "${onion_client_auth_add}"
   exit "${?}"
@@ -309,14 +302,14 @@ fi
 
 if [ -n "${onion_client_auth_remove}" ]; then
   [ -z "${onion}" ] && error_msg "This option requires an onion service to be specified, use with '-o address.onion'"
-  validate_onion
+  validate_onion "${onion}"
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} ONION_CLIENT_AUTH_REMOVE "${onion}"
   exit "${?}"
 fi
 
 if [ -n "${onion_client_auth_view}" ]; then
-  [ -n "${onion}" ] && validate_onion
+  [ -n "${onion}" ] && validate_onion "${onion}"
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} ONION_CLIENT_AUTH_VIEW ${onion}
   exit "${?}"
