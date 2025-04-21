@@ -237,6 +237,12 @@ login(){
   auth_methods="$(printf '%s\n' "${auth}" | sed "s/250-AUTH METHODS=//" | cut -d " " -f1 | tr "," "\n")"
   tor_cookie="$(printf '%s\n' "${auth}" | sed "s/.*COOKIEFILE=//" | tr -d "\"" | tr -d "\\r")"
 
+  if test -r "${tor_cookie}"; then
+    if [ ! "$tor_cookie" = "/run/tor/control.authcookie" ]; then
+      error_msg "Cookie file location other than '/run/tor/control.authcookie' currently unsupported."
+    fi
+  fi
+
   if printf '%s\n' "${auth_methods}" | grep -q -- "NULL"; then
     auth_string="AUTHENTICATE"
   elif test -r "${tor_cookie}"; then
