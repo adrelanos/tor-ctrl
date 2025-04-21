@@ -137,17 +137,18 @@ error_msg(){
 }
 
 validate_onion(){
-  onion="$1"
+  onion_to_validate="$1"
   ## remove .onion suffix and everything after it
-  onion=${onion%.onion*}
+  onion_to_validate=${onion_to_validate%.onion*}
   ## remove protocol (http://, git:// etc)
-  onion=${onion##*://}
+  onion_to_validate=${onion_to_validate##*://}
   ## count characters
-  [ "${#onion}" = "56" ] || error_msg "Onion '${onion}' is invalid
-  length '${#onion}' should be exactly 56 characters long (not counting .onion)"
+  [ "${#onion_to_validate}" = "56" ] || error_msg "Onion '${onion_to_validate}' is invalid
+  length '${#onion_to_validate}' should be exactly 56 characters long (not counting .onion)"
   ## check for base32 and lower case letters
-  [ "${onion%%*[^a-z2-7]*}" ] || error_msg "Onion '${onion}' is invalid
+  [ "${onion_to_validate%%*[^a-z2-7]*}" ] || error_msg "Onion '${onion_to_validate}' is invalid
   it is not within base32 alphabet lower-case encoding [a-z2-7]"
+  printf "%s\n" "${onion_to_validate}"
 }
 
 exit_handler() {
@@ -232,7 +233,7 @@ if [ -n "${list_onion}" ]; then
 fi
 
 if [ -n "${del_onion}" ]; then
-  validate_onion "${onion}"
+  onion="$(validate_onion "${onion}")"
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} DEL_ONION "${onion}"
   exit "${?}"
@@ -259,7 +260,7 @@ if [ -n "${add_onion}" ]; then
     exit_code="${?}"
     [ "${exit_code}" -ne 0 ] && error_msg "Failed to create onion"
     onion_id_file="$(grep -- "250-ServiceID=" "${permanent_onion_save}/onion.tmp" | sed "s/250-ServiceID=//" | tr -d "\\r")"
-    validate_onion "${onion_id_file}"
+    onion_id_file="$(validate_onion "${onion_id_file}")"
     ## save file with its Service Identification, good practice to identify the service
     mv -- "${permanent_onion_save%*/}/onion.tmp" "${permanent_onion_save%*/}/${onion_id_file}"
     exit "${?}"
@@ -294,7 +295,7 @@ fi
 
 if [ -n "${onion_client_auth_add}" ]; then
   [ -z "${onion}" ] && error_msg "This option requires an onion service to be specified, use with '-o address.onion'"
-  validate_onion "${onion}"
+  onion="$(validate_onion "${onion}")"
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} ONION_CLIENT_AUTH_ADD "${onion}" "${onion_client_auth_add}"
   exit "${?}"
@@ -302,14 +303,14 @@ fi
 
 if [ -n "${onion_client_auth_remove}" ]; then
   [ -z "${onion}" ] && error_msg "This option requires an onion service to be specified, use with '-o address.onion'"
-  validate_onion "${onion}"
+  onion="$(validate_onion "${onion}")"
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} ONION_CLIENT_AUTH_REMOVE "${onion}"
   exit "${?}"
 fi
 
 if [ -n "${onion_client_auth_view}" ]; then
-  [ -n "${onion}" ] && validate_onion "${onion}"
+  [ -n "${onion}" ] && onion="$(validate_onion "${onion}")"
   # shellcheck disable=SC2086
   tor-ctrl ${cli_args} ONION_CLIENT_AUTH_VIEW ${onion}
   exit "${?}"
