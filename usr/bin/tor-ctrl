@@ -14,6 +14,9 @@
 ## to configure the control method (ControlPort/ControlSocket) and the
 ## authentication method (CookieAuthentication/HashedControlPassword).
 
+# shellcheck source=../../../helper-scripts/usr/libexec/helper-scripts/strings.bsh
+source /usr/libexec/helper-scripts/strings.bsh
+
 ## script version
 torctrl_version="5.0.0"
 
@@ -351,6 +354,7 @@ get_arg(){
   value="${arg}"
   ## Escaping quotes is needed because else it will fail if the argument is quoted
   # shellcheck disable=SC2140
+  check_variable_name "${1}" || exit 1
   eval "${1}"="\"${value}\""
 }
 
