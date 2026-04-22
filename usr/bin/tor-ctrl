@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 ## Copyright (c) 2007 Stefan Behte <stefan.behte@gmx.net> <http://ge.mine.nu/>
 ## Copyright (C) 2013 - 2025 ENCRYPTED SUPPORT LLC <adrelanos@riseup.net>
