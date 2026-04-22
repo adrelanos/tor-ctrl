@@ -1,3 +1,15 @@
+commit 649820dd7be85d0382b6fff0572121acb0d4199d
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Wed Apr 22 09:20:39 2026 -0400
+
+    switch to bash to be able to use strings.bsh
+
+commit ddc28d9a3b9bdd4bb210ecc3cc5f16a9976c9de6
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Wed Apr 22 13:18:39 2026 +0000
+
+    bumped changelog version
+
 commit 1859a79723b0748e22b5d9786676e69203b8710e
 Merge: 813dfc3 79617af
 Author: Patrick Schleizer <adrelanos@whonix.org>
