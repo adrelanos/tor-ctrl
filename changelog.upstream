@@ -1,3 +1,22 @@
+commit 1859a79723b0748e22b5d9786676e69203b8710e
+Merge: 813dfc3 79617af
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Wed Apr 22 07:30:47 2026 -0400
+
+    Merge remote-tracking branch 'ArrayBolt3/arraybolt3/trixie'
+
+commit 79617afdfff18efc786de620a09b5eaf519f799a
+Author: Aaron Rainbolt <arraybolt3@gmail.com>
+Date:   Mon Apr 20 22:24:56 2026 -0400
+
+    Harden against command injection
+
+commit 813dfc3b0f5fec1b865307750b59f5e378f6542f
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Sun Mar 29 08:20:39 2026 +0000
+
+    bumped changelog version
+
 commit 3092dfd11013dd5789de7d261a70a322e9ac5131
 Merge: 743873b 4b36827
 Author: Patrick Schleizer <adrelanos@whonix.org>
@@ -53,20 +72,20 @@ Author: Aaron Rainbolt <arraybolt3@ubuntu.com>
 Date:   Mon Dec 1 21:22:36 2025 -0600
 
     Fix end-of-options parsing, make argument retrieval a bit cleaner
-    
+
     The pattern '--*' in the argument parser was matching the
     end-of-options string '--'. As a result, the string was collapsed to a
     blank string in the parser but not in the argument list itself. This
     triggered the parser to stop argument parsing, but without removing the
     '--' string from the argument list, resulting in it being sent as a
     command to the Tor daemon.
-    
+
     To fix, change the patterns '--*' and '-*' in the parser to '--?*' and
     '-?*', respectively. This makes the parser collapse '--' to '-', which
     it later recognizes as an end-of-options indicator. This causes the
     parser to remove '--' from the argument list before stopping argument
     parsing.
-    
+
     Also, stop assuming '$2' is always defined. We don't use 'set -u' in
     tor-ctrl today, but we might in the future.
 
@@ -528,7 +547,7 @@ Author: Patrick Schleizer <adrelanos@whonix.org>
 Date:   Tue Jun 13 08:47:12 2023 +0000
 
     fix lintian warning
-    
+
     P: tor-ctrl source: very-long-line-length-in-source-file 554 > 512 [README.md:256]
 
 commit 2836173372e877e86d944ddf5f07b57b643ebcf4
@@ -561,7 +580,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sat Oct 22 17:37:17 2022 +0000
 
     unlimit circuit hops
-    
+
     vanguards compatibility
 
 commit 8e51c0cf5a7f88174ae90b202f96594ef7812576
@@ -588,7 +607,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Tue Sep 27 20:39:01 2022 +0000
 
     make temporary file be created on tmpdir
-    
+
     avoid putitng files on current directory
 
 commit 23433ede20a3a93041834a42f557c88bd088bac5
@@ -602,7 +621,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sat Jul 9 00:09:59 2022 +0000
 
     source_addr
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/32
 
 commit 230499fbc8d29fe463a95c0e0cb97ef33f314b89
@@ -635,7 +654,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sun Feb 27 22:22:37 2022 +0100
 
     improve usage and less repeated code
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/27
 
 commit 0d55024e1e9fb5cece3f10678767dc6a2db39559
@@ -643,7 +662,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sun Feb 27 15:05:19 2022 +0100
 
     explain which socket failed and which worked
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/27
 
 commit b9ebebd9fd2de637b0e00fa97ca7418fb9a35214
@@ -651,7 +670,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sun Feb 27 11:17:46 2022 +0100
 
     sort socket per tor system
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/27
 
 commit a8d9bf3c244832e71b1a5f5c9c6ef698fd73ac68
@@ -665,7 +684,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sat Feb 26 14:06:10 2022 +0100
 
     enhance socket selection
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/27
 
 commit a1246bc518b73366bdfe57a016ed704bc93d29a3
@@ -673,7 +692,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sat Feb 26 02:08:15 2022 +0100
 
     sort socket per tor system
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/27
 
 commit 21aa3b189f2cfa8fbf36a1740e05ca0f2da2f6bc
@@ -681,7 +700,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Fri Feb 25 10:01:24 2022 +0100
 
     info about which socket it connected
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/27
 
 commit c69df4c1d8149e71813334b343fc0e8ce2e7e71e
@@ -689,7 +708,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Fri Feb 25 02:38:17 2022 +0100
 
     try TBB socket and env var till finding something
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/27
 
 commit 8df77adb6ea0f65e52bdac2136686e0b5a001c2a
@@ -728,7 +747,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 18:11:34 2022 +0000
 
     fix duplicate
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/28
 
 commit b90f6b8c1fc975d029bdc2bf1a371808dcb06870
@@ -736,7 +755,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 18:03:49 2022 +0000
 
     tor-ctrl-observer
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/28
 
 commit bdc74d70f24d542cbde4e781a6bedab027e12ae1
@@ -750,7 +769,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 13:36:00 2022 +0000
 
     the typo
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/30
 
 commit 40023de168f143e065a010931e7fd302b8748673
@@ -758,7 +777,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 13:35:45 2022 +0000
 
     the typo
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/30
 
 commit 944266ec6d2fd5d556c07aff323d0b34fb6f932b
@@ -766,7 +785,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 13:33:58 2022 +0000
 
     do no share circuits on public forums
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/30
 
 commit 8504280f38608b7ac0c5ba7a444be257ec4641cd
@@ -780,7 +799,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 12:22:03 2022 +0000
 
     fi
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/26
 
 commit 46362407665741342c351656cff37f3520062293
@@ -788,7 +807,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 12:20:35 2022 +0000
 
     restore also from file, not just folders
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/26
 
 commit 3ae5b08a30174bc3ce6e7fae533f1a41d597b369
@@ -796,7 +815,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 11:48:32 2022 +0000
 
     restore from a singe file
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/26
 
 commit 6fbfc86846e95f7327faf9a0c44be3aad467e05c
@@ -804,7 +823,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 11:44:16 2022 +0000
 
     finish permanent mode
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/26
 
 commit b97f9412ceb3f327422d6cda5b5246043226eb68
@@ -812,7 +831,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 11:35:40 2022 +0000
 
     fix return carriage
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/26
 
 commit 25583a1b83ebef8ab71c0766c120d5e2e2b79184
@@ -820,7 +839,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 11:34:04 2022 +0000
 
     fix return carriage
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/26
 
 commit 0d2f9b8583efcc1b6e3c86fba75b3f4b810a1c55
@@ -834,7 +853,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 10:58:18 2022 +0000
 
     introducing permanent onion mode
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/26
 
 commit 3847b1907cdf6cf8196b6bd6a8d62a0f7d698870
@@ -842,7 +861,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Feb 21 00:13:52 2022 +0000
 
     don't print exits on stream private mode
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/28
 
 commit b4e996dee3f6ace12d8baddcc8895f234a136be8
@@ -850,7 +869,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sun Feb 20 23:51:16 2022 +0000
 
     fix again 250 hide
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/28
 
 commit 6744c0ac6f70df08f1ee9d5e8d8fbb96b9081f1d
@@ -864,7 +883,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sun Feb 20 23:41:11 2022 +0000
 
     tone down warning on private mode
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/28
 
 commit 28f138d46a21cdd64ef3a949e7be610d8179ac8f
@@ -872,7 +891,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sun Feb 20 22:59:48 2022 +0000
 
     remove DIR_FETCH from private tor-ctrl-stream
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/28
 
 commit d7f4edf62734b2480a451544bf087bb57dde132f
@@ -886,7 +905,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sun Feb 20 19:11:43 2022 +0000
 
     add TBB instructions
-    
+
     fix https://github.com/nyxnor/tor-ctrl/issues/27
 
 commit 54ffffbeaa91a5d792cf000c67b4950fb2fe4061
@@ -925,7 +944,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sun Feb 13 00:50:56 2022 +0100
 
     grep fixed string to not fail on []
-    
+
     fix https://github.com/nyxnor/tor-ctrl/issues/25
 
 commit 7d822a2f566a5070b417597f34dae5750f387ad1
@@ -975,7 +994,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Thu Feb 3 23:43:18 2022 +0100
 
     add nonanonymous and maxtreams for tor-ctrl-onion
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/17
 
 commit 2860b60c3b2d809616f2c760f953e4d870e5377a
@@ -983,7 +1002,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Thu Feb 3 18:31:08 2022 +0100
 
     add ONION_CLIENT_AUTH_{ADD,REMOVE,VIEW} to tor-ctrl-onion
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/24 and https://github.com/nyxnor/tor-ctrl/issues/17
 
 commit 510029a9a43fa1e8102abf5d47bd9499e90c5186
@@ -1009,7 +1028,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Wed Feb 2 22:27:35 2022 +0100
 
     initial tor-ctrl-onion
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/17
 
 commit f33e9ac39e9017d9d0e736fa973b82a9f028a9f6
@@ -1029,7 +1048,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Tue Feb 1 17:25:09 2022 +0100
 
     move hostname to inside ()
-    
+
     fix for https://github.com/nyxnor/tor-ctrl/issues/22
 
 commit 922823236273b4bfd9cd5627e8e220f3cdacab39
@@ -1037,7 +1056,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Tue Feb 1 17:19:36 2022 +0100
 
     fix catting no file for the first run
-    
+
     fix for https://github.com/nyxnor/tor-ctrl/issues/22
 
 commit 7db9aacc25e4ee0f92cf241c38ac49219883a4cd
@@ -1045,7 +1064,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Tue Feb 1 17:14:07 2022 +0100
 
     saving hostname to a temporary file
-    
+
     fix https://github.com/nyxnor/tor-ctrl/issues/22
 
 commit 62ead28cdf8de507cef34ef0d97d061fc3bbcbcd
@@ -1055,7 +1074,7 @@ Date:   Fri Jan 28 23:31:40 2022 +0100
     save strean information as soon as client tried to connect
     "SENTCONNECT"  / ; Sent a connect cell along a circuit
     "SENTRESOLVE"  / ; Sent a resolve cell along a circuit
-    
+
     Now, stream does not need to succeed or be closed, it is better this way cause we can see all tried connections/resolves
 
 commit 96ffbdf42ea8eeef3340827411cd77fbb8f5d163
@@ -1084,7 +1103,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Fri Jan 28 16:02:57 2022 +0100
 
     fix tor-ctrl-stream listening to torscosk requests
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/22
 
 commit 0136eab410e590a872de2ff5b82b3011f82a5d91
@@ -1105,7 +1124,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Fri Jan 28 00:26:07 2022 +0100
 
     --no-sign package on configure.sh
-    
+
     I presume whonix automated script takes care of this for signing new releases without depending on this custom script
 
 commit 75349b8f777643cbed8d2435db986d4835a74446
@@ -1113,7 +1132,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Fri Jan 28 00:20:59 2022 +0100
 
     fix sending empty line has two or more consecutives \n \n
-    
+
     this occurs if there is a user made typo, just avoid it
 
 commit 20a8fe7fcdb1b2b2ac44229509820b73be502ccc
@@ -1121,7 +1140,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Fri Jan 28 00:14:32 2022 +0100
 
     don't attempt to sign package from readme instructions
-    
+
     if not signed, error code is 25,lets use flag --no-sign so error code is zero and not red alarming on the screen
 
 commit eb991be83864c8434d3f411b5bfc5dd90996ed21
@@ -1147,7 +1166,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Mon Jan 24 02:12:11 2022 +0100
 
     fix tor-ctrl-stream trap signal
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/18
 
 commit 443426965d4516b509642a595576d2598c78ed44
@@ -1223,7 +1242,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Thu Jan 20 02:13:26 2022 +0100
 
     Merge pull request #14 from Whonix/master
-    
+
     typo and bump deb package changelog version
 
 commit 827469c38682714157bcc9e4e2c0eaf5ac9f603b
@@ -1268,7 +1287,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Wed Jan 19 03:03:31 2022 +0100
 
     show streams before pressing enter
-    
+
     fix for tor-ctrl and tor-ctrl-stream. Unfortunately, on tor-ctrl-stream, I couldn't find a way to print the streams at the same time as saving them, it is closing the connection if I send the process to background with '$ tor-ctrl -w SETEVENTS STREAM &', so looping GETINFO stream-status is the workaround.
 
 commit bc6cfef968df32f2979750fa030c36b68cd998f5
@@ -1344,7 +1363,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sun Jan 16 19:59:00 2022 +0100
 
     Merge pull request #12 from adrelanos/patch-2
-    
+
     switch to netcat-openbsd
 
 commit 205571a8409c69cb0c55fd6dfb319d0f189ebfd0
@@ -1358,7 +1377,7 @@ Author: Patrick Schleizer <adrelanos@whonix.org>
 Date:   Sun Jan 16 13:57:03 2022 -0500
 
     switch to netcat-openbsd
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/9
 
 commit ecdfef1a05ee2e2ddaaac9278603c2b8310da209
@@ -1401,7 +1420,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sat Jan 15 22:29:08 2022 +0100
 
     Merge pull request #8 from Whonix/master
-    
+
     add new lines at the end
 
 commit 19f8731866caff49e81e6868bef09604bed3fc04
@@ -1531,7 +1550,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Thu Jan 13 09:59:59 2022 +0100
 
     Merge pull request #6 from adrelanos/patch-1
-    
+
     Update README.md
 
 commit 651204f6eb45572cc20570da70a9a334599fcd62
@@ -1551,7 +1570,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Thu Jan 13 02:15:33 2022 +0100
 
     conclude debian package folder
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/5
 
 commit 46fa89d5a002ee9ed2eb677b3148db46f3874ea4
@@ -1583,7 +1602,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Wed Jan 12 23:10:06 2022 +0100
 
     start structuring directories for debian package
-    
+
     https://github.com/nyxnor/tor-ctrl/issues/5
 
 commit 6e7034615d9728b79397acc2b07329033f9c17a9
@@ -1591,7 +1610,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Wed Jan 12 22:48:52 2022 +0100
 
     check if socket exist on unix domains
-    
+
     fix https://github.com/nyxnor/tor-ctrl/issues/4
 
 commit 2d40c46d8ea0cbe1fbe8e9b79c099080700d3d8a
@@ -1666,7 +1685,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sat Jan 8 23:48:48 2022 +0100
 
     fix no socket being selected
-    
+
     https://github.com/nyxnor/tor-controller/issues/2
 
 commit eb8d10d991850051bc1fc5b43a0530ddfba5a733
@@ -1674,7 +1693,7 @@ Author: nyxnor <nyxnor@protonmail.com>
 Date:   Sat Jan 8 23:42:51 2022 +0100
 
     improve tor-controller to specify less options
-    
+
     https://github.com/nyxnor/tor-controller/issues/2
 
 commit 366801ee39fba1ef6bf1e401566f5ad9ffae844d
