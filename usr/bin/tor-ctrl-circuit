@@ -1,4 +1,6 @@
-#!/usr/bin/env sh
+#!/bin/bash
+
+source /usr/libexec/helper-scripts/strings.bsh
 
 me="${0##*/}"
 
@@ -53,6 +55,9 @@ list_circuits(){
         relay_status="$(tor-ctrl -c "GETINFO ns/id/${relay_fingerprint}" ${cli_args})"
         relay_host="$(printf '%s\n' "${relay_status}" | grep -- "^r " | cut -d " " -f7)"
         relay_bandwidth="$(printf '%s\n' "${relay_status}" | grep -- "^w " | sed "s/w Bandwidth=//;s/\\r//")"
+        if ! is_whole_number "${relay_bandwidth}"; then
+          relay_bandwidth=0
+        fi
         relay_bandwidth="$((relay_bandwidth*512/1024/1024)) MiB/s"
         # shellcheck disable=SC2086
         relay_locale="$(tor-ctrl -c "GETINFO ip-to-country/${relay_host}" ${cli_args})"
